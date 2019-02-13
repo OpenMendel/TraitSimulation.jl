@@ -28,7 +28,7 @@ end
 
 
 
-# The first task 
+# The first task is to find the variables to make the mean vector:
 find_variables(x) = find_variables!(Symbol[], x) #this is so that we can call the function without the exclamation
 function find_variables!(var_names, x::Number) #if the variable name is a number then just return it without doing anything
                 return var_names
