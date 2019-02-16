@@ -36,3 +36,11 @@ out2 = names!(out2, [Symbol("trait$i") for i in 1:n_traits])
 return out2
 
 end 
+
+#test 
+# cd /Users/sarahji/Desktop/_MendelBase_updated_for_v0.7 
+# snps = SnpArray("SNP_data29a.bed")
+# GRM = grm(snps)
+# B = [0.3 0.1; 0.1 0.3]
+# formulaszzz = ["1 + 3(x1)", "2 + 3(x2) + abs(x3)"]
+# multiple_trait_simulation(formulaszzz, df, B, GRM)
