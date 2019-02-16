@@ -41,7 +41,9 @@ export LogLink, IdentityLink, SqrtLink, ProbitLink, LogitLink, InverseLink, Cauc
 include("simulate_glm_trait.jl")
 export Poisson, Normal, Binomial, Bernoulli, Gamma, InverseGaussian, TDist, Weibull #Exporting these from the Distributions package 
 
-function actual_simulation(mu, dist::ResponseType)
+
+#this is the main functionality of this package, to run the actual simulation.
+function actual_simulation(mu, dist::ResponseType) 
 	transmu = apply_inverse_link(mu, dist)
 	Simulated_Trait = simulate_glm_trait(transmu, dist)
 	return(Simulated_Trait)
@@ -49,3 +51,18 @@ end
 
 export ResponseType, actual_simulation, mean_formula
 end # module
+
+#Toy example test
+df = DataFrame(x1 = rand(10000), x2 = rand(10000), x3 = rand(10000), x4 = rand(10000))
+user_formula_string = "3 + log(x1) + 2sqrt(abs(log(x2))) + asin(x4)"
+
+
+μ = mean_formula(user_formula_string, df)
+
+# # # #Poisson
+dist = ResponseType(Poisson(), LogLink(), 0.0, 0.0, 0.0, 0.0, 0)
+# dist = ResponseType(Poisson(), 2, 2.0, 2.0, 0.0, 0.0, 0)
+# actual_simulation(μ, dist)
+
+#kens yellow book chapter 8
+#correlation between snps in snparrays using snparrays and store into a sparse matrix

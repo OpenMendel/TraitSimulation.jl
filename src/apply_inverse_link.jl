@@ -1,3 +1,5 @@
+#for every different type of linkfunction, internally julia will find the right apply_inverse_link function
+
 apply_inverse_link(μ, dist::ResponseType{D, LogLink}) where D = log_inverse_link.(μ)
 
 apply_inverse_link(μ, dist::ResponseType{D, IdentityLink}) where D = identity_inverse_link.(μ)

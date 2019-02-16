@@ -1,6 +1,7 @@
 #since the GLM package uses the Distribution types from the Distibutions package, we use these packages not to simulate from their existing functions but to 
 #use them as type dispatchers for the simulate_glm_trait function
 
+#SIMULATE WEIBULL TRAITS
 function simulate_glm_trait(μ, dist::ResponseType{Weibull{T}, L}) where {L, T} #by default any
 if dist.location < zero(T)
       error("Location parameter cannot be negative for a Poisson distribution!")
@@ -8,6 +9,7 @@ if dist.location < zero(T)
  return weibull_deviate.(μ, dist.shape) 
 end
 
+#SIMULATE POISSON traits
 function simulate_glm_trait(μ, dist::ResponseType{Poisson{T}, L}) where {L, T} #by default any
 if dist.location < zero(T)
       error("Location parameter cannot be negative for a Poisson distribution!")
@@ -15,7 +17,7 @@ if dist.location < zero(T)
  return poisson_deviate.(μ) 
 end
 
-#NORMAL TRAITS
+#SIMULATE NORMAL TRAITS
 function simulate_glm_trait(μ, dist::ResponseType{Normal{T}, L}) where {L, T} #by default any
 if dist.scale < zero(T)
       error("Scale cannot be negative for a normal distribution!")
@@ -23,12 +25,12 @@ if dist.scale < zero(T)
  return normal_deviate.(μ, dist.scale)
 end
 
-#Bernoulli TRAITS
+#SIMULATE Bernoulli TRAITS
 function simulate_glm_trait(μ, dist::ResponseType{Bernoulli{T}, L}) where {L, T} #by default any
  return bernoulli_deviate.(μ) 
 end
 
-#BINOMIAL TRAITS
+#SIMULATE BINOMIAL TRAITS
 function simulate_glm_trait(μ, dist::ResponseType{Binomial{T}, L}) where {L, T} #by default any
 if dist.trials < zero(T)
       error("Trials cannot be negative for a binomial distribution!")
@@ -36,7 +38,7 @@ if dist.trials < zero(T)
  return binomial_deviate.(μ, dist.trials)
 end
 
-#GAMMA TRAITS
+#SIMULATE GAMMA TRAITS
 function simulate_glm_trait(μ, dist::ResponseType{Gamma{T}, L}) where {L, T} #by default any
 if dist.shape < zero(T)
       error("Shape cannot be negative for a gamma distribution!")
@@ -44,7 +46,7 @@ if dist.shape < zero(T)
  return gamma_deviate.(dist.shape, μ)
 end
 
-#********INVERSE GAUSSIAN TRAITS
+#********SIMULATE INVERSE GAUSSIAN TRAITS
 function simulate_glm_trait(μ, dist::ResponseType{InverseGaussian{T}, L}) where {L, T} #by default any
 if dist.scale < zero(T)
       error("Scale must be positive for an inverse Gaussian distribution!")
@@ -53,7 +55,7 @@ if dist.scale < zero(T)
 end
 
 
-#########
+#########BERNOULLI 
 """Generates a Bernoulli random deviate with success probability p."""
 
 function bernoulli_deviate(p)
@@ -64,6 +66,7 @@ function bernoulli_deviate(p)
   end
 end
 
+#########BINOMIAL
 """Generates a binomial random deviate with success probability p
 and n trials."""
 

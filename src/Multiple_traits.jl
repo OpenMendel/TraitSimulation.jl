@@ -1,0 +1,38 @@
+using Distributions
+using DataFrames
+using LinearAlgebra
+using TraitSimulation
+
+#in context of linear mixed models and multiple correlated traits, the outcome must be multivariate normal with 
+#GRM and environmental variance matrix or constant (iid) B
+ 
+function multiple_trait_simulation(formulas, dataframe, B, GRM)
+# for multiple traits
+#find the number of traits
+n_traits = length(formulas)
+
+mean = Vector{Vector{Float64}}(undef, n_traits)
+#for each trait
+for i in 1:n_traits
+	#calculate the mean vector
+	mean[i] = mean_formula(formulas[i], dataframe)
+end
+
+#concatenate them together
+meanvector = vcat(mean...) # take all of the i's and splat them into the meanvector.
+
+A = cov(hcat(mean...)) # me assuming that we dont know this A and I have to assume it internally
+term1 = kron(A, GRM) 
+term2 = kron(B, Matrix{Float64}(I, size(GRM)))
+Σ = term1 + term2
+
+model = MvNormal(meanvector, Σ)
+out1 = rand(model)
+
+out2 = DataFrame(reshape(out1, (size(GRM)[1], n_traits)))
+
+out2 = names!(out2, [Symbol("trait$i") for i in 1:n_traits])
+
+return out2
+
+end 
