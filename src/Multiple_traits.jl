@@ -39,8 +39,13 @@ end
 
 #test 
 # cd /Users/sarahji/Desktop/_MendelBase_updated_for_v0.7 
-# snps = SnpArray("SNP_data29a.bed")
-# GRM = grm(snps)
-# B = [0.3 0.1; 0.1 0.3]
-# formulaszzz = ["1 + 3(x1)", "2 + 3(x2) + abs(x3)"]
+# snps = SnpArray("heritability.bed")
+# minor_allele_frequency = maf(snps)
+# common_snps_index = (0.05 .≤ minor_allele_frequency)
+# common_snps = SnpArrays.filter("heritability", trues(212), common_snps_index)
+# df = convert(Matrix{Float64}, snps)
+#df = DataFrame(df)
+# GRM = grm(common_snps)
+# B = [0.3 0.1 0.01; 0.1 0.3 0.1; 0.01 0.1 0.3]
+# formulaszzz = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)", "1 + x2*x3 + 0.2x5"]
 # multiple_trait_simulation(formulaszzz, df, B, GRM)
