@@ -100,7 +100,72 @@ return out
 
 end
 
-#checkings with huwenbos
+##
+
+#version 3
+
+function multiple_trait_simulation3(formulas, dataframe, A, B, GRM)
+	isposdef(GRM)
+	isposdef(A)
+	isposdef(B)
+
+	#if not then exit and return error ("not semi positive definite")
+	#cholesky decomp for A, GRM, B 
+	n_people = size(GRM)[1]
+	n_traits = size(A)[1]
+
+	cholA = cholesky(A)
+	cholK = cholesky(GRM)
+	cholB = cholesky(B)
+
+	#chol_AK = kron(cholA.L, cholK.L)
+	chol_BI = kron(cholB.L, Diagonal(ones(n_people)))
+
+	#generate from standard normal
+	z_1 = randn(n_people, n_traits)
+
+# we want to solve u then v to get the first variane component, v.
+#first matrix vector multiplication using cholesky decomposition
+	#u_1 = chol_AK' * z_1
+	new_u1 = cholK.U * z_1 * cholA.L
+
+#second matrix vector mult
+	#v_1 = chol_AK * u_1
+	new_v1 = cholK.L * new_u1 * cholA.U
+
+	#generate from standard normal
+	z_2 = randn(n_people, n_traits)
+
+#for second variance component
+	#u_2 = chol_BI' * z_2
+	new_u2 = z_2 * cholB.U #identity goes away
+
+	#v_2 = chol_BI * u_2
+	new_v2 = new_u2 * cholB.L #identity goes away
+
+#simulated_trait = reshape(new_v1 + new_v2, (n_people, n_traits))
+simulated_trait = new_v1 + new_v2
+
+#now that we have simulated from mvn(0, Sigma)
+#we need to add back the mean
+
+mean = Matrix{Float64}(undef, n_people, n_traits)
+#for each trait
+for i in 1:n_traits
+	#calculate the mean vector
+	mean[:, i] = mean_formula(formulas[i], dataframe)
+end
+
+simulated_trait += mean
+
+out = DataFrame(simulated_trait)
+
+out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+return out
+
+end
+
 
 #third version using Hua's VCM package to make use of model structure
 # hua does not use cholesky decomposition in his kroxaxpy! function
@@ -118,4 +183,4 @@ end
 # GRM = grm(common_snps)
 # #B = [0.3 0.1 0.01; 0.1 0.3 0.1; 0.01 0.1 0.3]
 # formulaszzz = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)"]
-# multiple_trait_simulation2(formulaszzz, df, A, B, GRM)
+# multiple_trait_simulation3(formulaszzz, df, A, B, GRM)
