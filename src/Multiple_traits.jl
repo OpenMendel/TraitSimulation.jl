@@ -119,7 +119,7 @@ function multiple_trait_simulation3(formulas, dataframe, A, B, GRM)
 	cholB = cholesky(B)
 
 	#chol_AK = kron(cholA.L, cholK.L)
-	chol_BI = kron(cholB.L, Diagonal(ones(n_people)))
+	#chol_BI = kron(cholB.L, Diagonal(ones(n_people)))
 
 	#generate from standard normal
 	z_1 = randn(n_people, n_traits)
@@ -166,7 +166,130 @@ return out
 
 end
 
+#version 4 tryiign to make memory allocation better by overwriting 
+#variance component matrix 
 
+function multiple_trait_simulation4(formulas, dataframe, A, B, GRM)
+	isposdef(GRM)
+	isposdef(A)
+	isposdef(B)
+
+	#if not then exit and return error ("not semi positive definite")
+	#cholesky decomp for A, GRM, B 
+	n_people = size(GRM)[1]
+	n_traits = size(A)[1]
+
+	cholA = cholesky(A)
+	cholK = cholesky(GRM)
+	cholB = cholesky(B)
+
+#preallocate memory for the returned dataframe simulated_trait
+simulated_trait = zeros(n_people, n_traits)
+
+	#generate from standard normal
+	z_1 = randn(n_people, n_traits)
+
+# we want to solve u then v to get the first variane component, v.
+#first matrix vector multiplication using cholesky decomposition
+
+	mul!(simulated_trait, cholK.U, z_1)
+	rmul!(simulated_trait, cholA.L)
+
+#second matrix vector mult
+
+	rmul!(simulated_trait, cholA.U)
+	lmul!(cholK.L, simulated_trait) #multiply on left and save to simulated_trait
+
+	#generate from standard normal
+	z_2 = randn(n_people, n_traits)
+
+#for second variance component
+
+	mul!(temp, z_2, cholB.U) 
+	rmul!(temp, cholB.L)
+	simulated_trait += temp
+
+#for each trait
+for i in 1:n_traits
+	#calculate the mean vector
+	simulated_trait[:, i] += mean_formula(formulas[i], dataframe)
+end
+
+out = DataFrame(simulated_trait)
+
+out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+return out
+
+end
+
+## scaling to more than 2 variance components 
+# make generic kron(A1, B1) + kron(A2, B2) structure for cov matrices
+#version 5
+function multiple_trait_simulation5(formulas, dataframe, A, B, GRM)
+	isposdef(GRM)
+	isposdef(A)
+	isposdef(B)
+
+	#if not then exit and return error ("not semi positive definite")
+	#cholesky decomp for A, GRM, B 
+	n_people = size(GRM)[1]
+	n_traits = size(A)[1]
+
+	cholK = cholesky(GRM)
+
+#preallocate memory for the returned dataframe simulated_trait
+simulated_trait = zeros(n_people, n_traits)
+z = Matrix(undef, n_people, n_traits)
+
+for i in 1:length(vc)
+
+chol_i = cholesky(vc[i])
+	cholesky!(cholA, A[i]) #for the ith covariance matrix (VC) in A 
+	#if A is a list of matrices 
+
+	cholesky!(cholB, B[i]) #for the ith covariance matrix (VC) in B
+
+	#generate from standard normal
+
+	randn!(z, n_people, n_traits)
+
+# we want to solve u then v to get the first variane component, v.
+#first matrix vector multiplication using cholesky decomposition
+
+#need to find which will be CholA, CholB 
+	lmul!(cholK.U, z)
+	rmul!(z, cholA.L)
+
+#second matrix vector mult
+
+	rmul!(z, cholA.U)
+	lmul!(cholK.L, z) #multiply on left and save to simulated_trait
+
+simulated_trait += z
+# 	#generate from standard normal
+# 	z_2 = randn(n_people, n_traits)
+
+# #for second variance component
+
+# 	mul!(temp, z_2, cholB.U) 
+# 	rmul!(temp, cholB.L)
+	
+end
+
+#for each trait
+for i in 1:n_traits
+	#calculate the mean vector
+	simulated_trait[:, i] += mean_formula(formulas[i], dataframe)
+end
+
+out = DataFrame(simulated_trait)
+
+out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+return out
+
+end
 #third version using Hua's VCM package to make use of model structure
 # hua does not use cholesky decomposition in his kroxaxpy! function
 
