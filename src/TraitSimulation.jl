@@ -53,14 +53,14 @@ export ResponseType, actual_simulation, mean_formula
 end # module
 
 #Toy example test
-df = DataFrame(x1 = rand(10000), x2 = rand(10000), x3 = rand(10000), x4 = rand(10000))
-user_formula_string = "3 + log(x1) + 2sqrt(abs(log(x2))) + asin(x4)"
+# df = DataFrame(x1 = rand(10000), x2 = rand(10000), x3 = rand(10000), x4 = rand(10000))
+# user_formula_string = "3 + log(x1) + 2sqrt(abs(log(x2))) + asin(x4)"
 
 
-μ = mean_formula(user_formula_string, df)
+# μ = mean_formula(user_formula_string, df)
 
-# # # #Poisson
-dist = ResponseType(Poisson(), LogLink(), 0.0, 0.0, 0.0, 0.0, 0)
+# # # # #Poisson
+# dist = ResponseType(Poisson(), LogLink(), 0.0, 0.0, 0.0, 0.0, 0)
 # dist = ResponseType(Poisson(), 2, 2.0, 2.0, 0.0, 0.0, 0)
 # actual_simulation(μ, dist)
 
