@@ -226,7 +226,7 @@ end
 ## scaling to more than 2 variance components 
 # make generic kron(A1, B1) + kron(A2, B2) structure for cov matrices
 #version 5
-function multiple_trait_simulation5(formulas, dataframe, A,)
+function multiple_trait_simulation5(formulas, dataframe, A, B)
 	#isposdef(A) cholesky decomp will fail if any A, B not semipd
 	#isposdef(B)
 
@@ -272,33 +272,59 @@ out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 
 return out
 
+# New version using the created VarianceComponent type as an input rather than the manual A, B
+#vc = [VarianceComponent(X1[i], Y1[i]) for i in 1:length(X1)]
+#vc = [VarianceComponent(X1[1], Y1[1])]
 
-##### 
-macro vc(expr::Expr)
-A = Matrix{Float64}[]
-B = Matrix{Float64}[]
-  # TODO: add code to check validity of expr before parseing it
-  # throw an exception if the expr doesn't follow the syntax
-for i = 2:length(expr.args)
+function multiple_trait_simulation6(formulas, dataframe, vc::Vector{VarianceComponent})
+	#isposdef(A) cholesky decomp will fail if any A, B not semipd
+	n_people = size(dataframe, 1)
+	n_traits = length(formulas)
+#preallocate memory for the returned dataframe simulated_trait
+simulated_trait = zeros(n_people, n_traits)
+z = Matrix{Float64}(undef, n_people, n_traits)
 
-	if expr.args[i].args[1] != :kron && expr.args[i].args[1] != :⊗
-		error("Not valid syntax")
-	else 
-		push!(A, eval(expression.args[i].args[2]))
-		push!(B, eval(expression.args[i].args[3]))
-	end
+for i in 1:length(vc)
+cholA = vc[i].CholA
+cholB = vc[i].CholB #for the ith covariance matrix (VC) in B
+
+	#generate from standard normal
+	randn!(z)
+
+# we want to solve u then v to get the first variane component, v.
+#first matrix vector multiplication using cholesky decomposition
+
+#need to find which will be CholA, CholB 
+	lmul!(cholB.U, z)
+	rmul!(z, cholA.L)
+
+#second matrix vector mult
+	rmul!(z, cholA.U)
+	lmul!(cholB.L, z) #multiply on left and save to simulated_trait
+
+simulated_trait += z
 end
 
-return A, B
-
+#for each trait
+for i in 1:n_traits
+	#calculate the mean vector
+	simulated_trait[:, i] += mean_formula(formulas[i], dataframe)
 end
+
+out = DataFrame(simulated_trait)
+
+out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+return out
 
 #####
-# Take a term A ⊗ B and add its elements to the lists X and Y
+# Take a term A ⊗ B and add its elements to the lists X and Yx
+X = :(Matrix{Float64}[])
+Y = :(Matrix{Float64}[])
+
 function append_terms!(X, Y, summand)
   # add the value of the symbol A to the list X
   push!(X.args, esc(summand.args[2]))
-
   # add the value of the symbol B to the list Y
   push!(Y.args, esc(summand.args[3]))
 end
@@ -307,40 +333,51 @@ end
 macro vc(expression)
 	n = length(expression.args)
 
-	#initialize empty lists of Matrix{Float64} objects
-	X = :(Matrix{Float64}[])
-	Y = :(Matrix{Float64}[])
+	#initialize empty array of Matrix{Float64} objects not evaluated yet
+	X = :(Matrix{Float64}[]) # these may change 
+	Y = :(Matrix{Float64}[]) # these may change 
 
-	if n >= 2
+	if expression.args[1] != :+ #if first argument is not plus (only one vc)
 		summand = expression 
 		append_terms!(X, Y, summand)
-	else 
+	else #MULTIPLE VARIANCE COMPONENTS if the first argument is a plus (Sigma is a sum multiple variance components)
 		for i in 2:n
 			summand = expression.args[i]
 			append_terms!(X, Y, summand)
 		end
-end
-
-:($X, $Y)
+	end
+:($X, $Y) # change this to return a vector of VarianceComponent objects
 end 
 
+#this VarianceComponent type stores A, B , CholA and CholB so we don't have to compute the cholesky decomposition inside the loop
+
+struct VarianceComponent
+	A::Matrix{Float64}
+	B::Matrix{Float64}
+	CholA::Cholesky{Float64,Array{Float64,2}}
+	CholB::Cholesky{Float64,Array{Float64,2}}
+	function VarianceComponent(A, B) #inner constructor given A, B 
+		return(new(A, B, cholesky(A), cholesky(B))) # can construct these
+	end
+end
+
 #user specify the @vc 
-test1 = :(A_1 ⊗ B_1 + A_2 ⊗ B_2)
-test2 = :(kron(A_1, B_1) + kron(A_2, B_2))
-A, B = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
-A, B = @vc A_1 ⊗ GRM + A_2 ⊗ B_2
-A, B = @vc kron(A_1, B_1) + kron(A_2, B_2)
+# test1 = :(A_1 ⊗ B_1 + A_2 ⊗ B_2)
+# test2 = :(kron(A_1, B_1) + kron(A_2, B_2))
+# A, B = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
+# A, B = @vc A_1 ⊗ GRM + A_2 ⊗ B_2
+# A, B = @vc kron(A_1, B_1) + kron(A_2, B_2)
 
-#compute grm using snparrays 
-GRM = grm(common_snps)
-A_1 = [0.3 0.1; 0.1 0.3]
-B_1 = GRM
-A_2 = [0.7 0.0; 0.0 0.7]
-B_2 = Matrix{Float64}(I, size(GRM))
+# #compute grm using snparrays 
+# GRM = grm(common_snps)
+# A_1 = [0.3 0.1; 0.1 0.3]
+# B_1 = GRM
+# A_2 = [0.7 0.0; 0.0 0.7]
+# B_2 = Matrix{Float64}(I, size(GRM))
 
-#return these two lists for the simulation function
-A = [A_1, A_2]
-B = [B_1, B_2]
+# #return these two lists for the simulation function
+# A = [A_1, A_2]
+# B = [B_1, B_2]
 
 
 # #test 
@@ -364,6 +401,7 @@ B = [B_1, B_2]
 # B_1 = GRM
 # A_2 = [0.7 0.0; 0.0 0.7]
 # B_2 = Matrix{Float64}(I, size(GRM))
+#vc = [VarianceComponent(A_1, B_1), VarianceComponent(A_2, B_2)]
 
 # #return these two lists for the simulation function
 # A = [A_1, A_2]
