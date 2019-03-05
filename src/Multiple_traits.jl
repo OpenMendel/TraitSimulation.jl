@@ -2,6 +2,7 @@ using Distributions
 using DataFrames
 using LinearAlgebra
 using TraitSimulation
+using Random
 
 #in context of linear mixed models and multiple correlated traits, the outcome must be multivariate normal with 
 #GRM and environmental variance matrix or constant (iid) B
@@ -40,7 +41,6 @@ end
 
 ####
 #version 2 
-
 
 function multiple_trait_simulation2(formulas, dataframe, A, B, GRM)
 	isposdef(GRM)
@@ -226,55 +226,38 @@ end
 ## scaling to more than 2 variance components 
 # make generic kron(A1, B1) + kron(A2, B2) structure for cov matrices
 #version 5
-function multiple_trait_simulation5(formulas, dataframe, A, B, GRM)
-	isposdef(GRM)
-	isposdef(A)
-	isposdef(B)
+function multiple_trait_simulation5(formulas, dataframe, A,)
+	#isposdef(A) cholesky decomp will fail if any A, B not semipd
+	#isposdef(B)
 
 	#if not then exit and return error ("not semi positive definite")
 	#cholesky decomp for A, GRM, B 
-	n_people = size(GRM)[1]
-	n_traits = size(A)[1]
-
-	cholK = cholesky(GRM)
+	n_people = size(B[1], 1)
+	n_traits = size(A[1], 1)
 
 #preallocate memory for the returned dataframe simulated_trait
 simulated_trait = zeros(n_people, n_traits)
-z = Matrix(undef, n_people, n_traits)
+z = Matrix{Float64}(undef, n_people, n_traits)
 
-for i in 1:length(vc)
-
-chol_i = cholesky(vc[i])
-	cholesky!(cholA, A[i]) #for the ith covariance matrix (VC) in A 
-	#if A is a list of matrices 
-
-	cholesky!(cholB, B[i]) #for the ith covariance matrix (VC) in B
+for i in 1:length(A)
+cholA = cholesky(A[i])
+cholB = cholesky(B[i]) #for the ith covariance matrix (VC) in B
 
 	#generate from standard normal
-
-	randn!(z, n_people, n_traits)
+	randn!(z)
 
 # we want to solve u then v to get the first variane component, v.
 #first matrix vector multiplication using cholesky decomposition
 
 #need to find which will be CholA, CholB 
-	lmul!(cholK.U, z)
+	lmul!(cholB.U, z)
 	rmul!(z, cholA.L)
 
 #second matrix vector mult
-
 	rmul!(z, cholA.U)
-	lmul!(cholK.L, z) #multiply on left and save to simulated_trait
+	lmul!(cholB.L, z) #multiply on left and save to simulated_trait
 
 simulated_trait += z
-# 	#generate from standard normal
-# 	z_2 = randn(n_people, n_traits)
-
-# #for second variance component
-
-# 	mul!(temp, z_2, cholB.U) 
-# 	rmul!(temp, cholB.L)
-	
 end
 
 #for each trait
@@ -289,10 +272,75 @@ out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 
 return out
 
-end
-#third version using Hua's VCM package to make use of model structure
-# hua does not use cholesky decomposition in his kroxaxpy! function
 
+##### 
+macro vc(expr::Expr)
+A = Matrix{Float64}[]
+B = Matrix{Float64}[]
+  # TODO: add code to check validity of expr before parseing it
+  # throw an exception if the expr doesn't follow the syntax
+for i = 2:length(expr.args)
+
+	if expr.args[i].args[1] != :kron && expr.args[i].args[1] != :⊗
+		error("Not valid syntax")
+	else 
+		push!(A, eval(expression.args[i].args[2]))
+		push!(B, eval(expression.args[i].args[3]))
+	end
+end
+
+return A, B
+
+end
+
+#####
+# Take a term A ⊗ B and add its elements to the lists X and Y
+function append_terms!(X, Y, summand)
+  # add the value of the symbol A to the list X
+  push!(X.args, esc(summand.args[2]))
+
+  # add the value of the symbol B to the list Y
+  push!(Y.args, esc(summand.args[3]))
+end
+
+
+macro vc(expression)
+	n = length(expression.args)
+
+	#initialize empty lists of Matrix{Float64} objects
+	X = :(Matrix{Float64}[])
+	Y = :(Matrix{Float64}[])
+
+	if n >= 2
+		summand = expression 
+		append_terms!(X, Y, summand)
+	else 
+		for i in 2:n
+			summand = expression.args[i]
+			append_terms!(X, Y, summand)
+		end
+end
+
+:($X, $Y)
+end 
+
+#user specify the @vc 
+test1 = :(A_1 ⊗ B_1 + A_2 ⊗ B_2)
+test2 = :(kron(A_1, B_1) + kron(A_2, B_2))
+A, B = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
+A, B = @vc A_1 ⊗ GRM + A_2 ⊗ B_2
+A, B = @vc kron(A_1, B_1) + kron(A_2, B_2)
+
+#compute grm using snparrays 
+GRM = grm(common_snps)
+A_1 = [0.3 0.1; 0.1 0.3]
+B_1 = GRM
+A_2 = [0.7 0.0; 0.0 0.7]
+B_2 = Matrix{Float64}(I, size(GRM))
+
+#return these two lists for the simulation function
+A = [A_1, A_2]
+B = [B_1, B_2]
 
 
 # #test 
@@ -303,7 +351,24 @@ end
 # common_snps = SnpArrays.filter("heritability", trues(212), common_snps_index)
 # df = convert(Matrix{Float64}, snps)
 # df = DataFrame(df)
+
+# @vc macro 
+# #user specify the @vc 
+# A, B = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2 
+# A, B = @vc A_1 ⊗ GRM + A_2 ⊗ B_2 
+# A, B = @vc kron(A_1, B_1) + kron(A_2, B_2)
+
+# #compute grm using snparrays 
 # GRM = grm(common_snps)
-# #B = [0.3 0.1 0.01; 0.1 0.3 0.1; 0.01 0.1 0.3]
-# formulaszzz = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)"]
+# A_1 = [0.3 0.1; 0.1 0.3]
+# B_1 = GRM
+# A_2 = [0.7 0.0; 0.0 0.7]
+# B_2 = Matrix{Float64}(I, size(GRM))
+
+# #return these two lists for the simulation function
+# A = [A_1, A_2]
+# B = [B_1, B_2]
+
+
+#formulaszzz = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)"]
 # multiple_trait_simulation3(formulaszzz, df, A, B, GRM)
