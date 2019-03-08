@@ -271,12 +271,27 @@ out = DataFrame(simulated_trait)
 out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 
 return out
+end
 
 # New version using the created VarianceComponent type as an input rather than the manual A, B
 #vc = [VarianceComponent(X1[i], Y1[i]) for i in 1:length(X1)]
 #vc = [VarianceComponent(X1[1], Y1[1])]
 
-function multiple_trait_simulation6(formulas, dataframe, vc::Vector{VarianceComponent})
+# change this to return a vector of VarianceComponent objects
+#this VarianceComponent type stores A, B , CholA and CholB so we don't have to compute the cholesky decomposition inside the loop
+
+struct VarianceComponent
+	A::Matrix{Float64}
+	B::Matrix{Float64}
+	CholA::Cholesky{Float64,Array{Float64,2}}
+	CholB::Cholesky{Float64,Array{Float64,2}}
+	function VarianceComponent(A, B) #inner constructor given A, B 
+		return(new(A, B, cholesky(A), cholesky(B))) # can construct these
+	end
+end
+
+
+function multiple_trait_simulation6(formulas, dataframe, vc::Vector{VarianceComponent} )
 	#isposdef(A) cholesky decomp will fail if any A, B not semipd
 	n_people = size(dataframe, 1)
 	n_traits = length(formulas)
@@ -316,9 +331,51 @@ out = DataFrame(simulated_trait)
 out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 
 return out
+end
 
 #####
-# Take a term A ⊗ B and add its elements to the lists X and Yx
+
+#without computign mean from dataframe and formulas 
+function multiple_trait_simulation7(mu, vc::Vector{VarianceComponent} )
+	#isposdef(A) cholesky decomp will fail if any A, B not semipd
+	n_people = size(mu)[1]
+	n_traits = size(mu)[2]
+#preallocate memory for the returned dataframe simulated_trait
+simulated_trait = zeros(n_people, n_traits)
+z = Matrix{Float64}(undef, n_people, n_traits)
+
+for i in 1:length(vc)
+cholA = vc[i].CholA
+cholB = vc[i].CholB #for the ith covariance matrix (VC) in B
+
+	#generate from standard normal
+	randn!(z)
+
+# we want to solve u then v to get the first variane component, v.
+#first matrix vector multiplication using cholesky decomposition
+
+#need to find which will be CholA, CholB 
+	lmul!(cholB.U, z)
+	rmul!(z, cholA.L)
+
+#second matrix vector mult
+	rmul!(z, cholA.U)
+	lmul!(cholB.L, z) #multiply on left and save to simulated_trait
+
+simulated_trait += z
+end
+
+#for each trait
+simulated_trait += mu
+
+out = DataFrame(simulated_trait)
+
+out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+return out
+end
+
+# Take a term A ⊗ B and add its elements to the lists X and Y
 X = :(Matrix{Float64}[])
 Y = :(Matrix{Float64}[])
 
@@ -346,20 +403,37 @@ macro vc(expression)
 			append_terms!(X, Y, summand)
 		end
 	end
-:($X, $Y) # change this to return a vector of VarianceComponent objects
+:($X, $Y) 
 end 
 
-#this VarianceComponent type stores A, B , CholA and CholB so we don't have to compute the cholesky decomposition inside the loop
 
-struct VarianceComponent
-	A::Matrix{Float64}
-	B::Matrix{Float64}
-	CholA::Cholesky{Float64,Array{Float64,2}}
-	CholB::Cholesky{Float64,Array{Float64,2}}
-	function VarianceComponent(A, B) #inner constructor given A, B 
-		return(new(A, B, cholesky(A), cholesky(B))) # can construct these
-	end
+#####
+# AB is an empty vector of variance components
+#Take a term A_1 ⊗ B_1 and add its elements to the vector of variance components
+AB = :(VarianceComponent[]) 
+
+function append_terms!(AB, summand)
+  # elements in args are symbols, 
+  push!(AB.args, :(VarianceComponent($(summand.args[2]), $(summand.args[3]))))
 end
+
+macro vc(expression)
+	n = length(expression.args)
+	# AB is an empty vector of variance components list of symbols
+	AB = :(VarianceComponent[]) 
+	if expression.args[1] != :+ #if first argument is not plus (only one vc)
+		summand = expression 
+		append_terms!(AB, summand)
+	else #MULTIPLE VARIANCE COMPONENTS if the first argument is a plus (Sigma is a sum multiple variance components)
+		for i in 2:n
+			summand = expression.args[i]
+			append_terms!(AB, summand)
+		end
+	end
+return(:($AB)) # change this to return a vector of VarianceComponent objects
+end 
+
+#for each A_1 , B_1 variance component we store their values and their cholesky decompositions in index i of vector AB returned from @vc (sum(A_i \otimes B_i)
 
 #user specify the @vc 
 # test1 = :(A_1 ⊗ B_1 + A_2 ⊗ B_2)
@@ -408,5 +482,5 @@ end
 # B = [B_1, B_2]
 
 
-#formulaszzz = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)"]
-# multiple_trait_simulation3(formulaszzz, df, A, B, GRM)
+#formulas = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)"]
+# multiple_trait_simulation3(formulas, df, A, B, GRM)

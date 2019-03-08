@@ -3,6 +3,8 @@ using GLM # this already defines some useful distribution and link types
 using DataFrames # so we can test it 
 using StatsModels # useful distributions
 using Distributions #lots more useful distributions
+using LinearAlgebra
+using Random
 
 struct ResponseType{D<:Distributions.Distribution, L<:GLM.Link}
   family::D
@@ -26,8 +28,8 @@ struct ResponseType{D<:Distributions.Distribution, L<:GLM.Link}
 
 end
 
-
 include("calculate_mean_vector.jl")
+export mean_formula
 #not in glm package say weibull assuming i find out what the weibull link is 
 #apply_inverse_link(μ, dist::ResponseType{D, LogLink}) where D = weibull_link.(μ)
 
@@ -49,9 +51,9 @@ function actual_simulation(mu, dist::ResponseType)
 	return(Simulated_Trait)
 end
 
-export ResponseType, actual_simulation, mean_formula
-end # module
 
+export ResponseType, actual_simulation, mean_formula #, GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc
+end #module
 #Toy example test
 # df = DataFrame(x1 = rand(10000), x2 = rand(10000), x3 = rand(10000), x4 = rand(10000))
 # user_formula_string = "3 + log(x1) + 2sqrt(abs(log(x2))) + asin(x4)"
@@ -61,8 +63,68 @@ end # module
 
 # # # # #Poisson
 # dist = ResponseType(Poisson(), LogLink(), 0.0, 0.0, 0.0, 0.0, 0)
+
 # dist = ResponseType(Poisson(), 2, 2.0, 2.0, 0.0, 0.0, 0)
 # actual_simulation(μ, dist)
 
 #kens yellow book chapter 8
 #correlation between snps in snparrays using snparrays and store into a sparse matrix
+
+# glm: for one trait at a time (Exponential Family)
+# specifying multiple formulas can be done for a vector of GLMTrait objects 
+#include("Multiple_traits.jl")
+
+# struct GLMTrait
+# formula::String
+# mu::Vector{Float64}
+# dist:: ResponseType
+# function GLMTrait(formula, df, dist)
+#     mu = mean_formula(formula, df)
+#     return(new(formula, mu, dist))
+#   end
+# end
+
+# function Multiple_GLMTraits(formulas, df, dist)
+#   vec = [GLMTrait(formulas[i], df, dist) for i in 1:length(formulas)] #vector of GLMTrait objects
+#   return(vec)
+# end
+
+
+# # lmm: multiple traits (MVN)
+
+# struct LMMTrait
+# formulas::Vector{String}
+# mu::Matrix{Float64}
+# vc::Vector{VarianceComponent}
+#   function LMMTrait(formulas, df, vc)
+#     n_traits = length(formulas)
+#     n_people = size(df)[1]
+#     mu = zeros(n_people, n_traits)
+#     for i in 1:n_traits
+#       #calculate the mean vector
+#       mu[:, i] += mean_formula(formulas[i], df)
+#     end
+#     return(new(formulas, mu, vc))
+#   end
+# end
+
+# #this for GLM trait 
+# function simulate(trait::GLMTrait)
+#   simulated_trait = actual_simulation(trait.mu, trait.dist::ResponseType)
+#   out = DataFrame(trait1 = simulated_trait)
+#   return(out)
+# end
+
+# # for multiple GLM traits 
+# function simulate(traits::Vector{GLMTrait})
+#   simulated_traits = [actual_simulation(traits[i].mu, traits[i].dist) for i in 1:length(traits)]
+#   out = DataFrame(simulated_traits)
+#   out = names!(out, [Symbol("trait$i") for i in 1:length(traits)])
+#   return(out)
+# end
+
+# # LMMtrait
+# function simulate(trait::LMMTrait)
+#   multiple_trait_simulation7(trait.mu, trait.vc)
+# end
+# module

@@ -22,7 +22,7 @@ function simulate_glm_trait(μ, dist::ResponseType{Normal{T}, L}) where {L, T} #
 if dist.scale < zero(T)
       error("Scale cannot be negative for a normal distribution!")
     end
- return normal_deviate.(μ, dist.scale)
+ return normal_deviate.(μ, dist.scale) # the sigma is coming from dist.scale "ResponseType" and not additionally from ~N(0,1)
 end
 
 #SIMULATE Bernoulli TRAITS
