@@ -291,7 +291,9 @@ struct VarianceComponent
 end
 
 
-function multiple_trait_simulation6(formulas, dataframe, vc::Vector{VarianceComponent} )
+
+
+function multiple_trait_simulation6(formulas, dataframe, vc::Vector{VarianceComponent})
 	#isposdef(A) cholesky decomp will fail if any A, B not semipd
 	n_people = size(dataframe, 1)
 	n_traits = length(formulas)
@@ -376,41 +378,41 @@ return out
 end
 
 # Take a term A ⊗ B and add its elements to the lists X and Y
-X = :(Matrix{Float64}[])
-Y = :(Matrix{Float64}[])
+# X = :(Matrix{Float64}[])
+# Y = :(Matrix{Float64}[])
 
-function append_terms!(X, Y, summand)
-  # add the value of the symbol A to the list X
-  push!(X.args, esc(summand.args[2]))
-  # add the value of the symbol B to the list Y
-  push!(Y.args, esc(summand.args[3]))
-end
+# function append_terms!(X, Y, summand)
+#   # add the value of the symbol A to the list X
+#   push!(X.args, esc(summand.args[2]))
+#   # add the value of the symbol B to the list Y
+#   push!(Y.args, esc(summand.args[3]))
+# end
 
 
-macro vc(expression)
-	n = length(expression.args)
+# macro vc(expression)
+# 	n = length(expression.args)
 
-	#initialize empty array of Matrix{Float64} objects not evaluated yet
-	X = :(Matrix{Float64}[]) # these may change 
-	Y = :(Matrix{Float64}[]) # these may change 
+# 	#initialize empty array of Matrix{Float64} objects not evaluated yet
+# 	X = :(Matrix{Float64}[]) # these may change 
+# 	Y = :(Matrix{Float64}[]) # these may change 
 
-	if expression.args[1] != :+ #if first argument is not plus (only one vc)
-		summand = expression 
-		append_terms!(X, Y, summand)
-	else #MULTIPLE VARIANCE COMPONENTS if the first argument is a plus (Sigma is a sum multiple variance components)
-		for i in 2:n
-			summand = expression.args[i]
-			append_terms!(X, Y, summand)
-		end
-	end
-:($X, $Y) 
-end 
+# 	if expression.args[1] != :+ #if first argument is not plus (only one vc)
+# 		summand = expression 
+# 		append_terms!(X, Y, summand)
+# 	else #MULTIPLE VARIANCE COMPONENTS if the first argument is a plus (Sigma is a sum multiple variance components)
+# 		for i in 2:n
+# 			summand = expression.args[i]
+# 			append_terms!(X, Y, summand)
+# 		end
+# 	end
+# :($X, $Y) 
+# end 
 
 
 #####
 # AB is an empty vector of variance components
 #Take a term A_1 ⊗ B_1 and add its elements to the vector of variance components
-AB = :(VarianceComponent[]) 
+#AB = :(VarianceComponent[]) 
 
 function append_terms!(AB, summand)
   # elements in args are symbols, 

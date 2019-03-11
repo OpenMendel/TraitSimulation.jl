@@ -4,7 +4,7 @@ using DataFrames, Distributions, SnpArrays, TraitSimulation, StatsModels, Random
 
 # 1. DATA IMPORT:
 #reads the bed file of snp data and then turns into named dataframe for simulation
-#cd /Users/sarahji/Desktop/OpenMendel_Sarah/Tutorials/Heritability 
+cd /Users/sarahji/Desktop/OpenMendel_Sarah/Tutorials/Heritability 
 snps = SnpArray("heritability.bed")
 minor_allele_frequency = maf(snps)
 common_snps_index = (0.05 .≤ minor_allele_frequency)
@@ -39,6 +39,9 @@ struct ResponseType{D<:Distributions.Distribution, L<:GLM.Link}
   shape::Float64
   df::Float64
   trials::Int
+  function ResponseType(dist)
+		return(new(dist))
+	end
 end
 
 #NEED to create a function that returns a vector of ResponseTypes to feed into the Multiple_GLM_traits_model_NOTIID
@@ -50,7 +53,7 @@ end
 
 #so that user can simulate simultaneous glm traits from different distributions from exponential family
 #this function must return a vector of GLM traits simulated from a vector of ResponseType's  
-function Multiple_GLMTraits(formulas::Vector{String}, df::DataFrame, dist::Array{ResponseType})
+function Multiple_GLMTraits(formulas::Vector{String}, df::DataFrame, dist::Vector{ResponseType})
 	vec = [GLMTrait(formulas[i], df, dist[i]) for i in 1:length(formulas)]
 	return(vec)
 end
@@ -82,6 +85,8 @@ B_1 = GRM
 A_2 = [0.7 0.0; 0.0 0.7]
 B_2 = Matrix{Float64}(I, size(GRM))
 
+
+test2 = @vc A_2 ⊗ Matrix{Float64}(I, 212)
 
 #Standard normal
 dist_N01 = ResponseType(Normal(), IdentityLink(), 0.0, 1.0, 0.0, 0.0, 0)
