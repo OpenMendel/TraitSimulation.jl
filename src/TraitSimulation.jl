@@ -25,7 +25,6 @@ struct ResponseType{D<:Distributions.Distribution, L<:GLM.Link}
 #     end
 #     return new{D, L}(family, inverse_link, location, scale, shape, df, trials) #overriding default types in responsetype 
 #   end
-
 end
 
 include("calculate_mean_vector.jl")
@@ -75,23 +74,6 @@ function simulate(trait::LMMTrait)
   multiple_trait_simulation7(trait.mu, trait.vc)
 end
 
-export ResponseType, actual_simulation, mean_formula, VarianceComponent, append_terms!, GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc
+export ResponseType, actual_simulation, mean_formula, VarianceComponent, append_terms!, GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, g
 end #module
 
-#Toy example test
-# df = DataFrame(x1 = rand(10000), x2 = rand(10000), x3 = rand(10000), x4 = rand(10000))
-# user_formula_string = "3 + log(x1) + 2sqrt(abs(log(x2))) + asin(x4)"
-
-
-# μ = mean_formula(user_formula_string, df)
-
-# # # #Poisson
-# dist = ResponseType(Poisson(), LogLink(), 0.0, 0.0, 0.0, 0.0, 0)
-# dist = ResponseType(Poisson(), 2, 2.0, 2.0, 0.0, 0.0, 0)
-# actual_simulation(μ, dist)
-
-#kens yellow book chapter 8
-#correlation between snps in snparrays using snparrays and store into a sparse matrix
-
-# glm: for one trait at a time (Exponential Family)
-# specifying multiple formulas can be done for a vector of GLMTrait objects 

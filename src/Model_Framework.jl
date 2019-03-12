@@ -8,8 +8,14 @@ function GLMTrait(formula, df, dist)
   end
 end
 
-function Multiple_GLMTraits(formulas, df, dist)
+function Multiple_GLMTraits(formulas, df, dist::ResponseType)
   vec = [GLMTrait(formulas[i], df, dist) for i in 1:length(formulas)] #vector of GLMTrait objects
+  return(vec)
+end
+
+# we put type of the dist vector as Any since we want to allow for any ResponseType{Poisson(), LogLink()}, ResponseType{Normal(), IdentityLink()}
+function Multiple_GLMTraits(formulas::Vector{String}, df::DataFrame, dist::Vector)
+  vec = [GLMTrait(formulas[i], df, dist[i]) for i in 1:length(formulas)]
   return(vec)
 end
 

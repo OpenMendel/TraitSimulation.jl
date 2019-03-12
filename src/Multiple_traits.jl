@@ -414,9 +414,13 @@ end
 #Take a term A_1 ⊗ B_1 and add its elements to the vector of variance components
 #AB = :(VarianceComponent[]) 
 
+g() = nothing
+
 function append_terms!(AB, summand)
-  # elements in args are symbols, 
-  push!(AB.args, :(VarianceComponent($(summand.args[2]), $(summand.args[3]))))
+  # elements in args are symbols,
+  A_esc = esc(summand.args[2])
+  B_esc = esc(summand.args[3])
+  push!(AB.args, :(VarianceComponent($A_esc, $B_esc)))
 end
 
 macro vc(expression)
