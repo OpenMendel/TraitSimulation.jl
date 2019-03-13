@@ -27,6 +27,16 @@ struct ResponseType{D<:Distributions.Distribution, L<:GLM.Link}
 #   end
 end
 
+# struct NewResponseType{D<:Distributions.Distribution, L<:GLM.Link}
+#   family::D
+#   inverse_link::L
+#   location::Float64
+#   scale::Float64
+#   shape::Float64
+#   df::Float64
+#   trials::Int
+# end
+
 include("calculate_mean_vector.jl")
 #not in glm package say weibull assuming i find out what the weibull link is 
 #apply_inverse_link(μ, dist::ResponseType{D, LogLink}) where D = weibull_link.(μ)
