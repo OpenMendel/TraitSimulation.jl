@@ -27,8 +27,10 @@ dist_N01 = ResponseType(Normal(), IdentityLink(), 0.0, 1.0, 0.0, 0.0, 0)
 #Normal(0, 5)
 dist_N05 = ResponseType(Normal(), IdentityLink(), 0.0, 5.0, 0.0, 0.0, 0)
 
+dist_Poisson5 = ResponseType(Poisson(), LogLink(), 5.0, 0.0, 0.0, 0.0, 0)
+
 #for multiple glm traits from different distributions
-dist_type_vector = [dist_N01, dist_N05]
+dist_type_vector = [dist_N01, dist_Poisson5]
 
 #SINGLE GLM TRAIT
 GLM_trait_model = GLMTrait(formulas[1], df, dist_N01)
@@ -75,7 +77,6 @@ sample_variance = sum(sumabs2)/(B - 1)
 return(sample_mean, sample_variance)
 end
 
-#ybar = mean(Y)
-#sample_variance = sum(abs2, Y - ybar)
+#testing(Matrix(Simulated_GLM_trait))
 
 
