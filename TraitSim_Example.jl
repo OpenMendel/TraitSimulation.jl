@@ -27,7 +27,7 @@ dist_N01 = ResponseType(Normal(), IdentityLink(), 0.0, 1.0, 0.0, 0.0, 0)
 #Normal(0, 5)
 dist_N05 = ResponseType(Normal(), IdentityLink(), 0.0, 5.0, 0.0, 0.0, 0)
 
-dist_Poisson5 = ResponseType(Poisson(), LogLink(), 5.0, 0.0, 0.0, 0.0, 0)
+dist_Poisson5 = ResponseType(Poisson(5), LogLink(), 5.0, 0.0, 0.0, 0.0, 0)
 
 #for multiple glm traits from different distributions
 dist_type_vector = [dist_N01, dist_Poisson5]
