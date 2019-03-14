@@ -9,12 +9,12 @@ const ResponseDistributionType = Union{ResponseDistribution, Vector{ResponseDist
 
 #SIMULATE STUDENT-T distributed TRAITS needs to be edited 
 #T distribution with v degrees of freedom 
-struct T_Response <: ResponseDistribution
+struct TResponse <: ResponseDistribution
 df::Int64
 scale::Float64
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{T_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{TResponse})
 if dist.location < zero(T)
       error("Location parameter cannot be negative for a Poisson distribution!")
     end
@@ -23,11 +23,11 @@ end
 
 #SIMULATE WEIBULL TRAITS
 #weibull distributed reponse with degrees of freedom df 
-struct Weibull_Response <: ResponseDistribution
+struct WeibullResponse <: ResponseDistribution
 df::Float64
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{Weibull_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{WeibullResponse})
 if dist.location < zero(T)
       error("Location parameter cannot be negative for a Poisson distribution!")
     end
@@ -36,10 +36,10 @@ end
 
 
 #SIMULATE POISSON traits
-struct Poisson_Response <: ResponseDistribution
+struct PoissonResponse <: ResponseDistribution
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{Poisson_Response)
+function simulate_glm_trait(μ, dist::ResponseDistribution{PoissonResponse)
 if dist.location < zero(T)
       error("Location parameter cannot be negative for a Poisson distribution!")
     end
@@ -48,11 +48,11 @@ end
 
 #SIMULATE NORMAL TRAITS
 # Normal response type with standard deviation σ
-struct Normal_Response <: ResponseDistribution
+struct NormalResponse <: ResponseDistribution
 scale::Float{64}
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{Normal_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{NormalResponse})
 if dist.scale < zero(T)
       error("Scale cannot be negative for a normal distribution!")
     end
@@ -60,20 +60,20 @@ if dist.scale < zero(T)
 end
 
 #SIMULATE Bernoulli TRAITS
-struct Bernoulli_Response <: ResponseDistribution
+struct BernoulliResponse <: ResponseDistribution
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{Bernoulli_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{BernoulliResponse})
  return bernoulli_deviate.(μ) 
 end
 
 
 #SIMULATE BINOMIAL TRAITS
-struct Binomial_Response <: ResponseDistribution
+struct BinomialResponse <: ResponseDistribution
 trials::Int64
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{Binomial_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{BinomialResponse})
 if dist.trials < zero(T)
       error("Trials cannot be negative for a binomial distribution!")
     end
@@ -82,7 +82,7 @@ end
 
 #SIMULATE GAMMA TRAITS
 #simulate from gamma response with shape parameter
-struct Gamma_Response <: ResponseDistribution
+struct GammaResponse <: ResponseDistribution
 shape::Float64
 function GammaResponse(shape::Float64)
   if(shape <= 0)
@@ -93,7 +93,7 @@ function GammaResponse(shape::Float64)
 end
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{Gamma_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{GammaResponse})
 if dist.shape < zero(T)
       error("Shape cannot be negative for a gamma distribution!")
     end
@@ -101,7 +101,7 @@ if dist.shape < zero(T)
 end
 
 # Inverse Gaussian with shape parameter 
-struct Inverse_Gaussian_Response <: ResponseDistribution
+struct InverseGaussianResponse <: ResponseDistribution
 shape::Float64
 function InverseGaussianResponse(shape)
   if(shape <= 0)
@@ -113,7 +113,7 @@ end
 end
 
 #********SIMULATE INVERSE GAUSSIAN TRAITS
-function simulate_glm_trait(μ, dist::ResponseDistribution{Inverse_Gaussian_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{InverseGaussianResponse})
 if dist.shape < zero(T)
       error("Shape must be positive for an inverse Gaussian distribution!")
     end
@@ -123,9 +123,9 @@ end
 
 #SIMULATE EXPONENTIAL TRAITS ## EDIT THIS GUY 
 #simulate from exponential response with shape parameter
-struct Exponential_Response <: ResponseDistribution
+struct ExponentialResponse <: ResponseDistribution
 scale::Float64
-function Exponential_Response(scale::Float64)
+function ExponentialResponse(scale::Float64)
   if(scale <= 0)
     error("scale must be greater than zero in a Exponential distribution!")
   else
@@ -134,7 +134,7 @@ function Exponential_Response(scale::Float64)
 end
 end
 
-function simulate_glm_trait(μ, dist::ResponseDistribution{Exponential_Response})
+function simulate_glm_trait(μ, dist::ResponseDistribution{ExponentialResponse})
 if dist.scale < zero(T)
       error("Scale cannot be negative for a Exponential distribution!")
     end
