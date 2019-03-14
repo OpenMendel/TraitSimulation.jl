@@ -43,12 +43,15 @@ include("calculate_mean_vector.jl")
 
 #in glm package
 include("apply_inverse_link.jl")
+#include("apply_inverse_link_new.jl")
 export LogLink, IdentityLink, SqrtLink, ProbitLink, LogitLink, InverseLink, CauchitLink, CloglogLink
 
 # #since the GLM package uses the Distribution types from the Distibutions package, we use these packages not to simulate from their existing functions but to 
 # #use them as type dispatchers for the simulate_glm_trait function
 
 include("simulate_glm_trait.jl")
+
+#include("simulate_glm_trait_new.jl")
 export Poisson, Normal, Binomial, Bernoulli, Gamma, InverseGaussian, TDist, Weibull #Exporting these from the Distributions package 
 
 
@@ -58,6 +61,14 @@ function actual_simulation(mu, dist::ResponseType)
 	Simulated_Trait = simulate_glm_trait(transmu, dist)
 	return(Simulated_Trait)
 end
+
+#this is the main functionality of this package, to run the actual simulation now for the split up responsedist type and linkfunction type
+# function actual_simulation(mu, dist::ResponseDistribution, link::InverseLinkFunction) 
+#   transmu = apply_inverse_link(mu, link)
+#   Simulated_Trait = simulate_glm_trait(transmu, dist)
+#   return(Simulated_Trait)
+# end
+
 ########
 
 include("Multiple_traits.jl")

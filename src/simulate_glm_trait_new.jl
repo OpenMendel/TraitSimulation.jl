@@ -4,9 +4,6 @@
 # This super type of all response distribution types
 abstract type ResponseDistribution end
 
-# a type alias for a single distribution and a vector of distributions
-const ResponseDistributionType = Union{ResponseDistribution, Vector{ResponseDistribution}}
-
 #SIMULATE STUDENT-T distributed TRAITS needs to be edited 
 #T distribution with v degrees of freedom 
 struct TResponse <: ResponseDistribution

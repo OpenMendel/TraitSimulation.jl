@@ -3,9 +3,6 @@
 # This super type of all response distribution types
 abstract type InverseLinkFunction end
 
-# a type alias for a single distribution and a vector of distributions
-const InverseLinkFunctionType = Union{InverseLinkFunction, Vector{InverseLinkFunction}}
-
 ##LINK FUNCTIONS##
 
 """inverse cauchit link."""
@@ -83,42 +80,42 @@ end
 
 ##APPLY INVERSE LINK FUNCTIONS
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{LogLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{LogLink})
 	D = log_inverse_link.(μ)
 	return(D)
 end
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{IdentityLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{IdentityLink})
 	D = identity_inverse_link.(μ)
 	return(D)
 end
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{SqrtLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{SqrtLink})
 	D = sqrt_inverse_link.(μ)
 	return(D)
 end
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{ProbitLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{ProbitLink})
 	D = probit_inverse_link.(μ)
 	return(D)
 end
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{LogitLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{LogitLink})
 	D = logit_inverse_link.(μ)
 	return(D)
 end
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{InverseLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{InverseLink})
 	D = inverse_inverse_link.(μ)
 	return(D)
 end
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{CauchitLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{CauchitLink})
 	D = cauchit_inverse_link.(μ)
 	return(D)
 end
 
-function apply_inverse_link(μ, dist::InverseLinkFunction{CloglogLink})
+function apply_inverse_link(μ, link::InverseLinkFunction{CloglogLink})
 	D = cloglog_inverse_link.(μ)
 	return(D)
 end
