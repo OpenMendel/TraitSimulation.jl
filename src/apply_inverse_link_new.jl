@@ -80,43 +80,19 @@ end
 
 ##APPLY INVERSE LINK FUNCTIONS
 
-function apply_inverse_link(μ, link::InverseLinkFunction{LogLink})
-	D = log_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::LogLink) = log_inverse_link.(μ)
 
-function apply_inverse_link(μ, link::InverseLinkFunction{IdentityLink})
-	D = identity_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::IdentityLink) = identity_inverse_link.(μ)
 
-function apply_inverse_link(μ, link::InverseLinkFunction{SqrtLink})
-	D = sqrt_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::SqrtLink) = sqrt_inverse_link.(μ)
 
-function apply_inverse_link(μ, link::InverseLinkFunction{ProbitLink})
-	D = probit_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::ProbitLink) = probit_inverse_link.(μ)
 
-function apply_inverse_link(μ, link::InverseLinkFunction{LogitLink})
-	D = logit_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::LogitLink) = logit_inverse_link.(μ)
 
-function apply_inverse_link(μ, link::InverseLinkFunction{InverseLink})
-	D = inverse_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::InverseLink) = inverse_inverse_link.(μ)
 
-function apply_inverse_link(μ, link::InverseLinkFunction{CauchitLink})
-	D = cauchit_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::CauchitLink) = cauchit_inverse_link.(μ)
 
-function apply_inverse_link(μ, link::InverseLinkFunction{CloglogLink})
-	D = cloglog_inverse_link.(μ)
-	return(D)
-end
+apply_inverse_link(μ, link::CloglogLink) = cloglog_inverse_link.(μ)
 

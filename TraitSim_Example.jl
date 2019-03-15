@@ -22,28 +22,25 @@ A_2 = [0.7 0.0; 0.0 0.7]
 B_2 = Matrix{Float64}(I, size(GRM))
 
 #Standard normal
-dist_N01 = ResponseType(Normal(), IdentityLink(), 0.0, 1.0, 0.0, 0.0, 0)
-
-#Normal(0, 5)
-dist_N05 = ResponseType(Normal(), IdentityLink(), 0.0, 5.0, 0.0, 0.0, 0)
-
-dist_Poisson5 = ResponseType(Poisson(5), LogLink(), 5.0, 0.0, 0.0, 0.0, 0)
 
 #for multiple glm traits from different distributions
-dist_type_vector = [dist_N01, dist_Poisson5]
+dist_type_vector = [NormalResponse(1), PoissonResponse()]
+
+link_type_vector = [IdentityLink(), LogLink()]
+
 
 #SINGLE GLM TRAIT
-GLM_trait_model = GLMTrait(formulas[1], df, dist_N01)
-Simulated_GLM_trait = simulate(GLM_trait_model)
+GLM_trait_model_Poisson5 = GLMTrait(formulas[1], df, PoissonResponse(), LogLink())
+Simulated_GLM_trait = simulate(GLM_trait_model_Poisson5)
 
 
 #MULTIPLE GLM TRAITS IID 
-Multiple_iid_GLM_traits_model = Multiple_GLMTraits(formulas, df, dist_N01)
-Simulated_GLM_trait = simulate(Multiple_iid_GLM_traits_model)
+Multiple_iid_GLM_traits_model = Multiple_GLMTraits(formulas, df, PoissonResponse(), LogLink())
+Simulated_GLM_trait_iid = simulate(Multiple_iid_GLM_traits_model)
 
 #MULTIPLE GLM TRAITS FROM DIFFERENT DISTRIBUTIONS
 
-Multiple_GLM_traits_model_NOTIID = Multiple_GLMTraits(formulas, df, dist_type_vector)
+Multiple_GLM_traits_model_NOTIID = Multiple_GLMTraits(formulas, df, dist_type_vector, link_type_vector)
 
 Simulated_GLM_trait = simulate(Multiple_GLM_traits_model_NOTIID)
 

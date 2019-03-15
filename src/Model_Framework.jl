@@ -1,21 +1,22 @@
-struct GLMTrait
+struct GLMTrait{D<:ResponseDistribution, L<:InverseLinkFunction}
 formula::String
 mu::Vector{Float64}
-dist:: ResponseType
-function GLMTrait(formula, df, dist)
+dist:: D
+link:: L
+function GLMTrait(formula, df, dist::D, link::L) where {D, L}
     mu = mean_formula(formula, df)
-    return(new(formula, mu, dist))
+    return(new{D, L}(formula, mu, dist))
   end
 end
 
-function Multiple_GLMTraits(formulas, df, dist::ResponseType)
-  vec = [GLMTrait(formulas[i], df, dist) for i in 1:length(formulas)] #vector of GLMTrait objects
+function Multiple_GLMTraits(formulas, df, dist::ResponseDistribution, link::InverseLinkFunction)
+  vec = [GLMTrait(formulas[i], df, dist, link) for i in 1:length(formulas)] #vector of GLMTrait objects
   return(vec)
 end
 
 # we put type of the dist vector as Any since we want to allow for any ResponseType{Poisson(), LogLink()}, ResponseType{Normal(), IdentityLink()}
-function Multiple_GLMTraits(formulas::Vector{String}, df::DataFrame, dist::Vector)
-  vec = [GLMTrait(formulas[i], df, dist[i]) for i in 1:length(formulas)]
+function Multiple_GLMTraits(formulas::Vector{String}, df::DataFrame, dist::Vector, link::Vector)
+  vec = [GLMTrait(formulas[i], df, dist[i], link[i]) for i in 1:length(formulas)]
   return(vec)
 end
 
