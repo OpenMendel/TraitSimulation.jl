@@ -1,4 +1,4 @@
-using DataFrames, Distributions, SnpArrays, StatsModels, Random, LinearAlgebra, TraitSimulation
+using DataFrames, SnpArrays, StatsModels, Random, LinearAlgebra, TraitSimulation
 
 #cd /Users/sarahji/Desktop/OpenMendel_Sarah/Tutorials/Heritability 
 

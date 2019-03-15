@@ -1,8 +1,7 @@
 module TraitSimulation
 using GLM # this already defines some useful distribution and link types
 using DataFrames # so we can test it 
-using StatsModels # useful distributions
-using Distributions #lots more useful distributions
+using StatsModels # useful distributions #lots more useful distributions
 using LinearAlgebra
 using Random
 

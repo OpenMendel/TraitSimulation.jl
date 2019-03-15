@@ -1,4 +1,3 @@
-using Distributions
 using DataFrames
 using LinearAlgebra
 using TraitSimulation
