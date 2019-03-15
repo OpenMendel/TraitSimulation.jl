@@ -376,44 +376,13 @@ out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 return out
 end
 
-# Take a term A ⊗ B and add its elements to the lists X and Y
-# X = :(Matrix{Float64}[])
-# Y = :(Matrix{Float64}[])
-
-# function append_terms!(X, Y, summand)
-#   # add the value of the symbol A to the list X
-#   push!(X.args, esc(summand.args[2]))
-#   # add the value of the symbol B to the list Y
-#   push!(Y.args, esc(summand.args[3]))
-# end
-
-
-# macro vc(expression)
-# 	n = length(expression.args)
-
-# 	#initialize empty array of Matrix{Float64} objects not evaluated yet
-# 	X = :(Matrix{Float64}[]) # these may change 
-# 	Y = :(Matrix{Float64}[]) # these may change 
-
-# 	if expression.args[1] != :+ #if first argument is not plus (only one vc)
-# 		summand = expression 
-# 		append_terms!(X, Y, summand)
-# 	else #MULTIPLE VARIANCE COMPONENTS if the first argument is a plus (Sigma is a sum multiple variance components)
-# 		for i in 2:n
-# 			summand = expression.args[i]
-# 			append_terms!(X, Y, summand)
-# 		end
-# 	end
-# :($X, $Y) 
-# end 
-
 
 #####
 # AB is an empty vector of variance components
 #Take a term A_1 ⊗ B_1 and add its elements to the vector of variance components
 #AB = :(VarianceComponent[]) 
 
-g() = nothing
+# g() = nothing
 
 function append_terms!(AB, summand)
   # elements in args are symbols,
@@ -438,54 +407,3 @@ macro vc(expression)
 return(:($AB)) # change this to return a vector of VarianceComponent objects
 end 
 
-#for each A_1 , B_1 variance component we store their values and their cholesky decompositions in index i of vector AB returned from @vc (sum(A_i \otimes B_i)
-
-#user specify the @vc 
-# test1 = :(A_1 ⊗ B_1 + A_2 ⊗ B_2)
-# test2 = :(kron(A_1, B_1) + kron(A_2, B_2))
-# A, B = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
-# A, B = @vc A_1 ⊗ GRM + A_2 ⊗ B_2
-# A, B = @vc kron(A_1, B_1) + kron(A_2, B_2)
-
-# #compute grm using snparrays 
-# GRM = grm(common_snps)
-# A_1 = [0.3 0.1; 0.1 0.3]
-# B_1 = GRM
-# A_2 = [0.7 0.0; 0.0 0.7]
-# B_2 = Matrix{Float64}(I, size(GRM))
-
-# #return these two lists for the simulation function
-# A = [A_1, A_2]
-# B = [B_1, B_2]
-
-
-# #test 
-# cd /Users/sarahji/Desktop/OpenMendel_Sarah/Tutorials/Heritability 
-# snps = SnpArray("heritability.bed")
-# minor_allele_frequency = maf(snps)
-# common_snps_index = (0.05 .≤ minor_allele_frequency)
-# common_snps = SnpArrays.filter("heritability", trues(212), common_snps_index)
-# df = convert(Matrix{Float64}, snps)
-# df = DataFrame(df)
-
-# @vc macro 
-# #user specify the @vc 
-# A, B = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2 
-# A, B = @vc A_1 ⊗ GRM + A_2 ⊗ B_2 
-# A, B = @vc kron(A_1, B_1) + kron(A_2, B_2)
-
-# #compute grm using snparrays 
-# GRM = grm(common_snps)
-# A_1 = [0.3 0.1; 0.1 0.3]
-# B_1 = GRM
-# A_2 = [0.7 0.0; 0.0 0.7]
-# B_2 = Matrix{Float64}(I, size(GRM))
-#vc = [VarianceComponent(A_1, B_1), VarianceComponent(A_2, B_2)]
-
-# #return these two lists for the simulation function
-# A = [A_1, A_2]
-# B = [B_1, B_2]
-
-
-#formulas = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)"]
-# multiple_trait_simulation3(formulas, df, A, B, GRM)
