@@ -63,7 +63,7 @@ function testing(simulatedtrait::Matrix)
 	diff = Vector{Matrix{Float64}}(undef, B)
 	sumabs2 = Vector{Float64}(undef, B)
 for i in 1:B
-	Y[i] = TraitSimulation.multiple_trait_simulation7(zeros(212, 2), variancecomp)
+	Y[i] = TraitSimulation.multiple_trait_simulation7(zeros(n_people, n_traits), variancecomp)
 	ybar[i] = vec(mean(Y[i], dims = 1))
 	diff[i] = Y[i] - reshape(repeat(ybar[i], inner = n_people), n_people, n_traits)
 	sumabs2[i] = sum(abs2, sum(diff[i], dims = 1))
@@ -76,4 +76,29 @@ end
 
 #testing(Matrix(Simulated_GLM_trait))
 
+### TESTING 
 
+B = 2000
+variancecomp = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
+
+function testing_new(n_people, n_traits, variancecomp)
+	Y = Vector{Matrix{Float64}}(undef, B)
+	ybar = Vector{Vector{Float64}}(undef, B)
+	CovMatrices_people = Vector{Matrix{Float64}}(undef, B)
+	CovMatrices_traits = Vector{Matrix{Float64}}(undef, B)
+
+for i in 1:B
+	Y[i] = TraitSimulation.multiple_trait_simulation7(zeros(n_people, n_traits), variancecomp)
+	ybar[i] = vec(mean(Y[i], dims = 1))
+	CovMatrices_people[i] = cov(Y[i], dims = 2)
+	CovMatrices_traits[i] = cov(Y[i], dims = 1)
+end
+
+sample_mean = mean(ybar)
+sample_cov_matrix_people = mean(CovMatrices_people)
+sample_cov_matrix_traits = mean(CovMatrices_traits)
+Total_Sigma = kron(sample_cov_matrix_people, sample_cov_matrix_traits)
+return(sample_mean, Total_Sigma)
+end
+
+#norm(testing_new(212, 2, variancecomp)[2] - A_1 ⊗ B_1 + A_2 ⊗ B_2)
