@@ -9,10 +9,10 @@ snps = SnpArray("heritability.bed")
 minor_allele_frequency = maf(snps)
 common_snps_index = (0.05 .≤ minor_allele_frequency)
 common_snps = SnpArrays.filter("heritability", trues(212), common_snps_index)
-df = convert(Matrix{Float64}, snps)
+df = convert(Matrix{Float64}, @view(snps[:, :]))
 df = DataFrame(df)
 
-formulas = ["1 + 3(x1)", "1 + 3(x2) + abs(x3)"]
+formulas = ["0 + 0(x1)", "5 + 0(x2)"]
 
 # Variance Specification for VCM: ex) @vc A ⊗ GRM + B ⊗ I
 GRM = grm(common_snps)
@@ -42,7 +42,7 @@ Simulated_GLM_trait_iid = simulate(Multiple_iid_GLM_traits_model)
 
 Multiple_GLM_traits_model_NOTIID = Multiple_GLMTraits(formulas, df, dist_type_vector, link_type_vector)
 
-Simulated_GLM_trait = simulate(Multiple_GLM_traits_model_NOTIID)
+Simulated_GLM_trait_NOTIID = simulate(Multiple_GLM_traits_model_NOTIID)
 
 #LMM TRAIT
 LMM_trait_model = LMMTrait(formulas, df, @vc A_1 ⊗ B_1 + A_2 ⊗ B_2)
@@ -51,28 +51,28 @@ Simulated_LMM_trait = simulate(LMM_trait_model)
 
 ### TESTING 
 
-B = 2000
-variancecomp = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
+# B = 2000
+# variancecomp = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
 
-function testing(simulatedtrait::Matrix)
-	n_people = size(simulatedtrait)[1]
-	n_traits = size(simulatedtrait)[2]
+# function testing(simulatedtrait::Matrix)
+# 	n_people = size(simulatedtrait)[1]
+# 	n_traits = size(simulatedtrait)[2]
 
-	Y = Vector{Matrix{Float64}}(undef, B)
-	ybar = Vector{Vector{Float64}}(undef, B)
-	diff = Vector{Matrix{Float64}}(undef, B)
-	sumabs2 = Vector{Float64}(undef, B)
-for i in 1:B
-	Y[i] = TraitSimulation.multiple_trait_simulation7(zeros(n_people, n_traits), variancecomp)
-	ybar[i] = vec(mean(Y[i], dims = 1))
-	diff[i] = Y[i] - reshape(repeat(ybar[i], inner = n_people), n_people, n_traits)
-	sumabs2[i] = sum(abs2, sum(diff[i], dims = 1))
-end
+# 	Y = Vector{Matrix{Float64}}(undef, B)
+# 	ybar = Vector{Vector{Float64}}(undef, B)
+# 	diff = Vector{Matrix{Float64}}(undef, B)
+# 	sumabs2 = Vector{Float64}(undef, B)
+# for i in 1:B
+# 	Y[i] = TraitSimulation.multiple_trait_simulation7(zeros(n_people, n_traits), variancecomp)
+# 	ybar[i] = vec(mean(Y[i], dims = 1))
+# 	diff[i] = Y[i] - reshape(repeat(ybar[i], inner = n_people), n_people, n_traits)
+# 	sumabs2[i] = sum(abs2, sum(diff[i], dims = 1))
+# end
 
-sample_mean = mean(ybar)
-sample_variance = sum(sumabs2)/(B - 1)
-return(sample_mean, sample_variance)
-end
+# sample_mean = mean(ybar)
+# sample_variance = sum(sumabs2)/(B - 1)
+# return(sample_mean, sample_variance)
+# end
 
 #testing(Matrix(Simulated_GLM_trait))
 
@@ -102,3 +102,5 @@ return(sample_mean, Total_Sigma)
 end
 
 #norm(testing_new(212, 2, variancecomp)[2] - A_1 ⊗ B_1 + A_2 ⊗ B_2)
+
+cd("/Users/sarahji/Desktop/TraitSimulation")

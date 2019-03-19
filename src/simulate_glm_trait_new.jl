@@ -40,7 +40,7 @@ function simulate_glm_trait(μ, dist::PoissonResponse)
 if any(μ_i -> μ_i < 0, μ)
       error("Location parameter cannot be negative for a Poisson distribution!")
     end
- return poisson_deviate.(μ)  
+ return poisson_deviate.(μ)
 end
 
 #SIMULATE NORMAL TRAITS
@@ -168,7 +168,7 @@ end
 """Generates an exponential random deviate with mean mu."""
 
 function exponential_deviate(mu)
-  return -mu * log(rand(eltype(mu)))
+  return -log(rand()) / mu
 end
 
 """Generates a gamma deviate with shape parameter alpha
@@ -215,7 +215,7 @@ end
 standard deviation sigma."""
 
 function normal_deviate(mu, sigma)
-  return sigma * randn(eltype(mu)) + mu
+  return sigma * randn() + mu
 end
 
 """Generates a Poisson random deviate with mean mu."""
@@ -224,7 +224,7 @@ function poisson_deviate(mu)
   (x, p, k) = (exp(-mu), one(eltype(mu)), 0)
   while p > x
     k = k + 1
-    p = p * rand(eltype(mu))
+    p = p * rand()
   end
   return k - 1
 end
