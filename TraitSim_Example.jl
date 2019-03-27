@@ -12,7 +12,7 @@ common_snps = SnpArrays.filter("heritability", trues(212), common_snps_index)
 df = convert(Matrix{Float64}, @view(snps[:, :]))
 df = DataFrame(df)
 
-formulas = ["0 + 0(x1)", "5 + 0(x2)"]
+formulas = ["1 + 5(x1)", "1 + abs(sin(x2))"]
 
 # Variance Specification for VCM: ex) @vc A ⊗ GRM + B ⊗ I
 GRM = grm(common_snps)
@@ -41,7 +41,6 @@ Simulated_GLM_trait_iid = simulate(Multiple_iid_GLM_traits_model)
 #MULTIPLE GLM TRAITS FROM DIFFERENT DISTRIBUTIONS
 
 Multiple_GLM_traits_model_NOTIID = Multiple_GLMTraits(formulas, df, dist_type_vector, link_type_vector)
-
 Simulated_GLM_trait_NOTIID = simulate(Multiple_GLM_traits_model_NOTIID)
 
 #LMM TRAIT
