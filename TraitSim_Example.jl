@@ -12,7 +12,7 @@ common_snps = SnpArrays.filter("heritability", trues(212), common_snps_index)
 df = convert(Matrix{Float64}, @view(snps[:, :]))
 df = DataFrame(df)
 
-formulas = ["1 + 5(x1)", "1 + abs(sin(x2))"]
+formulas = ["1 + 0.2(x1)", "1 + 3(x2) + 5(x5)"]
 
 # Variance Specification for VCM: ex) @vc A ⊗ GRM + B ⊗ I
 GRM = grm(common_snps)
@@ -103,3 +103,29 @@ end
 #norm(testing_new(212, 2, variancecomp)[2] - A_1 ⊗ B_1 + A_2 ⊗ B_2)
 
 cd("/Users/sarahji/Desktop/TraitSimulation")
+
+
+snpdata = SnpArray("traitsim28d.bed", 212)
+famfile = readdlm("traitsim28d.fam", ',')
+height = famfile[:, 7]
+sex = map(x -> strip(x) == "F" ? -1.0 : 1.0, famfile[:, 5])
+snpdef28_1 = readdlm("traitsim28d.bim", Any; header = false)
+snpid = map(x -> strip(string(x)), snpdef28_1[:, 1])
+
+ind_rs10412915 = findall(x -> x == "rs10412915", snpid)[1]
+locus = convert(Vector{Float64}, @view(snpdata[:,ind_rs10412915]))
+X = DataFrame(sex = sex, locus = locus)
+
+GRM = grm(snpdata, method= :GRM)
+A_1 = [0.3 0.1; 0.1 0.3]
+B_1 = GRM
+A_2 = [0.7 0.0; 0.0 0.7]
+B_2 = Matrix{Float64}(I, size(GRM))
+
+variancecomp = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
+trait_null = simulate(LMMTrait(["175", "175"], X, variancecomp))
+formulas = ["175 + 10(sex) + 10(locus)", "175 + 10(sex) + 10(locus)"]
+alternative_model = LMMTrait(formulas, df, variancecomp)
+trait_alternative = simulate(LMMTrait(formulas, X, variancecomp))
+
+

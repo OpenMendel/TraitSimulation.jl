@@ -337,7 +337,7 @@ end
 #####
 
 #without computign mean from dataframe and formulas 
-function multiple_trait_simulation7(mu, vc::Vector{VarianceComponent} )
+function multiple_trait_simulation7(mu, vc::Vector{VarianceComponent})
 	#isposdef(A) cholesky decomp will fail if any A, B not semipd
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
@@ -407,3 +407,18 @@ macro vc(expression)
 return(:($AB)) # change this to return a vector of VarianceComponent objects
 end 
 
+
+function  vcobjtuple(vcobject::Vector{VarianceComponent})
+	m = length(vcobject)
+	d = size(vcobject[1].A, 1)
+	n = size(vcobject[1].B, 1)
+
+	Σ = ntuple(x -> zeros(d, d), m)
+	V = ntuple(x -> zeros(n, n), m)
+
+	for i in eachindex(vcobject)
+		copyto!(V[i], vcobject[i].B)
+		copyto!(Σ[i], vcobject[i].A)
+	end
+	return(Σ, V)
+end
