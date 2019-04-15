@@ -48,6 +48,6 @@ function simulate(trait::LMMTrait)
   multiple_trait_simulation7(trait.mu, trait.vc)
 end
 
-export ResponseType, actual_simulation, mean_formula, VarianceComponent, append_terms!, GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc
+export ResponseType, actual_simulation, mean_formula, VarianceComponent, append_terms!, GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple
 end #module
 

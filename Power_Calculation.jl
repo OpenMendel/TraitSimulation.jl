@@ -34,45 +34,46 @@ end
 return(term)
 end
 
-snpdata = SnpArray("traitsim28d.bed", 212)
-famfile = readdlm("traitsim28d.fam", ',')
-height = famfile[:, 7]
-sex = map(x -> strip(x) == "F" ? -1.0 : 1.0, famfile[:, 5])
-snpdef28_1 = readdlm("traitsim28d.bim", Any; header = false)
-snpid = map(x -> strip(string(x)), snpdef28_1[:, 1])
+# snpdata = SnpArray("traitsim28d.bed", 212)
+# famfile = readdlm("traitsim28d.fam", ',')
+# height = famfile[:, 7]
+# sex = map(x -> strip(x) == "F" ? -1.0 : 1.0, famfile[:, 5])
+# snpdef28_1 = readdlm("traitsim28d.bim", Any; header = false)
+# snpid = map(x -> strip(string(x)), snpdef28_1[:, 1])
 
-ind_rs10412915 = findall(x -> x == "rs10412915", snpid)[1]
-locus = convert(Vector{Float64}, @view(snpdata[:,ind_rs10412915]))
-X = DataFrame(sex = sex, locus = locus)
+# ind_rs10412915 = findall(x -> x == "rs10412915", snpid)[1]
+# locus = convert(Vector{Float64}, @view(snpdata[:,ind_rs10412915]))
+# X = DataFrame(sex = sex, locus = locus)
 
-GRM = grm(snpdata, method= :GRM)
-A_1 = [100 80; 80 100]
-B_1 = GRM
-A_2 = [100 80; 80 100]
-B_2 = Matrix{Float64}(I, size(GRM))
+# GRM = grm(snpdata, method= :GRM)
+# A_1 = [100 80; 80 100]
+# B_1 = GRM
+# A_2 = [100 80; 80 100]
+# B_2 = Matrix{Float64}(I, size(GRM))
 
-variancecomp = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
-trait_null = simulate(LMMTrait(["175", "175"], X, variancecomp))
-formulas = ["175 + 10(sex) + 10(locus)", "60 + 10(sex) + 10(locus)"]
-alternative_model = LMMTrait(formulas, df, variancecomp)
-trait_alternative = simulate(LMMTrait(formulas, X, variancecomp))
+# variancecomp = @vc A_1 ⊗ B_1 + A_2 ⊗ B_2
+# trait_null = simulate(LMMTrait(["175", "175"], X, variancecomp))
+# formulas = ["175 + 10(sex) + 10(locus)", "60 + 10(sex) + 10(locus)"]
+# alternative_model = LMMTrait(formulas, df, variancecomp)
+# trait_alternative = simulate(LMMTrait(formulas, X, variancecomp))
 
- #export #function  vcobjtuple(vcobject::Vector{VarianceComponent})
-Σ_tuple, V_tuple = vcobjtuple(variancecomp)
-vcdata_null = VarianceComponentVariate(Matrix(trait_null), V_tuple)
-vcdata_alt = VarianceComponentVariate(Matrix(trait_alternative), Matrix(X), V_tuple)
-vcmodel_alt.Σ = Σ_tuple
-vcmodel_mle = deepcopy(vcmodel_alt)
-logl_alt, _, _, _, _, _ = fit_mle!(vcmodel_mle, vcdata_alt; algo = :MM)
+#  #export #function  vcobjtuple(vcobject::Vector{VarianceComponent})
+# Σ_tuple, V_tuple = vcobjtuple(variancecomp)
+# vcdata_null = VarianceComponentVariate(Matrix(trait_null), V_tuple)
+# vcdata_alt = VarianceComponentVariate(Matrix(trait_alternative), Matrix(X), V_tuple)
+# vcmodel_alt.Σ = Σ_tuple
+# vcmodel_mle = deepcopy(vcmodel_alt)
+# logl_alt, _, _, _, _, _ = fit_mle!(vcmodel_mle, vcdata_alt; algo = :MM)
 
-2*(logl_alt - logl_null) > cquantile(Chisq(1), 0.05)
+# 2*(logl_alt - logl_null) > cquantile(Chisq(1), 0.05)
 
 function PowerSampleSizeCalculation(alternative_formulas, snpdata, vc, X_covar, alpha, B)
 	# 1. Generate synthetic data, based on an assumed model
 	dataframe = DataFrame(vcat(snpdata, X_covar))
 	alternative_model = LMMTrait(alternative_formulas, dataframe, vc)
 	
-	null_model = LMMTrait(NullFormula(X_covar), dataframe, vc) # with all betas = 0 no genetic variants only intercept and covariates
+	null_model = LMMTrait(NullFormula(X_covar), 
+		ataframe, vc) # with all betas = 0 no genetic variants only intercept and covariates
 	trait_null = simulate(null_model)
 
 
