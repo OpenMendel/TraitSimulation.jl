@@ -1,4 +1,4 @@
-using DataFrames, SnpArrays, StatsModels, Random, LinearAlgebra, TraitSimulation, DelimitedFiles
+using DataFrames, SnpArrays, StatsModels, Random, LinearAlgebra, TraitSimulation, DelimitedFiles, BenchmarkTools
 
 #cd /Users/sarahji/Desktop/OpenMendel_Sarah/Tutorials/Heritability 
 
@@ -45,7 +45,7 @@ trait_null = simulate(LMMTrait(["40", "20"], X, variancecomp))
 formulas = ["40 + 3(sex) - 1.5(locus)", "20 + 2(sex) - 1.5(locus)"]
 alternative_model = LMMTrait(formulas, X, variancecomp)
 trait_alternative = simulate(LMMTrait(formulas, X, variancecomp))
-
+#means = alternative_model.mu
 # Statistics.mean(Matrix(trait_alternative), dims = 1)
 # Statistics.std(Matrix(trait_alternative), dims = 1)
 # Statistics.median(Matrix(trait_alternative), dims = 1)

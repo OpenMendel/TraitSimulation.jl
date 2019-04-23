@@ -3,10 +3,15 @@ formula::String
 mu::Vector{Float64}
 dist:: D
 link:: L
-function GLMTrait(formula, df, dist::D, link::L) where {D, L}
+end
+
+function GLMTrait(mu::Number, df, dist::D, link::L) where {D, L}
+    return(GLMTrait{D, L}(string(mu), repeat([mu], size(df, 1)), dist, link))
+end
+
+function GLMTrait(formula::String, df, dist::D, link::L) where {D, L}
     mu = mean_formula(formula, df)
-    return(new{D, L}(formula, mu, dist))
-  end
+    return(GLMTrait{D, L}(formula, mu, dist, link))
 end
 
 function Multiple_GLMTraits(formulas, df, dist::ResponseDistribution, link::InverseLinkFunction)
@@ -23,11 +28,11 @@ end
 
 # lmm: multiple traits (MVN)
 
-struct LMMTrait
+struct LMMTrait{T}
 formulas::Vector{String}
 mu::Matrix{Float64}
-vc::Vector{VarianceComponent}
-  function LMMTrait(formulas, df, vc)
+vc::T
+  function LMMTrait(formulas, df, vc::T) where T
     n_traits = length(formulas)
     n_people = size(df)[1]
     mu = zeros(n_people, n_traits)
@@ -35,6 +40,6 @@ vc::Vector{VarianceComponent}
       #calculate the mean vector
       mu[:, i] += mean_formula(formulas[i], df)
     end
-    return(new(formulas, mu, vc))
+    return(new{T}(formulas, mu, vc))
   end
 end

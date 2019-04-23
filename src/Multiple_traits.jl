@@ -336,8 +336,10 @@ end
 
 #####
 
+#multiple LMM traits
+
 #without computign mean from dataframe and formulas 
-function multiple_trait_simulation7(mu, vc::Vector{VarianceComponent})
+function LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
 	#isposdef(A) cholesky decomp will fail if any A, B not semipd
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
@@ -376,6 +378,36 @@ out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 return out
 end
 
+#single LMM trait  𝐿𝑣+𝜇.
+function LMM_trait_simulation(mu, vc::Matrix{T}) where T
+	#isposdef(A) cholesky decomp will fail if any A, B not semipd
+	n_people = size(mu)[1]
+	n_traits = size(mu)[2]
+#preallocate memory for the returned dataframe simulated_trait
+simulated_trait = zeros(n_people, n_traits)
+z = Matrix{Float64}(undef, n_people, n_traits)
+
+chol_Σ = cholesky(vc)
+	#generate from standard normal
+	randn!(z)
+
+# we want to solve u then v to get the first variane component, v.
+#first matrix vector multiplication using cholesky decomposition
+
+#need to find which will be CholA, CholB 
+	lmul!(chol_Σ.L, z)
+
+simulated_trait += z
+
+#for each trait
+simulated_trait += mu
+
+out = DataFrame(simulated_trait)
+
+out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+return out
+end
 
 #####
 # AB is an empty vector of variance components

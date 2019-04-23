@@ -45,9 +45,13 @@ end
 
 # for LMMtrait
 function simulate(trait::LMMTrait)
-  multiple_trait_simulation7(trait.mu, trait.vc)
+  LMM_trait_simulation(trait.mu, trait.vc)
 end
 
-export ResponseType, actual_simulation, mean_formula, VarianceComponent, append_terms!, GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple
+export ResponseType, actual_simulation, mean_formula, VarianceComponent, append_terms!
+export GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple
+export TResponse, WeibullResponse, PoissonResponse, NormalResponse, BernoulliResponse, BinomialResponse
+export GammaResponse, InverseGaussianResponse, ExponentialResponse
+export CauchitLink, CloglogLink, IdentityLink, InverseLink, LogitLink, LogLink, ProbitLink, SqrtLink
 end #module
 

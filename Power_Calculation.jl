@@ -72,8 +72,7 @@ function PowerSampleSizeCalculation(alternative_formulas, snpdata, vc, X_covar, 
 	dataframe = DataFrame(vcat(snpdata, X_covar))
 	alternative_model = LMMTrait(alternative_formulas, dataframe, vc)
 	
-	null_model = LMMTrait(NullFormula(X_covar), 
-		ataframe, vc) # with all betas = 0 no genetic variants only intercept and covariates
+	null_model = LMMTrait(NullFormula(X_covar), dataframe, vc) # with all betas = 0 no genetic variants only intercept and covariates
 	trait_null = simulate(null_model)
 
 
