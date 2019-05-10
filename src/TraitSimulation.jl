@@ -28,14 +28,21 @@ include("Multiple_traits.jl")
 
 include("Model_Framework.jl")
 
-#this for GLM trait 
+"""
+```
+simulate(trait::GLMTrait)
+```
+this for GLM trait
+"""
 function simulate(trait::GLMTrait)
   simulated_trait = actual_simulation(trait.mu, trait.dist, trait.link)
   out = DataFrame(trait1 = simulated_trait)
   return(out)
 end
 
-# for multiple GLM traits 
+"""
+this for multiple GLM traits
+"""
 function simulate(traits::Vector)
   simulated_traits = [actual_simulation(traits[i].mu, traits[i].dist, traits[i].link) for i in 1:length(traits)]
   out = DataFrame(simulated_traits)
@@ -43,7 +50,9 @@ function simulate(traits::Vector)
   return(out)
 end
 
-# for LMMtrait
+"""
+this for LMMtrait
+"""
 function simulate(trait::LMMTrait)
   LMM_trait_simulation(trait.mu, trait.vc)
 end
