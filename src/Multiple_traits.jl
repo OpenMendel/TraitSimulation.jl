@@ -423,6 +423,10 @@ function append_terms!(AB, summand)
   push!(AB.args, :(VarianceComponent($A_esc, $B_esc)))
 end
 
+"""
+this is a test for vc macro
+"""
+
 macro vc(expression)
 	n = length(expression.args)
 	# AB is an empty vector of variance components list of symbols
@@ -440,6 +444,9 @@ return(:($AB)) # change this to return a vector of VarianceComponent objects
 end 
 
 
+"""
+this is a test for vcobjtuple that is compatible with VarianceComponentModels.jl
+"""
 function  vcobjtuple(vcobject::Vector{VarianceComponent})
 	m = length(vcobject)
 	d = size(vcobject[1].A, 1)
