@@ -118,8 +118,6 @@ For convenience we use the common assumption that the residual covariance among 
 
 #### $$Y_{1} ∼ N(\mu_{1}, 4* 2GRM + 2I)$$
 
-In example (1a) we simulate a $\textbf{SINGLE TRAIT CONTROLLING FOR FAMILY STRUCTURE}$, with the corresponding Mendel Example 28e Simulation parameters, location : $\mu_{1} = 40 + 3*sex - 1.5*locus$, scale : $V$ =  $V_{{a}_{1,1}}* 2GRM + V_{{e}_{1, 1}}I_{n} = 4* 2GRM + 2I$. 
-
 
 ### (b) Multiple Correlated Traits: (Mendel Example 28e Simulation)
 
