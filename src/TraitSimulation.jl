@@ -41,6 +41,9 @@ function simulate(trait::GLMTrait)
 end
 
 """
+```
+simulate(traits::Vector)
+```
 this for multiple GLM traits
 """
 function simulate(traits::Vector)
@@ -51,6 +54,9 @@ function simulate(traits::Vector)
 end
 
 """
+```
+simulate(trait::LMMTrait)
+```
 this for LMMtrait
 """
 function simulate(trait::LMMTrait)
