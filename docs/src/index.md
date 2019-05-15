@@ -80,19 +80,12 @@ Example 1: Generalized Linear Model
 In this example we show how to generate single or multiple traits from GLM's with a genetic variant in the fixed effects, but no residual familial correlation.
 
 (a) Single Trait:
-$$Y_{1} âŒ N(\mu_{1}, \sigma^{2})$$
 
-In example (1a) we simulate a $\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$, with simulation parameters: $\mu_{1} = 20 + 3*sex - 1.5*locus$, $\sigma^{2} = 2$
-
+In example (1a) we simulate a $\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$
 (b) Multiple Independent Traits:
-$$ Y = 
- \begin{bmatrix}
-Y_{1}\\
-Y_{2}
-\end{bmatrix}, Y_{1} \!\perp\!\!\!\perp Y_{2}$$  &nbsp; &nbsp;  
-$$ Y_{1} âŒ N(\mu_{1}, 2), \mu_{1} = 40 + 3(sex) - 1.5(locus), Y_{2} âŒ Poisson(\mu_{1}), \mu_{1} = 2 + 2(sex) - 1.5(locus))$$
 
-In example (1b) we simulate $\textbf{TWO INDEPENDENT TRAITS SIMULTANEOUSLY}$, one from a Normal distribution and one from a Poisson distribution.<br>
+
+In example (1b) we simulate $\textbf{TWO INDEPENDENT TRAITS SIMULTANEOUSLY}$, one from a Normal distribution and one from a Poisson distribution.
 
 
 Example 2: Linear Mixed Model
@@ -102,41 +95,11 @@ For convenience we use the common assumption that the residual covariance among 
 
 (a) Single Trait:
 
-$$Y_{1} âŒ N(\mu_{1}, 4* 2GRM + 2I)$$
 
-In example (1a) we simulate a $\textbf{SINGLE TRAIT CONTROLLING FOR FAMILY STRUCTURE}$, with the corresponding Mendel Example 28e Simulation parameters, location : $\mu_{1} = 40 + 3*sex - 1.5*locus$, scale : $V$ =  $V_{{a}_{1,1}}* 2GRM + V_{{e}_{1, 1}}I_{n} = 4* 2GRM + 2I$. 
+In example (2a) we simulate a $\textbf{SINGLE TRAIT CONTROLLING FOR FAMILY STRUCTURE}$
 
 
 (b) Multiple Correlated Traits: (Mendel Example 28e Simulation)
-
-
-$$ Y = 
-\begin{bmatrix}
-Y_{1}\\
-Y_{2}
-\end{bmatrix}, Y_{1} \not\!\perp\!\!\!\perp Y_{2}
-$$
-
-$$Y \sim N(\mathbf{\mu},\Sigma  = V_{a} \otimes (2GRM) + V_{e} \otimes I_{n}) ,$$
-
-
-$$
-\mathbf{\mu} = \begin{bmatrix}
-\mu_1 \\
-\mu_2 \\
-\end{bmatrix}
-= \begin{bmatrix}
-40 + 3(sex) - 1.5(locus)\\
-20 + 2(sex) - 1.5(locus)\\
-\end{bmatrix} , V_{a} = \begin{bmatrix}
-4 & 1\\
-1 & 4\\
-\end{bmatrix} , V_e 
-= \begin{bmatrix}
-2 & 0\\
-0 & 2\\
-\end{bmatrix}
-$$
 
 
 We simulate $\textbf{TWO CORRELATED TRAITS CONTROLLING FOR FAMILY STRUCTURE}$ with simulation parameters, location = $\mu$ and scale = $\Sigma$. 
@@ -148,8 +111,6 @@ The example also assumes an additive genetic variance component in the model whi
 
 We simulate a Single normal Trait controlling for family structure, with effect sizes generated as a function of the minor allele frequencies.
 
-$$ Y_{2} âŒ N(\mu_{rare20}, 4* 2GRM + 2I)
-$$
 
 # Reading the Mendel 28a data using SnpArrays
 
@@ -165,31 +126,30 @@ snpdata = SnpArray("traitsim28e.bed", 212)
 
 
     212Ã253141 SnpArray:
-     0x03  0x03  0x00  0x03  0x03  0x03  âŠ  0x02  0x02  0x00  0x00  0x03  0x00
+     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x02  0x00  0x00  0x03  0x00
      0x03  0x03  0x00  0x02  0x02  0x03     0x00  0x03  0x00  0x00  0x03  0x00
      0x03  0x03  0x00  0x03  0x03  0x03     0x03  0x02  0x00  0x00  0x03  0x00
      0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x00  0x03  0x00
      0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03  âŠ  0x00  0x00  0x00  0x00  0x00  0x03
+     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x00  0x00  0x00  0x00  0x03
      0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x03  0x00  0x03
      0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x03  0x00  0x03
      0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x02  0x00  0x02  0x00  0x03
      0x03  0x02  0x00  0x03  0x03  0x03     0x03  0x03  0x00  0x03  0x00  0x03
-     0x03  0x02  0x00  0x03  0x03  0x03  âŠ  0x00  0x02  0x00  0x02  0x00  0x03
+     0x03  0x02  0x00  0x03  0x03  0x03     0x00  0x02  0x00  0x02  0x00  0x03
      0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x02  0x00  0x02  0x00  0x03
      0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x02  0x00  0x02  0x00  0x03
-        â®                             â®  â±     â®                             â®
-     0x03  0x03  0x00  0x03  0x03  0x03  âŠ  0x00  0x03  0x00  0x00  0x03  0x00
+     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
      0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x02  0x02  0x02
      0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x02  0x00  0x00  0x03  0x00
      0x03  0x02  0x00  0x02  0x02  0x03     0x02  0x03  0x00  0x03  0x00  0x03
      0x03  0x03  0x00  0x02  0x02  0x03     0x02  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03  âŠ  0x02  0x03  0x00  0x02  0x02  0x00
+     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x02  0x02  0x00
      0x03  0x03  0x00  0x02  0x02  0x03     0x02  0x03  0x00  0x00  0x02  0x02
      0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
      0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x00  0x02  0x02
      0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03  âŠ  0x02  0x03  0x00  0x00  0x03  0x00
+     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x00  0x03  0x00
      0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x02  0x02  0x02
 
 
@@ -234,7 +194,6 @@ sex = map(x -> strip(x) == "F" ? -1.0 : 1.0, famfile[:, 5]) # note julia's terna
      -1.0
       1.0
      -1.0
-      â®  
       1.0
       1.0
       1.0
@@ -323,12 +282,7 @@ X = DataFrame(sex = sex, locus = locus)
 Here I simulate two independent traits simultaneously, one from a Normal distribution and the other from a Poisson Distribution. 
 We create the following 3 vectors to specify the simulation parameters of the two independent traits: 
 
-&nbsp; &nbsp; `dist_type_vector` &nbsp; &nbsp; `link_type_vector` &nbsp; &nbsp; `mean_formulas`
-
-$$
-Y_{1b_{1}} âŒ N(\mu_{1b}, 2),  \mu_{1b} = 40 + 3(sex) - 1.5(locus)\\
-Y_{1b_{2}} âŒ Poisson(\mu_{2b}),  \mu_{2b} = 2 + 2(sex) - 1.5(locus)\\
-$$
+ `dist_type_vector` `link_type_vector`  `mean_formulas`
 
 
 ```julia
@@ -381,8 +335,6 @@ We make note that the user can extend the model in Example 2b to include more th
 
 ## The Variance Covariance Matrix
 
-Recall : $E(\mathbf{GRM}) = \Phi$
-<br>
 We use the [SnpArrays.jl](https://github.com/OpenMendel/SnpArrays.jl) package to find an estimate of the Kinship ($\Phi$), the Genetic Relationship Matrix (GRM). 
 
 We will use the same values of $\mathbf{GRM}$, $V_a$, and $V_e$ for both the mixed effect example and for the rare variant example.
@@ -397,32 +349,31 @@ GRM = grm(snpdata, minmaf=0.05)
 
 
 
-    212Ã212 Array{Float64,2}:
-      0.498264     0.0080878    0.0164327   âŠ   0.0246825    0.00181856
+    212x212 Array{Float64,2}:
+      0.498264     0.0080878    0.0164327      0.0246825    0.00181856
       0.0080878    0.498054    -0.0212599      -0.0285927   -0.0226525 
       0.0164327   -0.0212599    0.499442       -0.0219661   -0.00748536
       0.253627    -0.00160532   0.282542        0.00612693  -0.00339125
       0.126098     0.253365     0.128931       -0.0158446   -0.00633959
-     -0.014971    -0.00266073  -0.00243384  âŠ   0.00384757   0.0145936 
+     -0.014971    -0.00266073  -0.00243384     0.00384757   0.0145936 
      -0.0221357    0.0100492   -0.0107012      -0.0148443   -0.00127783
      -0.01629     -0.00749253  -0.015372       -0.0163305   -0.00258392
      -0.016679     0.00353587  -0.0128844      -0.0332489   -0.00707839
      -0.0176101   -0.00996912  -0.0158473      -0.00675875  -0.0122339 
-     -0.0162558    0.00938592   0.0064231   âŠ  -0.00510882   0.0168778 
+     -0.0162558    0.00938592   0.0064231      -0.00510882   0.0168778 
      -0.0167487    0.00414544  -0.00936538     -0.0134863    0.0020952 
-     -0.031148     0.00112387  -0.010794        0.00383105   0.0198635 
-      â®                                     â±   â®                      
-     -0.00865735  -0.00335548  -0.0148433   âŠ   0.00806601  -0.0211537 
+     -0.031148     0.00112387  -0.010794        0.00383105   0.0198635                  
+     -0.00865735  -0.00335548  -0.0148433       0.00806601  -0.0211537 
       0.00296028   0.0043655   -0.0183683       0.0012496    0.00898193
      -0.0204601   -0.0270898   -0.00194048     -0.0185883   -0.0116621 
      -0.0174561   -0.0128509   -0.0155773      -0.0274183   -0.0063823 
      -0.00170995   0.0154211   -0.00168146     -0.00684865  -0.0067438 
-      0.00718047  -0.00525265  -0.00283975  âŠ   0.0309601    0.0261103 
+      0.00718047  -0.00525265  -0.00283975     0.0309601     0.0261103 
      -0.0170218   -0.00661916   0.0020924      -0.022858     0.0037451 
       0.0142551    0.0208073    0.0096287       0.00598877   0.0094809 
      -0.00586031  -0.00733706   0.0339257       0.0109116   -0.0177771 
       0.00299024  -0.0134027    0.0150825       0.00799507   0.0150077 
-      0.0246825   -0.0285927   -0.0219661   âŠ   0.593999     0.0497083 
+      0.0246825   -0.0285927   -0.0219661       0.593999     0.0497083 
       0.00181856  -0.0226525   -0.00748536      0.0497083    0.491743  
 
 
@@ -435,19 +386,13 @@ I_n = Matrix{Float64}(I, size(GRM));
 ```
 
 Example 2a: Single Trait 
-$$
-Y_{2a} âŒ N(ÎŒ_1, 4* 2GRM + 2I)$$
 
-We simulate a Normal Trait controlling for family structure, location = $\mu_1$ and scale =  $\mathbf{V} = 2*V_a \Phi + V_e I = 4* 2GRM + 2I$. 
-
+We simulate a Normal Trait controlling for family structure
 
 
 ```julia
 mean_formula = ["40 + 3(sex) - 1.5(locus)"]
 ```
-
-
-
 
     1-element Array{String,1}:
      "40 + 3(sex) - 1.5(locus)"
@@ -460,7 +405,6 @@ Ex2a_model = LMMTrait(mean_formula, X, 4*(2*GRM) + 2*(I_n))
 trait_2a = simulate(Ex2a_model)
 ```
 
-
 ```julia
 describe(trait_2a, stats = [:mean, :std, :min, :q25, :median, :q75, :max, :eltype])
 ```
@@ -471,42 +415,21 @@ describe(trait_2a, stats = [:mean, :std, :min, :q25, :median, :q75, :max, :eltyp
 We simulate two correlated Normal Traits controlling for family structure, location = $ÎŒ$ and scale = $\mathbf\Sigma$.
 The corresponding variance covariance matrix as specified Mendel Option 28e, $\mathbf{Î£}$, is generated here.
 
-$$
-Y_{2b} âŒ N(ÎŒ, \mathbf\Sigma)
-$$ 
-
-$$
-\mathbf{\mu} = \begin{vmatrix}
-\mu_1 \\
-\mu_2 \\
-\end{vmatrix}
-= \begin{vmatrix}
-40 + 3(sex) - 1.5(locus)\\
-20 + 2(sex) - 1.5(locus)\\
-\end{vmatrix}
-\\
-$$
-
-$$
-\mathbf\Sigma  = V_a \otimes (2GRM) + V_e \otimes I_n
-$$
-
-
-&nbsp; $FYI$: To create a trait with different variance components change the elements of $\mathbf\Sigma$. We create the variance component object `variance_formula` below, to simulate our traits in example 2b. While this tutorial only uses 2 variance components, we make note that the `@vc` macro is designed to handle as many variance components as needed. 
+ $FYI$: To create a trait with different variance components change the elements of $\mathbf\Sigma$. We create the variance component object `variance_formula` below, to simulate our traits in example 2b. While this tutorial only uses 2 variance components, we make note that the `@vc` macro is designed to handle as many variance components as needed. 
 
 As long as each Variance Component is specified correctly, we can create a `VarianceComponent` Julia object for Trait Simulation:
 
-&nbsp; 
-Example) Specifying more than 2 variance components (let V_B indicate an additional Environmental Variance component) 
-```{julia}
-multiple_variance_formula = @vc V_A â GRM + V_E1 â I_n + V_E2 â I_n + V_E3 â I_n;
-```
+<!-- &nbsp;  -->
+Example) Specifying more than 2 variance components (let V_E3 indicate an additional Environmental Variance component) 
 
+```{julia}
+multiple_variance_formula = @vc kron(V_A , GRM) + kron(V_E1, I_n) + kron(V_E2, I_n) + kron(V_E3, I_n);
+```
 
 
 ```julia
 # @vc is a macro that creates a 'VarianceComponent' Type for simulation
-variance_formula = @vc V_A â GRM + V_E â I_n;
+variance_formula = @vc kron(V_A, GRM) + kron(V_E, I_n);
 ```
 
 These are the formulas for the fixed effects, as specified by Mendel Option 28e.
@@ -515,9 +438,6 @@ These are the formulas for the fixed effects, as specified by Mendel Option 28e.
 ```julia
 mean_formulas = ["40 + 3(sex) - 1.5(locus)", "20 + 2(sex) - 1.5(locus)"]
 ```
-
-
-
 
     2-element Array{String,1}:
      "40 + 3(sex) - 1.5(locus)"
@@ -551,12 +471,9 @@ describe(traits_original, stats = [:mean, :std, :min, :max, :eltype])
 ```
 
 
-Example 2c) Rare Variant Linear Mixed Model with effect sizes as a function of the allele frequencies. 
+Example 3) Rare Variant Linear Mixed Model with effect sizes as a function of the allele frequencies. 
 
 
-$$
-Y_{2c} âŒ N(\mu_{rare20}, 4* 2GRM + 2I)
-$$
 
 In this example we first subset only the rare SNP's with minor allele frequency greater than 0.002 but less than 0.02, then we simulate traits on 20 of the rare SNP's as fixed effects. For this demo, the indexing `snpid[rare_index][1:2:40]` allows us to subset every other rare snp in the first 40 SNPs, to get our list of 20 rare SNPs. Change the range and number of SNPs to simulate with more or less SNPs and from different regions of the genome. The number 20 is arbitrary and you can use more or less than 20 if you desire by changing the final number. You can change the spacing of the snps by changing the second number. 
 For example, `snpid[rare_index][1:5:500]` would give you 100 snps.
@@ -566,9 +483,9 @@ Here are the 20 SNP's that will be used for trait simulation in this example.
 
 
 ```julia
-# filter out rare SNPS, get a subset of uncommon SNPs with 0.002 < MAF â€ 0.02
+# filter out rare SNPS, get a subset of uncommon SNPs with 0.002 < MAF < 0.02
 minor_allele_frequency = maf(snpdata)
-rare_index = (0.002 .< minor_allele_frequency .â€ 0.02)
+rare_index = (0.002 .< minor_allele_frequency < 0.02)
 data_rare = snpdata[:, rare_index];
 ```
 
@@ -577,9 +494,6 @@ data_rare = snpdata[:, rare_index];
 maf_20_rare_snps = minor_allele_frequency[rare_index][1:2:40]
 rare_snps_for_simulation = snpid[rare_index][1:2:40]
 ```
-
-
-
 
     20-element Array{SubString{String},1}:
      "rs3020701"  
@@ -638,13 +552,13 @@ Take a look at the simulated coefficients on the left, next to the corresponding
 
 
 ```julia
-Ex2c_rare = round.([chisq_coeff maf_20_rare_snps], digits = 3)
-Ex2c_rare = DataFrame(Chisq_Coefficient = Ex2c_rare[:, 1] , MAF_rare = Ex2c_rare[:, 2] )
+Ex3_rare = round.([chisq_coeff maf_20_rare_snps], digits = 3)
+Ex3_rare = DataFrame(Chisq_Coefficient = Ex3_rare[:, 1] , MAF_rare = Ex3_rare[:, 2] )
 ```
 
 
 ```julia
-simulated_effectsizes_chisq = Ex2c_rare[:, 1]
+simulated_effectsizes_chisq = Ex3_rare[:, 1]
 ```
 
 
@@ -721,8 +635,6 @@ rare_snps_for_simulation
 ```
 
 
-
-
     20-element Array{SubString{String},1}:
      "rs3020701"  
      "rs181646587"
@@ -775,15 +687,11 @@ mean_formula_rare = FixedEffectTerms(simulated_effectsizes_chisq, rare_snps_for_
 
 
 
-
     " + -0.616(rs3020701) + -0.666(rs181646587) + -0.818(rs182902214) + -0.575(rs184527030) + 0.818(rs10409990) + 1.159(rs185166611) + -0.945(rs181637538) + -0.818(rs186213888) + 0.945(rs184010370) + -1.641(rs11667161) + -0.666(rs188819713) + 1.159(rs182378235) + 1.641(rs146361744) + -1.159(rs190575937) + -0.575(rs149949827) + 1.641(rs117671630) + 1.641(rs149171388) + -1.641(rs188520640) + 0.575(rs142722885)"
 
 
 
-# Example 2c) Mixed effects model Single Trait and Rare Variants:
-$$
-Y_{2c} âŒ N(ÎŒ_{20raresnps}, 4* 2GRM + 2I)$$
-
+# Example 3) Mixed effects model Single Trait and Rare Variants:
 
 
 ```julia
@@ -806,21 +714,21 @@ In addition, we output the genotypes for the variants used to simulate this trai
 
 
 ```julia
-Trait2_mixed = hcat(Fam_Person_id, trait_rare_20_snps, geno_rare20_converted)
+Trait3_mixed = hcat(Fam_Person_id, trait_rare_20_snps, geno_rare20_converted)
 ```
 
 
 ```julia
 Coefficients = DataFrame(Coefficients = simulated_effectsizes_chisq)
 SNPs_rare = DataFrame(SNPs = rare_snps_for_simulation)
-Trait2_mixed_sim = hcat(Coefficients, SNPs_rare)
+Trait3_mixed_sim = hcat(Coefficients, SNPs_rare)
 ```
 
 ```julia
 #cd("/Users") #change to home directory
 using CSV
-CSV.write("Trait2c_mixed.csv", Trait2_mixed)
-CSV.write("Trait2c_mixed_sim.csv", Trait2_mixed_sim);
+CSV.write("Trait3_mixed.csv", Trait3_mixed)
+CSV.write("Trait3_mixed_sim.csv", Trait3_mixed_sim);
 ```
 
 ## Citations: 
