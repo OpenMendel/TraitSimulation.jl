@@ -35,22 +35,17 @@ simulate(trait::GLMTrait)
 this for GLM trait
 """
 function simulate(trait::GLMTrait)
-  simulated_trait = actual_simulation(trait.mu, trait.dist, trait.link)
-  out = DataFrame(trait1 = simulated_trait)
-  return(out)
+    simulated_trait = actual_simulation(trait.mu, trait.dist, trait.link)
+    rep_simulation = DataFrame(trait1 = simulated_trait)
+    return(rep_simulation)
 end
 
-"""
-```
-simulate(traits::Vector)
-```
-this for multiple GLM traits
-"""
-function simulate(traits::Vector)
-  simulated_traits = [actual_simulation(traits[i].mu, traits[i].dist, traits[i].link) for i in 1:length(traits)]
-  out = DataFrame(simulated_traits)
-  out = names!(out, [Symbol("trait$i") for i in 1:length(traits)])
-  return(out)
+function simulate(trait::GLMTrait, n_reps::Int64)
+  rep_simulation = Vector{DataFrame}(undef, n_reps)
+  for i in 1:n_reps
+    rep_simulation[i] = simulate(trait) # store each data frame in the vector of dataframes rep_simulation
+  end
+    return(rep_simulation)
 end
 
 """
@@ -60,8 +55,18 @@ simulate(trait::LMMTrait)
 this for LMMtrait
 """
 function simulate(trait::LMMTrait)
-  LMM_trait_simulation(trait.mu, trait.vc)
+  rep_simulation = LMM_trait_simulation(trait.mu, trait.vc)
+  return(rep_simulation)
 end
+
+function simulate(trait::LMMTrait, n_reps::Int64)
+  rep_simulation = Vector{DataFrame}(undef, n_reps)
+  for i in 1:n_reps
+    rep_simulation[i] = simulate(trait)
+  end
+  return(rep_simulation)
+end
+
 
 export ResponseType, actual_simulation, mean_formula, VarianceComponent, append_terms!
 export GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple

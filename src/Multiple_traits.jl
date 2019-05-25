@@ -16,53 +16,7 @@ struct VarianceComponent
 	end
 end
 
-
-#multiple LMM traits
-
-#without computing mean from dataframe and formulas i.e given an evaluated matrix of means
-function LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
-	n_people = size(mu)[1]
-	n_traits = size(mu)[2]
-
-	#preallocate memory for the returned dataframe simulated_trait
-	simulated_trait = zeros(n_people, n_traits)
-	z = Matrix{Float64}(undef, n_people, n_traits)
-
-	for i in 1:length(vc)
-		#for the ith variance component (VC)
-		cholA = vc[i].CholA
-		cholB = vc[i].CholB 
-
-		#Generating MN(0, Sigma)
-		# first generate from standard normal
-		randn!(z)
-
-		# we want to solve u then v to get the first variance component, v.
-		# first matrix vector multiplication using cholesky decomposition
-
-		#need to find which will be CholA, CholB 
-		lmul!(cholB.U, z)
-		rmul!(z, cholA.L)
-
-		#second matrix vector mult
-		rmul!(z, cholA.U)
-		lmul!(cholB.L, z) #multiply on left and save to simulated_trait
-
-		#add the effects of each variance component
-		simulated_trait += z
-	end
-
-	#for each trait add the mean --> MN(mu, Sigma)
-	simulated_trait += mu
-
-	out = DataFrame(simulated_trait)
-
-	out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
-
-	return out
-end
-
-#single LMM trait 
+#single LMM trait with given evaluated matrix of Variance components 
 function LMM_trait_simulation(mu, vc::Matrix{T}) where T
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
@@ -91,6 +45,8 @@ function LMM_trait_simulation(mu, vc::Matrix{T}) where T
 
 	return out
 end
+
+
 
 function append_terms!(AB, summand)
 	# elements in args are symbols,
@@ -136,4 +92,97 @@ function  vcobjtuple(vcobject::Vector{VarianceComponent})
 		copyto!(Σ[i], vcobject[i].A)
 	end
 	return(Σ, V)
+end
+
+
+# for a single Variance Component
+# algorithm that will transform z~N(0,1)
+function SimulateMVN!(z, vc::VarianceComponent)
+	#for the ith variance component (VC)
+	cholA = vc.CholA
+	cholB = vc.CholB 
+
+	#Generating MN(0, Sigma)
+	# first generate from standard normal
+	randn!(z)
+
+	# we want to solve u then v to get the first variance component, v.
+	# first matrix vector multiplication using cholesky decomposition
+
+	#need to find which will be CholA, CholB 
+	lmul!(cholB.U, z)
+	rmul!(z, cholA.L)
+
+	#second matrix vector mult
+	rmul!(z, cholA.U)
+	lmul!(cholB.L, z) #multiply on left and save to simulated_trait
+
+	#add the effects of each variance component
+	return(z)
+end
+
+#this function will call the SimulateMVN! so that I write over z (reuse memory allocation) for potentially many simulations
+function SimulateMVN(n_people, n_traits, vc::VarianceComponent)
+	#preallocate memory for the returned dataframe simulated_trait once
+	z = Matrix{Float64}(undef, n_people, n_traits)
+
+	# calls the function to apply the cholesky decomposition (we have stored in vc object)
+	# and transforms/updates z ~ MN(0, vc)
+	SimulateMVN!(z, vc::VarianceComponent)
+	#returns the allocated and now transformed z
+	return(z)
+end
+
+##Single Variance Component object 
+#without computing mean from dataframe and formulas i.e given an evaluated matrix of means
+function LMM_trait_simulation(mu, vc::VarianceComponent)
+	n_people = size(mu)[1]
+	n_traits = size(mu)[2]
+
+	z = SimulateMVN(n_people, n_traits, vc)
+
+	#for each trait add the mean --> MN(mu, Sigma)
+	z += mu
+
+	out = DataFrame(z)
+
+	out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+	return out
+end
+
+# we note the exclamation is to indicate this function will mutate or override the values that its given
+# here z, simulated_trait will get updated but vc will not be touched.
+## AGGREGATE MULTIPLE VARIANCE COMPONENTS IN LMM TRAIT OBJECT to creat overall variance 
+function Aggregate_VarianceComponents!(z, total_variance, vc::Vector{VarianceComponent})
+	for i in 1:length(vc)
+		SimulateMVN!(z, vc[i])
+		#add the effects of each variance component
+		total_variance += z
+	end
+
+	return total_variance
+end
+
+#multiple LMM traits
+
+#without computing mean from dataframe and formulas i.e given an evaluated matrix of means
+function LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
+	n_people = size(mu)[1]
+	n_traits = size(mu)[2]
+
+	#preallocate memory for the returned dataframe simulated_trait
+	simulated_trait = zeros(n_people, n_traits)
+	z = Matrix{Float64}(undef, n_people, n_traits)
+
+	#using the function above to write over the allocated z and simulated_trait
+	Aggregate_VarianceComponents!(z, simulated_trait, vc)
+	#for each trait add the mean --> MN(mu, Sigma)
+	simulated_trait += mu
+
+	out = DataFrame(simulated_trait)
+
+	out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+
+	return out
 end
