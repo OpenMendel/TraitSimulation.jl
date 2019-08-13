@@ -67,8 +67,8 @@ function simulate(trait::LMMTrait, n_reps::Int64)
 end
 
 
-export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, append_terms!
-export GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple, SimulateMVN, SimulateMVN!, Aggregate_VarianceComponents!, LMM_trait_simulation
+export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, append_terms!, LMM_trait_simulation
+export GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple, SimulateMVN, SimulateMVN!, Aggregate_VarianceComponents!
 export TResponse, WeibullResponse, PoissonResponse, NormalResponse, BernoulliResponse, BinomialResponse
 export GammaResponse, InverseGaussianResponse, ExponentialResponse
 export CauchitLink, CloglogLink, IdentityLink, InverseLink, LogitLink, LogLink, ProbitLink, SqrtLink
