@@ -24,6 +24,7 @@ function LMM_trait_simulation(mu, vc::Matrix{T}) where T
 	simulated_trait = zeros(n_people, n_traits)
 	z = Matrix{Float64}(undef, n_people, n_traits)
 
+	#for a single evaluated matrix as the specified covariance matrix instead of a Variancewe do not need to call the 
 	chol_Σ = cholesky(vc)
 	#generate from standard normal
 	randn!(z)
@@ -96,24 +97,22 @@ end
 
 
 # for a single Variance Component
-# algorithm that will transform z~N(0,1)
+# algorithm that will transform z ~ N(0,1)
 function SimulateMVN!(z, vc::VarianceComponent)
 	#for the ith variance component (VC)
-	cholA = vc.CholA
-	cholB = vc.CholB 
+	cholA = vc.CholA # grab (not calculate) the stored Cholesky decomposition of n_traits by n_traits variance component matrix
+	cholB = vc.CholB # grab (not calculate) the stored Cholesky decomposition of n_people by n_people variance component matrix
 
 	#Generating MN(0, Sigma)
 	# first generate from standard normal
 	randn!(z)
 
 	# we want to solve u then v to get the first variance component, v.
-	# first matrix vector multiplication using cholesky decomposition
-
-	#need to find which will be CholA, CholB 
+	# first matrix vector multiplication using the cholesky decomposed CholA, CholB above 
 	lmul!(cholB.U, z)
 	rmul!(z, cholA.L)
 
-	#second matrix vector mult
+	#second matrix vector multiplication using the he cholesky decomposed CholA, CholB above
 	rmul!(z, cholA.U)
 	lmul!(cholB.L, z) #multiply on left and save to simulated_trait
 
