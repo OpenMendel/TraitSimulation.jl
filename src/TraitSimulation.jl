@@ -29,9 +29,9 @@ include("Model_Framework.jl")
 
 """
 ```
-simulate(trait::GLMTrait)
+simulate(trait, n_reps)
 ```
-this for GLM trait
+this for simulating a single GLM trait, n_reps times. 
 """
 function simulate(trait::GLMTrait)
     simulated_trait = GLM_trait_simulation(trait.mu, trait.dist, trait.link)
@@ -49,9 +49,9 @@ end
 
 """
 ```
-simulate(trait::LMMTrait)
+simulate(trait, nreps)
 ```
-this for LMMtrait
+this for simulating multiple LMMtraits, n_reps times. 
 """
 function simulate(trait::LMMTrait)
   rep_simulation = LMM_trait_simulation(trait.mu, trait.vc)
