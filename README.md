@@ -2,6 +2,14 @@
 
 *Trait Simulation in Julia.*
 
+## Installation
+This package requires Julia v0.7 or later, which can be obtained from https://julialang.org/downloads/ or by building Julia from the sources in the https://github.com/JuliaLang/julia repository.
+
+The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
+
+(v1.2) pkg> add https://github.com/sarah-ji/TraitSimulation.jl
+Use the backspace key to return to the Julia REPL.
+
 | **Documentation**                                                                           | **Build Status**                                                              | **Code Coverage**                                                                            |
 |---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
 | [![Stable][docs-stable-img]][docs-stable-url] [![Latest][docs-latest-img]][docs-latest-url] | [![Travis][travis-img]][travis-url] [![Appveyor][appveyor-img]][appveyor-url] | [![Coverage Status][coveralls-img]][coveralls-url] [![codecov.io][codecov-img]][codecov-url] |
