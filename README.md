@@ -10,7 +10,7 @@ The package has not yet been registered and must be installed using the reposito
 `(v1.2) pkg> add https://github.com/sarah-ji/TraitSimulation.jl`
 
 
-\\
+\
 Use the backspace key to return to the Julia REPL.
 
 | **Documentation**                                                                           | **Build Status**                                                              | **Code Coverage**                                                                            |
