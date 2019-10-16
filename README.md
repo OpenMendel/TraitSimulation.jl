@@ -7,7 +7,7 @@ This package requires Julia v0.7 or later, which can be obtained from https://ju
 
 The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 
-(v1.2) pkg> add https://github.com/sarah-ji/TraitSimulation.jl
+`(v1.2) pkg> add https://github.com/sarah-ji/TraitSimulation.jl`
 Use the backspace key to return to the Julia REPL.
 
 | **Documentation**                                                                           | **Build Status**                                                              | **Code Coverage**                                                                            |
