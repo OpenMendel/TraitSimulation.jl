@@ -81,7 +81,7 @@ Random.seed!(1234);
 In this example we show how to generate multiple traits from GLM's with a genetic variant in the fixed effects, but no residual familial correlation.
 
 ### Single Trait:
-$$Y âŒ N(\mu, \sigma^{2})$$
+$$Y \sim N(\mu, \sigma^{2})$$
 
 In example (1a) we simulate a $\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$, with simulation parameters: $\mu = 20 + 3*sex - 1.5*locus$, $\sigma^{2} = 2$. By default, without specifying a number of replicates for the user specified GLM (like this example), the `simulate` function returns a single simulated trait.
 
@@ -91,7 +91,7 @@ In this example we show how to generate data so that the related individuals hav
 For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient. However, if you like you can specify your own variance components and their design matrices as long as they are positive semi definite using the `@vc` macro demonstrated in this example. We run this simulation 1000 times, and store the simulation results in a vector of DataFrames.
 
 ### (a) Multiple Independent Traits:
-$$Y âŒ N(\mu, 4* 2GRM + 2I, n_{reps} = 10)$$
+$$Y \sim N(\mu, 4* 2GRM + 2I, n_{reps} = 10)$$
 
 In example (2a) we simulate $\textbf{MULTIPLE 2 INDEPENDENT TRAITS CONTROLLING FOR FAMILY STRUCTURE}$, with the corresponding Mendel Example 28e Simulation parameters, location : $\mu = 40 + 3*sex - 1.5*locus$, scale : $V$ = 4* 2GRM + 2I$.$ We run this simulation 1000 times.
 
@@ -137,7 +137,7 @@ Specifically we are generating a single normal trait controlling for family stru
 
 We run this simulation 1000 times, and store the simulation results in a vector of DataFrames. At the end of this example we write the results of the first of the 1000 replicates to a file on your own machine.
 
-$$ Y âŒ N(\mu_{rare20}, 4* 2GRM + 2I, n_{reps} = 1000)
+$$ Y \sim N(\mu_{rare20}, 4* 2GRM + 2I, n_{reps} = 1000)
 $$
 
 # Reading the Mendel 28a data using SnpArrays
@@ -313,7 +313,7 @@ Be sure to change Random.seed!(1234) to something else (or comment out) if you w
 
 
 ### Example 1a: Single Trait
-$$Y âŒ N(\mu, \sigma^{2})$$
+$$Y \sim� N(\mu, \sigma^{2})$$
 
 In example (1a) we simulate a $\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$, with simulation parameters: $\mu = 20 + 3*sex - 1.5*locus$, $\sigma^{2} = 2$
 
@@ -412,7 +412,7 @@ GRM = grm(snpdata, minmaf = 0.05)
 
 ### Example 2a: Single Trait 
 $$
-Y âŒ N(ÎŒ, 4* 2GRM + 2I, n_{reps} = 1000)$$
+Y \sim N(\mu�, 4* 2GRM + 2I, n_{reps} = 1000)$$
 
 We simulate a Normal Trait controlling for family structure, location = $\mu = 40 + 3(sex) - 1.5(locus)$ and scale =  $\mathbf{V} = 2*V_a \Phi + V_e I = 4* 2GRM + 2I$. 
 
@@ -446,11 +446,11 @@ describe(Simulated_LMM_Trait[1], stats = [:mean, :std, :min, :q25, :median, :q75
 
 ###  Example 2b: Multiple Correlated Traits (Mendel Example 28e Simulation)
 
-We simulate two correlated Normal Traits controlling for family structure, location = $ÎŒ$ and scale = $\mathbf\Sigma$. 
-The corresponding bivariate variance covariance matrix as specified Mendel Option 28e, $\mathbf{Î£}$, is generated here.
+We simulate two correlated Normal Traits controlling for family structure, location = $\mu�$ and scale = $\mathbf\Sigma$. 
+The corresponding bivariate variance covariance matrix as specified Mendel Option 28e, $\mathbf{\Sigma}$, is generated here.
 
 $$
-Y âŒ N(ÎŒ, \mathbf\Sigma)
+Y \sim� N(\mu�, \mathbf\Sigma)
 $$ 
 
 $$
@@ -470,7 +470,7 @@ $$
 $$
 
 
-&nbsp; $FYI$: To create a trait with different variance components change the elements of $\mathbf\Sigma$. We create the variance component object `variance_formula` below, to simulate our traits in example 2b. While this tutorial only uses 2 variance components, we make note that the `@vc` macro is designed to handle as many variance components as needed. 
+$FYI$: To create a trait with different variance components change the elements of $\mathbf\Sigma$. We create the variance component object `variance_formula` below, to simulate our traits in example 2b. While this tutorial only uses 2 variance components, we make note that the `@vc` macro is designed to handle as many variance components as needed. 
 
 As long as each Variance Component is specified correctly, we can create a `VarianceComponent` Julia object for Trait Simulation:
 
@@ -478,7 +478,7 @@ As long as each Variance Component is specified correctly, we can create a `Vari
 Example) Specifying more than 2 variance components (let V_H indicate an additional Household Variance component and V_D indicate a dominance genetic effect) 
 
 ```{julia}
-    multiple_variance_formula = @vc V_A â 2GRM + V_E â I_n + V_D â Î + V_H â H;
+    multiple_variance_formula = @vc V_A  \otimes 2GRM + V_E \otimes I_n + V_D \otimes I_n� + V_H \otimes I_n;
 ```
 
 V_E is multiplies a 212 by 212 identity matrix, which we creat along with the V_E and V_A matrices. 
@@ -492,7 +492,7 @@ V_E = [2.0 0.0; 0.0 2.0];
 
 ```julia
 # @vc is a macro that creates a 'VarianceComponent' Type for simulation
-variance_formula = @vc V_A â 2GRM + V_E â I_n;
+variance_formula = @vc V_A \otimes� 2GRM + V_E \otimes� I_n;
 ```
 
 These are the formulas for the fixed effects, as specified by Mendel Option 28e.
@@ -542,7 +542,7 @@ describe(Traits_Mendel28e, stats = [:mean, :std, :min, :max, :eltype])
 
 
 $$
-Y âŒ N(\mu_{rare20}, 4* 2GRM + 2I)
+Y \sim N(\mu_{rare20}, 4* 2GRM + 2I)
 $$
 
 In this example we first subset only the rare SNP's with minor allele frequency greater than 0.002 but less than 0.02, then we simulate traits on 20 of the rare SNP's as fixed effects. For this demo, the indexing `snpid[rare_index][1:2:40]` allows us to subset every other rare snp in the first 40 SNPs, to get our list of 20 rare SNPs. Change the range and number of SNPs to simulate with more or less SNPs and from different regions of the genome. The number 20 is arbitrary and you can use more or less than 20 if you desire by changing the final number. You can change the spacing of the snps by changing the second number. 
@@ -727,7 +727,7 @@ Example 3: Single Trait, Rare Variants
 We look at just the first of the 1000 simulation results below.
 
 $$
-Y âŒ N(ÎŒ_{20raresnps}, 4* 2GRM + 2I, n_{reps} = 1000)$$
+Y \sim� N(\mu�_{20raresnps}, 4* 2GRM + 2I, n_{reps} = 1000)$$
 
 
 ```julia
