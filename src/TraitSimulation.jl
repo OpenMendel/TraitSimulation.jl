@@ -29,9 +29,9 @@ include("Model_Framework.jl")
 
 """
 ```
-simulate(trait::GLMTrait)
+simulate(trait, n_reps)
 ```
-this for GLM trait
+this for simulating a single GLM trait, n_reps times. 
 """
 function simulate(trait::GLMTrait)
     simulated_trait = GLM_trait_simulation(trait.mu, trait.dist, trait.link)
@@ -49,9 +49,9 @@ end
 
 """
 ```
-simulate(trait::LMMTrait)
+simulate(trait, nreps)
 ```
-this for LMMtrait
+this for simulating multiple LMMtraits, n_reps times. 
 """
 function simulate(trait::LMMTrait)
   rep_simulation = LMM_trait_simulation(trait.mu, trait.vc)
@@ -67,8 +67,8 @@ function simulate(trait::LMMTrait, n_reps::Int64)
 end
 
 
-export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, append_terms!
-export GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple, SimulateMVN, SimulateMVN!, Aggregate_VarianceComponents!, LMM_trait_simulation
+export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, append_terms!, LMM_trait_simulation
+export GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple, SimulateMVN, SimulateMVN!, Aggregate_VarianceComponents!
 export TResponse, WeibullResponse, PoissonResponse, NormalResponse, BernoulliResponse, BinomialResponse
 export GammaResponse, InverseGaussianResponse, ExponentialResponse
 export CauchitLink, CloglogLink, IdentityLink, InverseLink, LogitLink, LogLink, ProbitLink, SqrtLink

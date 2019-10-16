@@ -1,3 +1,7 @@
+"""
+GLMTrait
+GLMTrait object is one of the two model framework objects. Stores information about the simulation of a single trait, under the Generalized Linear Model Framework.
+"""
 struct GLMTrait{D<:ResponseDistribution, L<:InverseLinkFunction}
 formula::String
 mu::Vector{Float64}
@@ -27,7 +31,10 @@ end
 
 
 # lmm: multiple traits (MVN)
-
+"""
+LMMTrait
+LMMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
+"""
 struct LMMTrait{T}
 formulas::Vector{String}
 mu::Matrix{Float64}

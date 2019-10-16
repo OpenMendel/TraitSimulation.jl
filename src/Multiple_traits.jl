@@ -3,8 +3,10 @@ using LinearAlgebra
 using TraitSimulation
 using Random
 
-#this VarianceComponent type stores A, B , CholA and CholB so we don't have to compute the cholesky decomposition inside the loop
-
+"""
+VarianceComponent
+this VarianceComponent type stores A, B , CholA and CholB so we don't have to compute the cholesky decomposition inside the loop.
+"""
 struct VarianceComponent
 	A::Matrix{Float64} # n_traits by n_traits
 	B::Matrix{Float64} # n_people by n_people
@@ -16,7 +18,10 @@ struct VarianceComponent
 	end
 end
 
-#single LMM trait with given evaluated matrix of Variance components 
+"""
+LMM_trait_simulation
+single LMM trait with given evaluated matrix of Variance components
+""" 
 function LMM_trait_simulation(mu, vc::Matrix{T}) where T
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
@@ -47,8 +52,10 @@ function LMM_trait_simulation(mu, vc::Matrix{T}) where T
 	return out
 end
 
-
-
+"""
+append_terms
+Allows us to append terms to create a VarianceComponent type
+""" 
 function append_terms!(AB, summand)
 	# elements in args are symbols,
 	A_esc = esc(summand.args[2])
@@ -78,7 +85,8 @@ end
 
 
 """
-this is a test for vcobjtuple that is compatible with VarianceComponentModels.jl
+vcobjectuple(vcobject)
+This function creates a tuple of Variance Components, given a vector of variancecomponent objects to be compatible with VarianceComponentModels.jl
 """
 function  vcobjtuple(vcobject::Vector{VarianceComponent})
 	m = length(vcobject)
@@ -95,9 +103,11 @@ function  vcobjtuple(vcobject::Vector{VarianceComponent})
 	return(Σ, V)
 end
 
-
-# for a single Variance Component
-# algorithm that will transform z ~ N(0,1)
+"""
+SimulateMVN!(z, vc)
+SimulateMVN(n_people, n_traits, vc::VarianceComponent)
+For a single Variance Component, algorithm that will transform standard normal distribution. SimulateMVN allows us to preallocate n_people by n_traits and rewrite over this matrix to save memory allocation.
+"""
 function SimulateMVN!(z, vc::VarianceComponent)
 	#for the ith variance component (VC)
 	cholA = vc.CholA # grab (not calculate) the stored Cholesky decomposition of n_traits by n_traits variance component matrix
@@ -131,9 +141,10 @@ function SimulateMVN(n_people, n_traits, vc::VarianceComponent)
 	#returns the allocated and now transformed z
 	return(z)
 end
-
-##Single Variance Component object 
-#without computing mean from dataframe and formulas i.e given an evaluated matrix of means
+"""
+LMM_trait_simulation(mu, vc::VarianceComponent)
+For a single Variance Component object, without computing mean from dataframe and formulas i.e given an evaluated matrix of means, simulate from LMM.
+"""
 function LMM_trait_simulation(mu, vc::VarianceComponent)
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
@@ -150,9 +161,13 @@ function LMM_trait_simulation(mu, vc::VarianceComponent)
 	return out
 end
 
-# we note the exclamation is to indicate this function will mutate or override the values that its given
+
 # here z, simulated_trait will get updated but vc will not be touched.
 ## AGGREGATE MULTIPLE VARIANCE COMPONENTS IN LMM TRAIT OBJECT to creat overall variance 
+"""
+Aggregate_VarianceComponents(z, total_variance, vc)
+Update the simulated trait with the effect of each variance component. We note the exclamation is to indicate this function will mutate or override the values that its given.
+"""
 function Aggregate_VarianceComponents!(z, total_variance, vc::Vector{VarianceComponent})
 	for i in 1:length(vc)
 		SimulateMVN!(z, vc[i])
@@ -163,9 +178,10 @@ function Aggregate_VarianceComponents!(z, total_variance, vc::Vector{VarianceCom
 	return total_variance
 end
 
-#multiple LMM traits
-
-#without computing mean from dataframe and formulas i.e given an evaluated matrix of means
+"""
+LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
+For a vector of Variance Component objects, without computing mean from dataframe and formulas i.e given an evaluated matrix of means, simulate from LMM.
+"""
 function LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]

@@ -1,5 +1,7 @@
-
-# The first task is to find the variables to make the mean vector:
+"""
+find_variables(x)
+Find and return the variable names in the expression x. This function is called in the main function mean_formula. 
+"""
 find_variables(x) = find_variables!(Symbol[], x) #this is so that we can call the function without the exclamation
 function find_variables!(var_names, x::Number) #if the variable name is a number then just return it without doing anything
     return var_names
@@ -19,6 +21,10 @@ end
 return var_names
 end
 
+"""
+search_variables(x, var)
+Search the expression x for the variable name in var, and then create the julia interpretable expression. We extend this function to allow for recursion on the variable vars... This function is called in the main function mean_formula. 
+"""
 function search_variables!(x::Expr, var::Symbol)
     for i in eachindex(x.args)
         if x.args[i] == var # if the argument is one of the variables given then just put it in the right format df[:x1] 
@@ -37,8 +43,15 @@ function search_variables!(x::Expr, vars...) # this is for when you have more th
     return x 
 end
 
+"""
+    mean_formula(user_formula_string, df)
+Construction of the evaluated mean vector, given user formula string and named dataframe of covariates. This function is the main mean_formula function.
+
+This function makes calls to find_variables, search_variables. 
+
+"""
 function mean_formula(user_formula_string::String, df::DataFrame)
-    global input_data_from_user = df
+    global input_data_from_user = df #this is so we can call whatever name the user has for the dataframe 
     
     users_formula_expression = Meta.parse(user_formula_string)
     if(users_formula_expression isa Expr)

@@ -1,11 +1,16 @@
 #since the GLM package uses the Distribution types from the Distibutions package, we use these packages not to simulate from their existing functions but to 
 #use them as type dispatchers for the simulate_glm_trait function
 
-# This super type of all response distribution types
+"""
+ResponseDistribution
+This super type of all response distribution types
+"""
 abstract type ResponseDistribution end
 
-#SIMULATE STUDENT-T distributed TRAITS needs to be edited 
-#T distribution with v degrees of freedom 
+"""
+TResponse
+STUDENT-T distributed TRAITS, T distribution with v degrees of freedom 
+"""
 struct TResponse <: ResponseDistribution
 df::Int64
 scale::Float64
@@ -18,8 +23,10 @@ if dist.scale < 0
  return t_deviate.(μ, dist.scale, dist.df)
 end
 
-#SIMULATE WEIBULL TRAITS
-#weibull distributed reponse with shape 
+"""
+WeibullResponse
+Weibull distributed TRAITS, with shape parameter. 
+"""
 struct WeibullResponse <: ResponseDistribution
 shape::Float64
 end
@@ -32,7 +39,10 @@ if dist.shape < 0
 end
 
 
-#SIMULATE POISSON traits
+"""
+PoissonResponse
+Poisson distributed TRAITS, with location parameter. 
+"""
 struct PoissonResponse <: ResponseDistribution
 end
 
@@ -43,8 +53,10 @@ if any(μ_i -> μ_i < 0, μ)
  return poisson_deviate.(μ)
 end
 
-#SIMULATE NORMAL TRAITS
-# Normal response type with standard deviation σ
+"""
+NormalResponse
+Normally distributed TRAITS, with scale.
+"""
 struct NormalResponse <: ResponseDistribution
 scale::Float64
 end
@@ -56,7 +68,10 @@ if dist.scale <= 0
  return normal_deviate.(μ, dist.scale) # the sigma is coming from dist.scale "ResponseType" and not additionally from ~N(0,1)
 end
 
-#SIMULATE Bernoulli TRAITS
+"""
+BernoulliResponse
+Bernoulli distributed TRAITS, with location.
+"""
 struct BernoulliResponse <: ResponseDistribution
 end
 
@@ -65,7 +80,10 @@ function simulate_glm_trait(μ, dist::BernoulliResponse)
 end
 
 
-#SIMULATE BINOMIAL TRAITS
+"""
+BinomialResponse
+Binomial distributed TRAITS, with the number of trials.
+"""
 struct BinomialResponse <: ResponseDistribution
 trials::Int64
 end
@@ -77,8 +95,10 @@ if dist.trials < 0
  return binomial_deviate.(μ, dist.trials)
 end
 
-#SIMULATE GAMMA TRAITS
-#simulate from gamma response with shape parameter
+"""
+GammaResponse
+Gamma distributed TRAITS, with shape parameter.
+"""
 struct GammaResponse <: ResponseDistribution
 shape::Float64
 function GammaResponse(shape::Float64)
@@ -97,7 +117,10 @@ if any(μ_i -> μ_i < 0, μ)
  return gamma_deviate.(dist.shape, μ)
 end
 
-# Inverse Gaussian with shape parameter 
+"""
+InverseGaussianResponse
+Inverse Gaussian distributed TRAITS, with shape parameter.
+"""
 struct InverseGaussianResponse <: ResponseDistribution
 shape::Float64
 function InverseGaussianResponse(shape)
@@ -109,7 +132,6 @@ function InverseGaussianResponse(shape)
 end
 end
 
-#********SIMULATE INVERSE GAUSSIAN TRAITS
 function simulate_glm_trait(μ, dist::InverseGaussianResponse)
 if dist.shape < 0
       error("Shape must be positive for an inverse Gaussian distribution!")
@@ -117,7 +139,10 @@ if dist.shape < 0
  return inverse_gaussian_deviate.(dist.shape, μ)
 end
 
-
+"""
+ExponentialResponse
+Exponentially distributed TRAITS, with shape parameter.
+"""
 #SIMULATE EXPONENTIAL TRAITS ## EDIT THIS GUY 
 #simulate from exponential response with shape parameter
 struct ExponentialResponse <: ResponseDistribution
@@ -141,7 +166,6 @@ end
 
 #########BERNOULLI 
 """Generates a Bernoulli random deviate with success probability p."""
-#********SIMULATE BERNOULLI TRAITS
 
 function bernoulli_deviate(p)
   if rand(eltype(p)) <= p
