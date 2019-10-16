@@ -9,8 +9,15 @@ The package has not yet been registered and must be installed using the reposito
 
 `(v1.2) pkg> add https://github.com/OpenMendel/TraitSimulation.jl`
 
-
 \
+
+#Citation
+If you use OpenMendel analysis packages in your research, please cite the following reference in the resulting publications:
+
+OPENMENDEL: a cooperative programming project for statistical genetics. Zhou H, Sinsheimer JS, Bates DM, Chu BB, German CA, Ji SS, Keys KL, Kim J, Ko S, Mosher GD, Papp JC, Sobel EM, Zhai J, Zhou JJ, Lange K. Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z. [Epub ahead of print] PMID: 30915546
+
+
+
 Use the backspace key to return to the Julia REPL.
 
 | **Documentation**                                                                           | **Build Status**                                                              | **Code Coverage**                                                                            |
