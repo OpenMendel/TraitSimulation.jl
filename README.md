@@ -9,7 +9,7 @@ The package has not yet been registered and must be installed using the reposito
 
 `(v1.2) pkg> add https://github.com/OpenMendel/TraitSimulation.jl`
 
-\
+
 
 #Citation
 If you use OpenMendel analysis packages in your research, please cite the following reference in the resulting publications:
