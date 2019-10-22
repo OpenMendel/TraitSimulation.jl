@@ -1,19 +1,23 @@
 using Documenter, TraitSimulation
 
 makedocs(
-    format = Documenter.HTML(),
-    sitename = "TraitSimulation.jl",
-    authors = "Sarah Ji",
-    clean = true,
-    debug = true,
-    pages = [
-        "index.md"
-    ]
+  doctest  = false,
+  format   = Documenter.HTML(),
+  modules  = [TraitSimulation],
+  clean    = true,
+  sitename = "TraitSimulation.jl",
+  authors  = "Sarah Ji",
+  pages = [
+    "Home"       => "index.md",
+    "GLM"   => "man/GLM.md",
+    "LMM" => "man/LMM.md",
+    "Example"   => "man/RareVariantExample.md",
+  ]
 )
 
 deploydocs(
-    repo   = "github.com/sarah-ji/TraitSimulation.jl.git",
-    target = "build",
-    deps   = nothing,
-    make   = nothing
+  repo   = "github.com/OpenMendel/TraitSimulation.jl.git",
+  target = "build",
+  deps   = nothing,
+  make   = nothing
 )
