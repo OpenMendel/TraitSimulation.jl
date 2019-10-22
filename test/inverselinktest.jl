@@ -1,3 +1,5 @@
+import TraitSimulation: cauchit_inverse_link, cloglog_inverse_link, inverse_inverse_link, identity_inverse_link
+
 float64_input = Float64[0, 1]
 float64_output = Float64[0.5, 0.75]
 
@@ -9,8 +11,8 @@ float32_input = Float32[0, 1]
 float32_output = Float32[0.5, 0.75]
 @test cauchit_inverse_link(float32_input[1]) isa Float32
 
-#And update our algorithm: 
-cauchit_inverse_link(x) = atan(x) / pi + one(x) / 2
+# #And update our algorithm: 
+# cauchit_inverse_link(x) = atan(x) / pi + one(x) / 2
 
 for i in eachindex(float32_input)
   return(@test cauchit_inverse_link(float32_input[i]) == float32_output[i])
@@ -29,10 +31,10 @@ float32_input = Float32[0, 1]
 float32_output = Float32[0.6321205588285577, 0.9340119641546875]
 @test cloglog_inverse_link(float32_input[1]) isa Float32
 
-#And update our algorithm: 
-function cloglog_inverse_link(x)
-  return one(x) - exp(-exp(x))
-end 
+# #And update our algorithm: 
+# function cloglog_inverse_link(x)
+#   return one(x) - exp(-exp(x))
+# end 
 
 for i in eachindex(float32_input)
   return(@test cloglog_inverse_link(float32_input[i]) == float32_output[i])
@@ -50,10 +52,10 @@ float32_input = Float32[0, 1]
 float32_output = Float32[0.0, 1.0]
 @test identity_inverse_link(float32_input[1]) isa Float32
 
-#And update our algorithm: 
-function identity_inverse_link(x)
-  return x
-end
+# #And update our algorithm: 
+# function identity_inverse_link(x)
+#   return x
+# end
 
 for i in eachindex(float32_input)
   return(@test identity_inverse_link(float32_input[i]) == float32_output[i])
@@ -71,10 +73,10 @@ float32_input = Float32[1, 2]
 float32_output = Float32[1.0, 2.0]
 @test inverse_inverse_link(float32_input[1]) isa Float32
 
-#And update our algorithm: 
-function inverse_inverse_link(x)
-  return one(x) / x
-end
+# #And update our algorithm: 
+# function inverse_inverse_link(x)
+#   return one(x) / x
+# end
 
 for i in eachindex(float32_input)
   return(@test inverse_inverse_link(float32_input[i]) == float32_output[i])
