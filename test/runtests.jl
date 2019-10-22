@@ -6,4 +6,7 @@ using LinearAlgebra
 using Random
 using Test 
 
-include("run.jl")
+@testset "inverselink" begin 
+	include("inverselinktest.jl")
+end
+
