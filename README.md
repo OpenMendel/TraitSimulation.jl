@@ -30,16 +30,16 @@ Use the backspace key to return to the Julia REPL.
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://openmendel.github.io/TraitSimulation.jl/latest/
 
-[travis-img]: https://travis-ci.com/sarah-ji/TraitSimulation.jl.svg?branch=master
-[travis-url]: https://travis-ci.com/sarah-ji/TraitSimulation.jl
+[travis-img]: https://travis-ci.com/OpenMendel/TraitSimulation.jl.svg?branch=master
+[travis-url]: https://travis-ci.com/OpenMendel/TraitSimulation.jl
 
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/xnug0ey8xpx8we48?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/sarah-ji/TraitSimulation-jl
+[appveyor-url]: https://ci.appveyor.com/project/OpenMendel/TraitSimulation-jl
 
-[issues-url]: https://github.com/sarah-ji/TraitSimulation.jl/issues
+[issues-url]: https://github.com/OpenMendel/TraitSimulation.jl/issues
 
-[coveralls-img]: https://coveralls.io/repos/github/sarah-ji/TraitSimulation.jl/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/sarah-ji/TraitSimulation.jl?branch=master
+[coveralls-img]: https://coveralls.io/repos/github/OpenMendel/TraitSimulation.jl/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/OpenMendel/TraitSimulation.jl?branch=master
 
-[codecov-img]: https://codecov.io/gh/sarah-ji/TraitSimulation.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/sarah-ji/TraitSimulation.jl
+[codecov-img]: https://codecov.io/gh/OpenMendel/TraitSimulation.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/OpenMendel/TraitSimulation.jl
