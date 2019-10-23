@@ -30,8 +30,8 @@ Use the backspace key to return to the Julia REPL.
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://openmendel.github.io/TraitSimulation.jl/latest/
 
-[travis-img]: https://travis-ci.com/OpenMendel/TraitSimulation.jl.svg?branch=master
-[travis-url]: https://travis-ci.com/OpenMendel/TraitSimulation.jl
+[travis-img]: https://travis-ci.org/OpenMendel/TraitSimulation.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/OpenMendel/TraitSimulation.jl
 
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/xnug0ey8xpx8we48?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/OpenMendel/TraitSimulation-jl
