@@ -4,6 +4,7 @@ using DataFrames # so we can test it
 using StatsModels # useful distributions #lots more useful distributions
 using LinearAlgebra
 using Random
+using SpecialFunctions
 
 include("calculate_mean_vector.jl")
 
