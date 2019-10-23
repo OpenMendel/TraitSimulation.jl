@@ -4,6 +4,7 @@ using DataFrames # so we can test it
 using StatsModels # useful distributions #lots more useful distributions
 using LinearAlgebra
 using Random
+using SpecialFunctions
 
 include("calculate_mean_vector.jl")
 
@@ -35,14 +36,15 @@ this for simulating a single GLM trait, n_reps times.
 """
 function simulate(trait::GLMTrait)
     simulated_trait = GLM_trait_simulation(trait.mu, trait.dist, trait.link)
-    rep_simulation = DataFrame(trait1 = simulated_trait)
-    return(rep_simulation)
+    #rep_simulation = DataFrame(trait1 = simulated_trait)
+    return(simulated_trait)
 end
 
 function simulate(trait::GLMTrait, n_reps::Int64)
-  rep_simulation = Vector{DataFrame}(undef, n_reps)
+  n_people = length(trait.mu)
+  rep_simulation = Matrix{Float64}(undef, n_people, n_reps)
   for i in 1:n_reps
-    rep_simulation[i] = simulate(trait) # store each data frame in the vector of dataframes rep_simulation
+    rep_simulation[:, i] .= simulate(trait) # store each data frame in the vector of dataframes rep_simulation
   end
     return(rep_simulation)
 end
@@ -59,9 +61,10 @@ function simulate(trait::LMMTrait)
 end
 
 function simulate(trait::LMMTrait, n_reps::Int64)
-  rep_simulation = Vector{DataFrame}(undef, n_reps)
+  n_people, n_traits = size(trait.mu)
+  rep_simulation = zeros(n_people, n_traits, n_reps)
   for i in 1:n_reps
-    rep_simulation[i] = simulate(trait)
+    rep_simulation[:, :, i] = simulate(trait)
   end
   return(rep_simulation)
 end

@@ -45,11 +45,11 @@ function LMM_trait_simulation(mu, vc::Matrix{T}) where T
 	#for each trait
 	simulated_trait += mu
 
-	out = DataFrame(simulated_trait)
+	#out = DataFrame(simulated_trait)
 
-	out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+	#out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 
-	return out
+	return simulated_trait
 end
 
 """
@@ -154,11 +154,11 @@ function LMM_trait_simulation(mu, vc::VarianceComponent)
 	#for each trait add the mean --> MN(mu, Sigma)
 	z += mu
 
-	out = DataFrame(z)
+	#out = DataFrame(z)
 
-	out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+	#out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 
-	return out
+	return z
 end
 
 
@@ -195,9 +195,9 @@ function LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
 	#for each trait add the mean --> MN(mu, Sigma)
 	simulated_trait += mu
 
-	out = DataFrame(simulated_trait)
+	#out = DataFrame(simulated_trait)
 
-	out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
+	#out = names!(out, [Symbol("trait$i") for i in 1:n_traits])
 
-	return out
+	return simulated_trait
 end
