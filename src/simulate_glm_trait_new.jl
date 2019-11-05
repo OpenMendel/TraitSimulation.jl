@@ -257,7 +257,7 @@ end
 and degrees of freedom df."""
 
 function t_deviate(mu, scale, df)
-  x = randn(mu)
+  x = randn()
   y = 2 * gamma_deviate(df / 2, one(mu))
   return scale * (x / sqrt(y / df)) + mu
 end
