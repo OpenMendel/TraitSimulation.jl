@@ -146,14 +146,6 @@ Exponentially distributed TRAITS, with shape parameter.
 #SIMULATE EXPONENTIAL TRAITS ## EDIT THIS GUY 
 #simulate from exponential response with shape parameter
 struct ExponentialResponse <: ResponseDistribution
-scale::Float64
-function ExponentialResponse(scale::Float64)
-  if(scale <= 0)
-    error("scale must be greater than zero in a Exponential distribution!")
-  else
-    new(scale)
-  end
-end
 end
 
 function simulate_glm_trait(μ, dist::ExponentialResponse)
