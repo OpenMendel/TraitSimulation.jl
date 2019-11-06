@@ -1,14 +1,14 @@
 import TraitSimulation: simulate_glm_trait
 
 # test for correct error
-@test_throws ErrorException simulate_glm_trait(-1, TraitSimulation.ExponentialResponse(-1.0))
+@test_throws ErrorException simulate_glm_trait(-1, TraitSimulation.ExponentialResponse())
 
 # test for correct summary statistics
 
 #Create GLMtrait object case for distribution d 
 
 df = DataFrame(x = repeat([0], 10), y = repeat([1], 10))
-case = GLMTrait(-1, df, TraitSimulation.ExponentialResponse(1.0), TraitSimulation.LogLink())
+case = GLMTrait(-1, df, TraitSimulation.ExponentialResponse(), TraitSimulation.LogLink())
 
 #simulate exponential trait 1000 times
 simtraits = simulate(case, 1000)
