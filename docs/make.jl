@@ -8,10 +8,10 @@ makedocs(
   sitename = "TraitSimulation.jl",
   authors  = "Sarah Ji",
   pages = [
-    "Home"       => "index.md",
-    "GLM"   => "man/GLM.md",
-    "LMM" => "man/LMM.md",
-    "Example"   => "man/RareVariantExample.md",
+    "Home"       => "src/index.md",
+    "GLM"   => "src/man/GLM.md",
+    "LMM" => "src/man/LMM.md",
+    "Example"   => "src/man/RareVariantExample.md",
   ]
 )
 
