@@ -28,6 +28,8 @@ include("Multiple_traits.jl")
 
 include("Model_Framework.jl")
 
+include("Simulate_RandomGLM.jl")
+
 """
 ```
 simulate(trait, n_reps)
@@ -75,5 +77,6 @@ export GLMTrait, Multiple_GLMTraits, LMMTrait, simulate, @vc, vcobjtuple, Simula
 export TResponse, WeibullResponse, PoissonResponse, NormalResponse, BernoulliResponse, BinomialResponse
 export GammaResponse, InverseGaussianResponse, ExponentialResponse
 export CauchitLink, CloglogLink, IdentityLink, InverseLink, LogitLink, LogLink, ProbitLink, SqrtLink
+export Generate_Random_Model_Chisq
 end #module
 
