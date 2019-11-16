@@ -59,8 +59,8 @@ using DataFrames, SnpArrays, StatsModels, Random, LinearAlgebra, DelimitedFiles,
 using CSV
 ```
 
-    ┌ Info: Recompiling stale cache file /Users/sarahji/.julia/compiled/v1.2/TraitSimulation/VikWX.ji for TraitSimulation [dec3038e-29bc-11e9-2207-9f3d5855a202]
-    └ @ Base loading.jl:1240
+     Info: Recompiling stale cache file /Users/sarahji/.julia/compiled/v1.2/TraitSimulation/VikWX.ji for TraitSimulation [dec3038e-29bc-11e9-2207-9f3d5855a202]
+     @ Base loading.jl:1240
 
 
 # Reproducibility
@@ -78,7 +78,7 @@ Random.seed!(1234);
 In this example we show how to generate multiple traits from GLM's with a genetic variant in the fixed effects, but no residual familial correlation.
 
 ### Single Trait:
-$$Y ∼ N(\mu, \sigma^{2})$$
+$$Y \sim N(\mu, \sigma^{2})$$
 
 In example (1a) we simulate a $\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$, with simulation parameters: $\mu = 20 + 3*sex - 1.5*locus$, $\sigma^{2} = 2$. By default, without specifying a number of replicates for the user specified GLM (like this example), the `simulate` function returns a single simulated trait.
 
@@ -88,7 +88,7 @@ In this example we show how to generate data so that the related individuals hav
 For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient. However, if you like you can specify your own variance components and their design matrices as long as they are positive semi definite using the `@vc` macro demonstrated in this example. We run this simulation 1000 times, and store the simulation results in a vector of DataFrames.
 
 ### (a) Multiple Independent Traits:
-$$Y ∼ N(\mu, 4* 2GRM + 2I, n_{reps} = 10)$$
+$$Y \sim N(\mu, 4* 2GRM + 2I, n_{reps} = 10)$$
 
 In example (2a) we simulate $\textbf{MULTIPLE 2 INDEPENDENT TRAITS CONTROLLING FOR FAMILY STRUCTURE}$, with the corresponding Mendel Example 28e Simulation parameters, location : $\mu = 40 + 3*sex - 1.5*locus$, scale : $V$ = 4* 2GRM + 2I$.$ We run this simulation 1000 times.
 
@@ -134,7 +134,7 @@ Specifically we are generating a single normal trait controlling for family stru
 
 We run this simulation 1000 times, and store the simulation results in a vector of DataFrames. At the end of this example we write the results of the first of the 1000 replicates to a file on your own machine.
 
-$$ Y ∼ N(\mu_{rare20}, 4* 2GRM + 2I, n_{reps} = 1000)
+$$ Y \sim N(\mu_{rare20}, 4* 2GRM + 2I, n_{reps} = 1000)
 $$
 
 # Reading the Mendel 28a data using SnpArrays
@@ -267,9 +267,6 @@ snpdef28_1 = readdlm("traitsim28e.bim", Any; header = false)
 snpid = map(x -> strip(string(x)), snpdef28_1[:, 1]) # strip mining in the data 
 ```
 
-
-
-
     253141-element Array{SubString{String},1}:
      "rs3020701"  
      "rs56343121" 
@@ -306,11 +303,7 @@ We next need to find the position of the snp rs10412915.  If you wish to use ano
 ```julia
 ind_rs10412915 = findall(x -> x == "rs10412915", snpid)[1]
 ```
-
-
-
-
-    236074
+  236074
 
 
 
@@ -324,13 +317,6 @@ locus = convert(Vector{Float64}, @view(snpdata[:, ind_rs10412915]))
 X = DataFrame(sex = sex, locus = locus)
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>sex</th><th>locus</th></tr><tr><th></th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>212 rows × 2 columns</p><tr><th>1</th><td>-1.0</td><td>2.0</td></tr><tr><th>2</th><td>-1.0</td><td>0.0</td></tr><tr><th>3</th><td>1.0</td><td>2.0</td></tr><tr><th>4</th><td>1.0</td><td>2.0</td></tr><tr><th>5</th><td>-1.0</td><td>1.0</td></tr><tr><th>6</th><td>-1.0</td><td>1.0</td></tr><tr><th>7</th><td>1.0</td><td>1.0</td></tr><tr><th>8</th><td>1.0</td><td>2.0</td></tr><tr><th>9</th><td>-1.0</td><td>1.0</td></tr><tr><th>10</th><td>1.0</td><td>1.0</td></tr><tr><th>11</th><td>-1.0</td><td>0.0</td></tr><tr><th>12</th><td>1.0</td><td>0.0</td></tr><tr><th>13</th><td>-1.0</td><td>0.0</td></tr><tr><th>14</th><td>-1.0</td><td>1.0</td></tr><tr><th>15</th><td>-1.0</td><td>2.0</td></tr><tr><th>16</th><td>1.0</td><td>1.0</td></tr><tr><th>17</th><td>-1.0</td><td>2.0</td></tr><tr><th>18</th><td>1.0</td><td>2.0</td></tr><tr><th>19</th><td>-1.0</td><td>2.0</td></tr><tr><th>20</th><td>1.0</td><td>1.0</td></tr><tr><th>21</th><td>-1.0</td><td>1.0</td></tr><tr><th>22</th><td>1.0</td><td>2.0</td></tr><tr><th>23</th><td>1.0</td><td>2.0</td></tr><tr><th>24</th><td>1.0</td><td>1.0</td></tr><tr><th>25</th><td>-1.0</td><td>2.0</td></tr><tr><th>26</th><td>1.0</td><td>2.0</td></tr><tr><th>27</th><td>-1.0</td><td>2.0</td></tr><tr><th>28</th><td>-1.0</td><td>1.0</td></tr><tr><th>29</th><td>1.0</td><td>1.0</td></tr><tr><th>30</th><td>1.0</td><td>0.0</td></tr><tr><th>&vellip;</th><td>&vellip;</td><td>&vellip;</td></tr></tbody></table>
-
-
-
 # Example 1 Generalized Linear Model:
 
 This example simulates a case where three snps have fixed effects on the trait. Any apparent genetic correlation between relatives for the trait is due to the effect of these snps, so once these effects of these snps are modelled there should be no residual correlation among relatives. Note that by default, individuals with missing genotype values will have missing phenotype values, unless the user specifies the argument `impute = true` in the convert function above.
@@ -338,7 +324,7 @@ Be sure to change Random.seed!(1234) to something else (or comment out) if you w
 
 
 ### Example 1a: Single Trait
-$$Y ∼ N(\mu, \sigma^{2})$$
+$$Y \sim N(\mu, \sigma^{2})$$
 
 In example (1a) we simulate a $\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$, with simulation parameters: $\mu = 20 + 3*sex - 1.5*locus$, $\sigma^{2} = 2$
 
@@ -365,8 +351,7 @@ Simulated_GLM_trait = simulate(GLM_trait_model)
      6.826256483803932e-11 
      1.7192863926872046e-9 
      2.9455372662475496e-10
-     6.567897481758455e-8  
-     ⋮                     
+     6.567897481758455e-8                     
      3.3568076549084827e-10
      1.9406327162542503e-11
      1.0527756763463589e-9 
@@ -410,25 +395,10 @@ Here we output the simulated trait and covariates for each of the 212 individual
 Trait1_GLM = hcat(Fam_Person_id, Simulated_GLM_trait, X)
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>FamID</th><th>PID</th><th>x1</th><th>sex</th><th>locus</th></tr><tr><th></th><th>Any</th><th>Any</th><th>Float64</th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>212 rows × 5 columns</p><tr><th>1</th><td>1</td><td>16</td><td>15.7347</td><td>-1.0</td><td>2.0</td></tr><tr><th>2</th><td>1</td><td>8228</td><td>15.1965</td><td>-1.0</td><td>0.0</td></tr><tr><th>3</th><td>1</td><td>17008</td><td>19.011</td><td>1.0</td><td>2.0</td></tr><tr><th>4</th><td>1</td><td>9218</td><td>18.1942</td><td>1.0</td><td>2.0</td></tr><tr><th>5</th><td>1</td><td>3226</td><td>17.2288</td><td>-1.0</td><td>1.0</td></tr><tr><th>6</th><td>2</td><td>29</td><td>19.9238</td><td>-1.0</td><td>1.0</td></tr><tr><th>7</th><td>2</td><td>2294</td><td>22.5656</td><td>1.0</td><td>1.0</td></tr><tr><th>8</th><td>2</td><td>3416</td><td>19.4565</td><td>1.0</td><td>2.0</td></tr><tr><th>9</th><td>2</td><td>17893</td><td>16.5047</td><td>-1.0</td><td>1.0</td></tr><tr><th>10</th><td>2</td><td>6952</td><td>20.466</td><td>1.0</td><td>1.0</td></tr><tr><th>11</th><td>2</td><td>14695</td><td>15.879</td><td>-1.0</td><td>0.0</td></tr><tr><th>12</th><td>2</td><td>6790</td><td>22.9614</td><td>1.0</td><td>0.0</td></tr><tr><th>13</th><td>2</td><td>3916</td><td>17.2561</td><td>-1.0</td><td>0.0</td></tr><tr><th>14</th><td>3</td><td>39</td><td>19.2056</td><td>-1.0</td><td>1.0</td></tr><tr><th>15</th><td>3</td><td>4521</td><td>12.3445</td><td>-1.0</td><td>2.0</td></tr><tr><th>16</th><td>3</td><td>8366</td><td>21.7202</td><td>1.0</td><td>1.0</td></tr><tr><th>17</th><td>3</td><td>16693</td><td>13.4976</td><td>-1.0</td><td>2.0</td></tr><tr><th>18</th><td>3</td><td>21688</td><td>20.7394</td><td>1.0</td><td>2.0</td></tr><tr><th>19</th><td>3</td><td>25532</td><td>14.1442</td><td>-1.0</td><td>2.0</td></tr><tr><th>20</th><td>3</td><td>26294</td><td>18.4931</td><td>1.0</td><td>1.0</td></tr><tr><th>21</th><td>3</td><td>16795</td><td>18.6283</td><td>-1.0</td><td>1.0</td></tr><tr><th>22</th><td>3</td><td>17445</td><td>17.2065</td><td>1.0</td><td>2.0</td></tr><tr><th>23</th><td>3</td><td>2039</td><td>22.211</td><td>1.0</td><td>2.0</td></tr><tr><th>24</th><td>3</td><td>2831</td><td>19.2865</td><td>1.0</td><td>1.0</td></tr><tr><th>25</th><td>4</td><td>54</td><td>7.57728</td><td>-1.0</td><td>2.0</td></tr><tr><th>26</th><td>4</td><td>5072</td><td>19.852</td><td>1.0</td><td>2.0</td></tr><tr><th>27</th><td>4</td><td>17240</td><td>14.302</td><td>-1.0</td><td>2.0</td></tr><tr><th>28</th><td>5</td><td>70</td><td>17.0386</td><td>-1.0</td><td>1.0</td></tr><tr><th>29</th><td>5</td><td>24010</td><td>20.8797</td><td>1.0</td><td>1.0</td></tr><tr><th>30</th><td>5</td><td>21999</td><td>21.7946</td><td>1.0</td><td>0.0</td></tr><tr><th>&vellip;</th><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td></tr></tbody></table>
-
-
-
-
 ```julia
 #cd("/Users") #change to home directory
 CSV.write("Trait1_GLM.csv", Trait1_GLM)
 ```
-
-
-
-
-    "Trait1_GLM.csv"
-
-
 
 # Example 2: Linear Mixed Model (with additive genetic variance component).
 Examples 2a simulates a single trait, while Example 2b simulates two correlated traits.
@@ -440,7 +410,7 @@ Also, you can extend the model in Example 2b to include more than 2 variance com
 ## The Variance Covariance Matrix
 
 Recall : $E(\mathbf{GRM}) = \Phi$
-<br>
+
 We use the [SnpArrays.jl](https://github.com/OpenMendel/SnpArrays.jl) package to find an estimate of the Kinship ($\Phi$), the Genetic Relationship Matrix (GRM). 
 
 We will use the same values of $\textbf{GRM, V_a, and V_e}$ in the bivariate covariance matrix for both the mixed effect example and for the rare variant example.
@@ -453,41 +423,38 @@ GRM = grm(snpdata, minmaf = 0.05)
 ```
 
 
-
-
-    212×212 Array{Float64,2}:
-      0.498264     0.0080878    0.0164327   …   0.0246825    0.00181856
+    212x�212 Array{Float64,2}:
+      0.498264     0.0080878    0.0164327      0.0246825    0.00181856
       0.0080878    0.498054    -0.0212599      -0.0285927   -0.0226525 
       0.0164327   -0.0212599    0.499442       -0.0219661   -0.00748536
       0.253627    -0.00160532   0.282542        0.00612693  -0.00339125
       0.126098     0.253365     0.128931       -0.0158446   -0.00633959
-     -0.014971    -0.00266073  -0.00243384  …   0.00384757   0.0145936 
+     -0.014971    -0.00266073  -0.00243384     0.00384757   0.0145936 
      -0.0221357    0.0100492   -0.0107012      -0.0148443   -0.00127783
      -0.01629     -0.00749253  -0.015372       -0.0163305   -0.00258392
      -0.016679     0.00353587  -0.0128844      -0.0332489   -0.00707839
      -0.0176101   -0.00996912  -0.0158473      -0.00675875  -0.0122339 
-     -0.0162558    0.00938592   0.0064231   …  -0.00510882   0.0168778 
+     -0.0162558    0.00938592   0.0064231     -0.00510882   0.0168778 
      -0.0167487    0.00414544  -0.00936538     -0.0134863    0.0020952 
-     -0.031148     0.00112387  -0.010794        0.00383105   0.0198635 
-      ⋮                                     ⋱   ⋮                      
-     -0.00865735  -0.00335548  -0.0148433   …   0.00806601  -0.0211537 
+     -0.031148     0.00112387  -0.010794        0.00383105   0.0198635                       
+     -0.00865735  -0.00335548  -0.0148433      0.00806601  -0.0211537 
       0.00296028   0.0043655   -0.0183683       0.0012496    0.00898193
      -0.0204601   -0.0270898   -0.00194048     -0.0185883   -0.0116621 
      -0.0174561   -0.0128509   -0.0155773      -0.0274183   -0.0063823 
      -0.00170995   0.0154211   -0.00168146     -0.00684865  -0.0067438 
-      0.00718047  -0.00525265  -0.00283975  …   0.0309601    0.0261103 
+      0.00718047  -0.00525265  -0.00283975     0.0309601    0.0261103 
      -0.0170218   -0.00661916   0.0020924      -0.022858     0.0037451 
       0.0142551    0.0208073    0.0096287       0.00598877   0.0094809 
      -0.00586031  -0.00733706   0.0339257       0.0109116   -0.0177771 
       0.00299024  -0.0134027    0.0150825       0.00799507   0.0150077 
-      0.0246825   -0.0285927   -0.0219661   …   0.593999     0.0497083 
+      0.0246825   -0.0285927   -0.0219661      0.593999     0.0497083 
       0.00181856  -0.0226525   -0.00748536      0.0497083    0.491743  
 
 
 
 ### Example 2a: Single Trait 
 $$
-Y ∼ N(μ, 4* 2GRM + 2I, n_{reps} = 1000)$$
+Y \sim N(\mu, 4* 2GRM + 2I, n_{reps} = 1000)$$
 
 We simulate a Normal Trait controlling for family structure, location = $\mu = 40 + 3(sex) - 1.5(locus)$ and scale =  $\mathbf{V} = 2*V_a \Phi + V_e I = 4* 2GRM + 2I$. 
 
@@ -497,13 +464,8 @@ We simulate a Normal Trait controlling for family structure, location = $\mu = 4
 mean_formula = ["40 + 3(sex) - 1.5(locus)"]
 ```
 
-
-
-
     1-element Array{String,1}:
      "40 + 3(sex) - 1.5(locus)"
-
-
 
 
 ```julia
@@ -512,10 +474,7 @@ LMM_trait_model = LMMTrait(mean_formula, X, 4*(2*GRM) + 2*(I_n))
 Simulated_LMM_Trait = simulate(LMM_trait_model, 1000)[:, :, 1]
 ```
 
-
-
-
-    212×1 Array{Float64,2}:
+    212-�1 Array{Float64,2}:
      38.20266058527332 
      37.36878235649297 
      41.652852584894866
@@ -528,8 +487,7 @@ Simulated_LMM_Trait = simulate(LMM_trait_model, 1000)[:, :, 1]
      37.8134354286862  
      31.925670322528724
      41.90289800510304 
-     33.372975336984815
-      ⋮                
+     33.372975336984815       
      39.052863779414245
      40.11076940829843 
      38.86834109675366 
@@ -567,10 +525,10 @@ describe(Simulated_LMM_Trait[:,:, 1][:])
 ###  Example 2b: Multiple Correlated Traits (Mendel Example 28e Simulation)
 
 We simulate two correlated Normal Traits controlling for family structure, location = μ and scale = $\mathbf\Sigma$. 
-The corresponding bivariate variance covariance matrix as specified Mendel Option 28e, $\mathbf{Σ}$, is generated here.
+The corresponding bivariate variance covariance matrix as specified Mendel Option 28e, is generated here.
 
 $$
-Y ∼ N(μ, \mathbf\Sigma)
+Y \sim N(μ, \mathbf\Sigma)
 $$ 
 
 $$
@@ -594,11 +552,10 @@ $$
 
 As long as each Variance Component is specified correctly, we can create a `VarianceComponent` Julia object for Trait Simulation:
 
-&nbsp; 
 Example) Specifying more than 2 variance components (let V_H indicate an additional Household Variance component and V_D indicate a dominance genetic effect) 
 
 ```{julia}
-    multiple_variance_formula = @vc V_A ⊗ 2GRM + V_E ⊗ I_n + V_D ⊗ Δ + V_H ⊗ H;
+    multiple_variance_formula = @vc V_A $\otimes$ 2GRM + V_E $\otimes$�� I_n + V_D $\otimes$�� Δ + V_H $\otimes$ H;
 ```
 
 V_E is multiplies a 212 by 212 identity matrix, which we creat along with the V_E and V_A matrices. 
@@ -612,7 +569,7 @@ V_E = [2.0 0.0; 0.0 2.0];
 
 ```julia
 # @vc is a macro that creates a 'VarianceComponent' Type for simulation
-variance_formula = @vc V_A ⊗ 2GRM + V_E ⊗ I_n;
+variance_formula = @vc V_A $\otimes$ 2GRM + V_E $\otimes$ I_n;
 ```
 
 These are the formulas for the fixed effects, as specified by Mendel Option 28e.
@@ -637,26 +594,12 @@ Multiple_LMM_traits_model = LMMTrait(mean_formulas, X, variance_formula)
 Simulated_LMM_Traits = DataFrame(simulate(Multiple_LMM_traits_model))
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>x1</th><th>x2</th></tr><tr><th></th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>212 rows × 2 columns</p><tr><th>1</th><td>34.0</td><td>15.0</td></tr><tr><th>2</th><td>37.0</td><td>18.0</td></tr><tr><th>3</th><td>40.0</td><td>19.0</td></tr><tr><th>4</th><td>40.0</td><td>19.0</td></tr><tr><th>5</th><td>35.5</td><td>16.5</td></tr><tr><th>6</th><td>35.5</td><td>16.5</td></tr><tr><th>7</th><td>41.5</td><td>20.5</td></tr><tr><th>8</th><td>40.0</td><td>19.0</td></tr><tr><th>9</th><td>35.5</td><td>16.5</td></tr><tr><th>10</th><td>41.5</td><td>20.5</td></tr><tr><th>11</th><td>37.0</td><td>18.0</td></tr><tr><th>12</th><td>43.0</td><td>22.0</td></tr><tr><th>13</th><td>37.0</td><td>18.0</td></tr><tr><th>14</th><td>35.5</td><td>16.5</td></tr><tr><th>15</th><td>34.0</td><td>15.0</td></tr><tr><th>16</th><td>41.5</td><td>20.5</td></tr><tr><th>17</th><td>34.0</td><td>15.0</td></tr><tr><th>18</th><td>40.0</td><td>19.0</td></tr><tr><th>19</th><td>34.0</td><td>15.0</td></tr><tr><th>20</th><td>41.5</td><td>20.5</td></tr><tr><th>21</th><td>35.5</td><td>16.5</td></tr><tr><th>22</th><td>40.0</td><td>19.0</td></tr><tr><th>23</th><td>40.0</td><td>19.0</td></tr><tr><th>24</th><td>41.5</td><td>20.5</td></tr><tr><th>25</th><td>34.0</td><td>15.0</td></tr><tr><th>26</th><td>40.0</td><td>19.0</td></tr><tr><th>27</th><td>34.0</td><td>15.0</td></tr><tr><th>28</th><td>35.5</td><td>16.5</td></tr><tr><th>29</th><td>41.5</td><td>20.5</td></tr><tr><th>30</th><td>43.0</td><td>22.0</td></tr><tr><th>&vellip;</th><td>&vellip;</td><td>&vellip;</td></tr></tbody></table>
-
-
-
 ### Summary Statistics of Our Simulated Traits
 
 
 ```julia
 describe(Simulated_LMM_Traits, stats = [:mean, :std, :min, :max, :eltype])
 ```
-
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>variable</th><th>mean</th><th>std</th><th>min</th><th>max</th><th>eltype</th></tr><tr><th></th><th>Symbol</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>DataType</th></tr></thead><tbody><p>2 rows × 6 columns</p><tr><th>1</th><td>x1</td><td>38.1321</td><td>3.16812</td><td>34.0</td><td>43.0</td><td>Float64</td></tr><tr><th>2</th><td>x2</td><td>18.0472</td><td>2.2361</td><td>15.0</td><td>22.0</td><td>Float64</td></tr></tbody></table>
-
-
 
 ### Summary Statistics of the Original Mendel 28e dataset Traits:
 
@@ -667,18 +610,11 @@ Note we want to see similar values from our simulated traits!
 describe(Traits_Mendel28e, stats = [:mean, :std, :min, :max, :eltype])
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>variable</th><th>mean</th><th>std</th><th>min</th><th>max</th><th>eltype</th></tr><tr><th></th><th>Symbol</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>DataType</th></tr></thead><tbody><p>2 rows × 6 columns</p><tr><th>1</th><td>Trait1</td><td>37.8602</td><td>4.04887</td><td>29.2403</td><td>47.8619</td><td>Any</td></tr><tr><th>2</th><td>Trait2</td><td>18.472</td><td>3.37633</td><td>9.2421</td><td>27.5554</td><td>Any</td></tr></tbody></table>
-
-
-
 # Example 3: Rare Variant Linear Mixed Model
 
 
 $$
-Y ∼ N(\mu_{rare20}, 4* 2GRM + 2I)
+Y \sim N(\mu_{rare20}, 4* 2GRM + 2I)
 $$
 
 In this example we first subset only the rare SNP's with minor allele frequency greater than 0.002 but less than 0.02, then we simulate traits on 20 of the rare SNP's as fixed effects. For this demo, the indexing `snpid[rare_index][1:2:40]` allows us to subset every other rare snp in the first 40 SNPs, to get our list of 20 rare SNPs. Change the range and number of SNPs to simulate with more or less SNPs and from different regions of the genome. The number 20 is arbitrary and you can use more or less than 20 if you desire by changing the final number. You can change the spacing of the snps by changing the second number. 
@@ -696,13 +632,10 @@ rare_index = (0.002 .< minor_allele_frequency .≤ 0.02)
 data_rare = @view(snpdata[:, rare_index]);
 ```
 
-
 ```julia
 maf_20_rare_snps = minor_allele_frequency[rare_index][1:2:40]
 rare_snps_for_simulation = snpid[rare_index][1:2:40]
 ```
-
-
 
 
     20-element Array{SubString{String},1}:
@@ -744,13 +677,6 @@ geno_rare20_converted = convert(DataFrame, geno_rare_converted[:, 1:2:40])
 names!(geno_rare20_converted, Symbol.(rare_snps_for_simulation))
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>rs3020701</th><th>rs181646587</th><th>rs182902214</th><th>rs184527030</th><th>rs10409990</th><th>rs185166611</th><th>rs181637538</th><th>rs186213888</th><th>rs184010370</th><th>rs11667161</th><th>rs188819713</th><th>rs182378235</th><th>rs146361744</th><th>rs190575937</th><th>rs149949827</th><th>rs117671630</th><th>rs149171388</th><th>rs188520640</th><th>rs142722885</th><th>rs146938393</th></tr><tr><th></th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>212 rows × 20 columns</p><tr><th>1</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>2</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>3</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>4</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>5</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>6</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>7</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>8</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>9</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>10</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>11</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>12</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>13</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>14</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>15</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>16</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>17</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>18</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>19</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>20</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>21</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>22</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>23</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>24</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>25</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>26</th><td>2.0</td><td>0.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>27</th><td>2.0</td><td>0.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>28</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>29</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>30</th><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>&vellip;</th><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td></tr></tbody></table>
-
-
-
 ### Chisquared Distribution (df = 1)
 
 For demonstration purposes, we simulate effect sizes from the Chi-squared(df = 1) distribution, where we use the minor allele frequency (maf) as x and find f(x) where f is the pdf for the Chi-squared (df = 1) density, so that the rarest SNP's have the biggest effect sizes. The effect sizes are rounded to the second digit, throughout this example. Notice there is a random +1 or -1, so that there are effects that both increase and decrease the simulated trait value.
@@ -773,22 +699,9 @@ Take a look at the simulated coefficients on the left, next to the corresponding
 Ex3_rare = round.([chisq_coeff maf_20_rare_snps], digits = 3)
 Ex3_rare = DataFrame(Chisq_Coefficient = Ex3_rare[:, 1] , MAF_rare = Ex3_rare[:, 2] )
 ```
-
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>Chisq_Coefficient</th><th>MAF_rare</th></tr><tr><th></th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>20 rows × 2 columns</p><tr><th>1</th><td>0.785</td><td>0.017</td></tr><tr><th>2</th><td>0.847</td><td>0.014</td></tr><tr><th>3</th><td>-1.034</td><td>0.009</td></tr><tr><th>4</th><td>-0.735</td><td>0.019</td></tr><tr><th>5</th><td>1.034</td><td>0.009</td></tr><tr><th>6</th><td>-1.459</td><td>0.005</td></tr><tr><th>7</th><td>-1.193</td><td>0.007</td></tr><tr><th>8</th><td>-1.034</td><td>0.009</td></tr><tr><th>9</th><td>1.193</td><td>0.007</td></tr><tr><th>10</th><td>2.062</td><td>0.002</td></tr><tr><th>11</th><td>-0.847</td><td>0.014</td></tr><tr><th>12</th><td>-1.459</td><td>0.005</td></tr><tr><th>13</th><td>2.062</td><td>0.002</td></tr><tr><th>14</th><td>1.459</td><td>0.005</td></tr><tr><th>15</th><td>0.735</td><td>0.019</td></tr><tr><th>16</th><td>-2.062</td><td>0.002</td></tr><tr><th>17</th><td>-2.062</td><td>0.002</td></tr><tr><th>18</th><td>2.062</td><td>0.002</td></tr><tr><th>19</th><td>0.735</td><td>0.019</td></tr><tr><th>20</th><td>1.459</td><td>0.005</td></tr></tbody></table>
-
-
-
-
 ```julia
 simulated_effectsizes_chisq = Ex3_rare[:, 1]
 ```
-
-
-
-
     20-element Array{Float64,1}:
       0.785
       0.847
@@ -823,10 +736,6 @@ The function `FixedEffectTerms`, creates the proper evaluated expression for the
 ```julia
 rare_snps_for_simulation
 ```
-
-
-
-
     20-element Array{SubString{String},1}:
      "rs3020701"  
      "rs181646587"
@@ -865,19 +774,12 @@ end
 
 ```
 
-
-
-
-    FixedEffectTerms (generic function with 1 method)
-
-
-
 Example 3: Single Trait, Rare Variants
 
 We look at just the first of the 1000 simulation results below.
 
 $$
-Y ∼ N(μ_{20raresnps}, 4* 2GRM + 2I, n_{reps} = 1000)$$
+Y \sim N(\mu_{20raresnps}, 4* 2GRM + 2I, n_{reps} = 1000)$$
 
 
 ```julia
@@ -885,10 +787,6 @@ mean_formula_rare = FixedEffectTerms(simulated_effectsizes_chisq, rare_snps_for_
 rare_20_snp_model = LMMTrait([mean_formula_rare], geno_rare20_converted, 4*(2*GRM) + 2*(I_n))
 trait_rare_20_snps = simulate(rare_20_snp_model, 1000)[:, :, 1][:]
 ```
-
-
-
-
     212-element Array{Float64,1}:
       0.4801532327653446  
       0.46446556578922316 
@@ -902,8 +800,7 @@ trait_rare_20_snps = simulate(rare_20_snp_model, 1000)[:, :, 1][:]
      -0.031165290034150694
       5.040644432778814   
       2.448381706430353   
-      2.9113946526554786  
-      ⋮                   
+      2.9113946526554786             
      -0.21888757661852987 
      -0.8311241840820487  
       3.89638370178692    
@@ -947,13 +844,6 @@ Here we output the simulated trait values and corresponding genotypes for each o
 Trait3_rare = hcat(Fam_Person_id, trait_rare_20_snps[:], geno_rare20_converted)
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>FamID</th><th>PID</th><th>x1</th><th>rs3020701</th><th>rs181646587</th><th>rs182902214</th><th>rs184527030</th><th>rs10409990</th><th>rs185166611</th><th>rs181637538</th><th>rs186213888</th><th>rs184010370</th><th>rs11667161</th><th>rs188819713</th><th>rs182378235</th><th>rs146361744</th><th>rs190575937</th><th>rs149949827</th><th>rs117671630</th><th>rs149171388</th><th>rs188520640</th><th>rs142722885</th><th>rs146938393</th></tr><tr><th></th><th>Any</th><th>Any</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>212 rows × 23 columns</p><tr><th>1</th><td>1</td><td>16</td><td>0.480153</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>2</th><td>1</td><td>8228</td><td>0.464466</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>3</th><td>1</td><td>17008</td><td>1.55356</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>4</th><td>1</td><td>9218</td><td>2.89365</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>5</th><td>1</td><td>3226</td><td>1.42821</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>6</th><td>2</td><td>29</td><td>3.09239</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>7</th><td>2</td><td>2294</td><td>1.89755</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>8</th><td>2</td><td>3416</td><td>1.10767</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>9</th><td>2</td><td>17893</td><td>-0.606084</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>10</th><td>2</td><td>6952</td><td>-0.0311653</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>11</th><td>2</td><td>14695</td><td>5.04064</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>12</th><td>2</td><td>6790</td><td>2.44838</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>13</th><td>2</td><td>3916</td><td>2.91139</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>14</th><td>3</td><td>39</td><td>-1.95902</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>15</th><td>3</td><td>4521</td><td>3.36333</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>16</th><td>3</td><td>8366</td><td>3.78558</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>17</th><td>3</td><td>16693</td><td>4.65568</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>18</th><td>3</td><td>21688</td><td>3.06168</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>19</th><td>3</td><td>25532</td><td>-0.71737</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>20</th><td>3</td><td>26294</td><td>-0.474266</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>21</th><td>3</td><td>16795</td><td>0.232297</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>22</th><td>3</td><td>17445</td><td>2.59857</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>23</th><td>3</td><td>2039</td><td>1.76984</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>24</th><td>3</td><td>2831</td><td>5.67857</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>25</th><td>4</td><td>54</td><td>1.27389</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>26</th><td>4</td><td>5072</td><td>-1.86413</td><td>2.0</td><td>0.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>27</th><td>4</td><td>17240</td><td>-3.02934</td><td>2.0</td><td>0.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>28</th><td>5</td><td>70</td><td>5.31109</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>29</th><td>5</td><td>24010</td><td>1.51317</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>1.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>30</th><td>5</td><td>21999</td><td>-0.260484</td><td>2.0</td><td>0.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>2.0</td><td>2.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr><tr><th>&vellip;</th><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td></tr></tbody></table>
-
-
-
 In addition, we output the simulation parameters (generated effect sizes and SNP names) used to simulate this trait.
 
 
@@ -962,14 +852,6 @@ Coefficients = DataFrame(Coefficients = simulated_effectsizes_chisq)
 SNPs_rare = DataFrame(SNPs = rare_snps_for_simulation)
 Trait3_rare_sim = hcat(Coefficients, SNPs_rare)
 ```
-
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>Coefficients</th><th>SNPs</th></tr><tr><th></th><th>Float64</th><th>SubStrin…</th></tr></thead><tbody><p>20 rows × 2 columns</p><tr><th>1</th><td>0.785</td><td>rs3020701</td></tr><tr><th>2</th><td>0.847</td><td>rs181646587</td></tr><tr><th>3</th><td>-1.034</td><td>rs182902214</td></tr><tr><th>4</th><td>-0.735</td><td>rs184527030</td></tr><tr><th>5</th><td>1.034</td><td>rs10409990</td></tr><tr><th>6</th><td>-1.459</td><td>rs185166611</td></tr><tr><th>7</th><td>-1.193</td><td>rs181637538</td></tr><tr><th>8</th><td>-1.034</td><td>rs186213888</td></tr><tr><th>9</th><td>1.193</td><td>rs184010370</td></tr><tr><th>10</th><td>2.062</td><td>rs11667161</td></tr><tr><th>11</th><td>-0.847</td><td>rs188819713</td></tr><tr><th>12</th><td>-1.459</td><td>rs182378235</td></tr><tr><th>13</th><td>2.062</td><td>rs146361744</td></tr><tr><th>14</th><td>1.459</td><td>rs190575937</td></tr><tr><th>15</th><td>0.735</td><td>rs149949827</td></tr><tr><th>16</th><td>-2.062</td><td>rs117671630</td></tr><tr><th>17</th><td>-2.062</td><td>rs149171388</td></tr><tr><th>18</th><td>2.062</td><td>rs188520640</td></tr><tr><th>19</th><td>0.735</td><td>rs142722885</td></tr><tr><th>20</th><td>1.459</td><td>rs146938393</td></tr></tbody></table>
-
-
-
 
 ```julia
 #cd("/Users") #change to home directory
