@@ -69,3 +69,18 @@ function mean_formula(user_formula_string::String, df::DataFrame)
     return mean_vector
 end
 
+"""
+FixedEffectTerms(effectsizes, snps)
+Construction of the proper expression for evaluation in the simulation process, using the specified vectors of regression coefficients (Effect Sizes) and snp names
+"""
+function FixedEffectTerms(effectsizes::AbstractVecOrMat, snps::AbstractVecOrMat)
+ # implementation
+    fixed_terms = ""
+for i in 1:length(effectsizes)
+expression = " + " * string(effectsizes[i]) * "(" * snps[i] * ")"
+    fixed_terms = fixed_terms * expression
+end
+    return String(fixed_terms)
+end
+
+
