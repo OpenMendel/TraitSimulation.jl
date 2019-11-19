@@ -8,7 +8,7 @@ so that the rarest SNP's have the biggest effect sizes.
 The effect sizes are rounded to the second digit, throughout this example.
 Notice there is a random +1 or -1, so that there are effects that both increase and decrease the simulated trait value.
 """
-function GLM_Chisq_mean_df(filepath::String, k::Int64; effectsizes = [], min_success_rate_per_row = 0.98, min_success_rate_per_col = 0.98, min_maf = 0.01, min_hwe_pval = 0.0, maxiters = 5)
+function Generate_ChisqEF_mean_df(filepath::String, k::Int64; effectsizes = [], min_success_rate_per_row = 0.98, min_success_rate_per_col = 0.98, min_maf = 0.01, min_hwe_pval = 0.0, maxiters = 5)
 snpdata = SnpArray(filepath * ".bed")
 
 rowmask, colmask =  SnpArrays.filter(snpdata,
