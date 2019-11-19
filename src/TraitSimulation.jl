@@ -5,6 +5,7 @@ using StatsModels # useful distributions #lots more useful distributions
 using LinearAlgebra
 using Random
 using SpecialFunctions
+using SnpArrays
 
 include("calculate_mean_vector.jl")
 

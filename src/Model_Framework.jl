@@ -3,10 +3,10 @@ GLMTrait
 GLMTrait object is one of the two model framework objects. Stores information about the simulation of a single trait, under the Generalized Linear Model Framework.
 """
 struct GLMTrait{D<:ResponseDistribution, L<:InverseLinkFunction}
-formula::String
-mu::Vector{Float64}
-dist:: D
-link:: L
+  formula::String
+  mu::Vector{Float64}
+  dist:: D
+  link:: L
 end
 
 function GLMTrait(mu::Number, df, dist::D, link::L) where {D, L}
@@ -36,9 +36,9 @@ LMMTrait
 LMMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
 """
 struct LMMTrait{T}
-formulas::Vector{String}
-mu::Matrix{Float64}
-vc::T
+  formulas::Vector{String}
+  mu::Matrix{Float64}
+  vc::T
   function LMMTrait(formulas, df, vc::T) where T
     n_traits = length(formulas)
     n_people = size(df)[1]

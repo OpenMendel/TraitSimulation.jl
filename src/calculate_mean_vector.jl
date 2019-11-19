@@ -28,7 +28,7 @@ Search the expression x for the variable name in var, and then create the julia 
 function search_variables!(x::Expr, var::Symbol)
     for i in eachindex(x.args)
         if x.args[i] == var # if the argument is one of the variables given then just put it in the right format df[:x1] 
-            x.args[i] = Meta.parse(string(:input_data_from_user,"[", ":", var, "]"))
+            x.args[i] = Meta.parse(string(:input_data_from_user,"[!, ", ":", var, "]"))
         elseif x.args[i] isa Expr # else if the argument is an expression (i.e not a varaible (symbol) or a number) then 
             search_variables!(x.args[i], var) #go through this function recursively on each of the arguments of the expression object
         end
@@ -68,4 +68,19 @@ function mean_formula(user_formula_string::String, df::DataFrame)
     end
     return mean_vector
 end
+
+"""
+FixedEffectTerms(effectsizes, snps)
+Construction of the proper expression for evaluation in the simulation process, using the specified vectors of regression coefficients (Effect Sizes) and snp names
+"""
+function FixedEffectTerms(effectsizes::AbstractVecOrMat, snps::AbstractVecOrMat)
+ # implementation
+    fixed_terms = ""
+for i in 1:length(effectsizes)
+expression = " + " * string(effectsizes[i]) * "(" * snps[i] * ")"
+    fixed_terms = fixed_terms * expression
+end
+    return String(fixed_terms)
+end
+
 
