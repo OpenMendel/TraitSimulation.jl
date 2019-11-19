@@ -1,5 +1,5 @@
 """
-GLM_Chisq_mean_df(filepath, k; effectsizes, min_success_rate_per_row, min_maf, min_hwe_pval, maxiters)
+Generate_Random_Model_Chisq(filepath, k; effectsizes, min_success_rate_per_row, min_maf, min_hwe_pval, maxiters)
 
 For demonstration purposes, we simulate effect sizes from the Chi-squared(df = 1) distribution,
 where we use the minor allele frequency (maf) as x and find f(x),
@@ -8,7 +8,7 @@ so that the rarest SNP's have the biggest effect sizes.
 The effect sizes are rounded to the second digit, throughout this example.
 Notice there is a random +1 or -1, so that there are effects that both increase and decrease the simulated trait value.
 """
-function Generate_ChisqEF_mean_df(filepath::String, k::Int64; effectsizes = [], min_success_rate_per_row = 0.98, min_success_rate_per_col = 0.98, min_maf = 0.01, min_hwe_pval = 0.0, maxiters = 5)
+function Generate_Random_Model_Chisq(filepath::String, k::Int64; effectsizes = [], min_success_rate_per_row = 0.98, min_success_rate_per_col = 0.98, min_maf = 0.01, min_hwe_pval = 0.0, maxiters = 5)
 snpdata = SnpArray(filepath * ".bed")
 
 rowmask, colmask =  SnpArrays.filter(snpdata,
