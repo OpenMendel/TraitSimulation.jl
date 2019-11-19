@@ -22,7 +22,8 @@ x = SnpArrays.filter(filepath, rowmask, colmask)
 
 SNP_data = SnpData(filepath)
 snpid = SNP_data.snp_info[!, :snpid]
-k_indices = rand(1:length(snpid), k)
+#k_indices = rand(1:length(snpid), k)
+k_indices = 1:k
 snpid_k = snpid[k_indices]
 
 genotype_converted = DataFrame(convert(Matrix{Float64}, @view(x[:, k_indices])));
