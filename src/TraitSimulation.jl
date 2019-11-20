@@ -17,9 +17,16 @@ export PoissonResponse, NormalResponse, BinomialResponse, BernoulliResponse, Gam
 
 
 #this is the main functionality of this package, to run the actual simulation now for the split up responsedist type and linkfunction type
-function GLM_trait_simulation(mu, dist::ResponseDistribution, link::InverseLinkFunction) 
-  transmu = apply_inverse_link(mu, link)
-  Simulated_Trait = simulate_glm_trait(transmu, dist)
+function GLM_trait_simulation(μ, dist::Union{ResponseDistribution, UnivariateDistribution}, link::Union{InverseLinkFunction, Link}) 
+  transformedμ = apply_inverse_link(μ, link)
+  Simulated_Trait = simulate_glm_trait(transformedμ, dist)
+  return(Simulated_Trait)
+end
+
+#using GLM package
+function GLM_trait_simulation(μ, dist::UnionAll, link::Link) 
+  transformedμ = linkinv.(link, μ)
+  Simulated_Trait = y = [rand(dist(i)) for i in transformedμ]
   return(Simulated_Trait)
 end
 
