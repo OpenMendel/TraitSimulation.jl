@@ -18,11 +18,13 @@ struct VarianceComponent
 	end
 end
 
+
 """
 LMM_trait_simulation
 single LMM trait with given evaluated covariance matrix so not a VarianceComponent type
+ i.e given an evaluated matrix of means, simulate from LMM.
 """ 
-function LMM_trait_simulation(mu, vc::Matrix{T}) where T
+function LMM_trait_simulation(mu, vc::AbstractArray{T, 2}) where T
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
 	#preallocate memory for the returned dataframe simulated_trait
@@ -58,7 +60,8 @@ function append_terms!(AB, summand)
 end
 
 """
-this vc macro allows us to create a vector of VarianceComponent objects for simulation
+this vc macro allows us to create a vector of VarianceComponent objects for simulation so with_bigfloat_precis, precision::Integer)
+so that the user can type out @vc V[1] ⊗ Σ[1] + V[2] ⊗ Σ[2] + .... + V[m] ⊗ Σ[m]
 """
 
 macro vc(expression)
@@ -74,10 +77,16 @@ macro vc(expression)
 			append_terms!(AB, summand)
 		end
 	end
-	return(:($AB)) # change this to return a vector of VarianceComponent objects
+	return(:($AB)) 
 end 
 
+#this does the same as ^ @vc macro
+#given a vector of Σ and V covariance matrices (of length m),
+# we can create a vector of VarianceComponent types to represent the total variance in VCM 
+#[VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
 
+
+ 
 """
 vcobjectuple(vcobject)
 This function creates a tuple of Variance Components, given a vector of variancecomponent objects to be compatible with VarianceComponentModels.jl
@@ -135,10 +144,10 @@ function SimulateMN(n_people, n_traits, vc::VarianceComponent)
 	#returns the allocated and now transformed z
 	return(z)
 end
+
 """
 LMM_trait_simulation(mu, vc::VarianceComponent)
 For a single Variance Component object, without computing mean from dataframe and formulas
- i.e given an evaluated matrix of means, simulate from LMM.
 """
 function LMM_trait_simulation(mu, vc::VarianceComponent)
 	n_people = size(mu)[1]
@@ -168,7 +177,7 @@ end
 LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
 For a vector of Variance Component objects, without computing mean from dataframe and formulas i.e given an evaluated matrix of means, simulate from LMM.
 """
-function LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
+function LMM_trait_simulation(mu::Matrix, vc::Vector{VarianceComponent})
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
 
@@ -190,51 +199,68 @@ function LMM_trait_simulation(mu, vc::Vector{VarianceComponent})
 	return simulated_trait
 end
 
+#from huas package 
+
+function VCM_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, V, Σ) where T
+	n, p = size(X)
+	m = length(V)
+	d = size(Σ, 1)
+	Vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+
+	mean = X*B
+	VCM_Model = LMMTrait(mean, Vc)
+	VCM_trait = simulate(VCM_Model)
+
+	return(VCM_trait)
+end 
+
+
 # using Random
-Random.seed!(1234);
-n = 1000   # no. observations
-d = 2      # dimension of responses
-m = 2      # no. variance components
-p = 2      # no. covariates
+# Random.seed!(1234);
+# n = 1000   # no. observations
+# d = 2      # dimension of responses
+# m = 2      # no. variance components
+# p = 2      # no. covariates
 
-# n-by-p design matrix
-X = randn(n, p)
+# # n-by-p design matrix
+# X = randn(n, p)
 
-# p-by-d mean component regression coefficient
-B = ones(p, d)  
+# # p-by-d mean component regression coefficient
+# B = ones(p, d)  
 
-# a tuple of m covariance matrices
-V = ntuple(x -> zeros(n, n), m) 
-for i = 1:m-1
-  Vi = [j ≥ i ? i * (n - j + 1) : j * (n - i + 1) for i in 1:n, j in 1:n]
-  copy!(V[i], Vi * Vi')
-end
-copy!(V[m], Diagonal(ones(n))) # last covarianec matrix is idendity
-# a tuple of m d-by-d variance component parameters
-Σ = ntuple(x -> zeros(d, d), m) 
-for i in 1:m
-  Σi = [j ≥ i ? i * (d - j + 1) : j * (d - i + 1) for i in 1:d, j in 1:d]
-  copy!(Σ[i], Σi' * Σi)
-end
+# # a tuple of m covariance matrices
+# V = ntuple(x -> zeros(n, n), m) 
+# for i = 1:m-1
+#   Vi = [j ≥ i ? i * (n - j + 1) : j * (n - i + 1) for i in 1:n, j in 1:n]
+#   copy!(V[i], Vi * Vi')
+# end
+# copy!(V[m], Diagonal(ones(n))) # last covarianec matrix is idendity
+# # a tuple of m d-by-d variance component parameters
+# Σ = ntuple(x -> zeros(d, d), m) 
+# for i in 1:m
+#   Σi = [j ≥ i ? i * (d - j + 1) : j * (d - i + 1) for i in 1:d, j in 1:d]
+#   copy!(Σ[i], Σi' * Σi)
+# end
 
-# mn1 = MatrixNormal(m0, V[1], Σ[1])
-# mn2 = MatrixNormal(zeros(size(m0)), V[2], Σ[2])
-# bigV = V[1] + V[2]
-# bigΣ = Σ[1] + Σ[2]
+# #[VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
 
-# bigMN = MatrixNormal(m0, bigV, bigΣ)
 
-# function VCM_simulation(n::Int64, d::Int64, m::Int64, p::Int64, X::Matrix{Float64},
-# 						 B::Matrix{Float64}, V, Σ)
-# 	# n-by-p design matrix
+# # mn1 = MatrixNormal(m0, V[1], Σ[1])
+# # mn2 = MatrixNormal(zeros(size(m0)), V[2], Σ[2])
+# # bigV = V[1] + V[2]
+# # bigΣ = Σ[1] + Σ[2]
+
+# # bigMN = MatrixNormal(m0, bigV, bigΣ)
+
+# # n-by-p design matrix
 # 	X = randn(n, p)
 
 # 	# p-by-d mean component regression coefficient
 # 	B = ones(p, d)  
 
 # 	# a tuple of m covariance matrices
-# 	V = ntuple(x -> zeros(n, n), m) 
-	
+# 	V = ntuple(x -> zeros(n, n), m)
+
 # 	for i = 1:m-1
 #   		Vi = randn(n, 50)
 #   		copy!(V[i], Vi * Vi')
@@ -242,13 +268,6 @@ end
 # 	copy!(V[m], Diagonal(ones(n))) # last covarianec matrix is idendity
 # 	# a tuple of m d-by-d variance component parameters
 # 	Σ = ntuple(x -> zeros(d, d), m) 
-	
-	
-# 	# form overall nd-by-nd covariance matrix Ω
-# 	O = zeros(n * d, n * d)
-# 	for i = 1:m
-# 	  O += kron(Σ[i], V[i])
-# 	end
-# end 
+
 
 

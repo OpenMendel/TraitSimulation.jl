@@ -57,6 +57,7 @@ end
 # end
 
 
+
 # lmm: multiple traits (MVN)
 """
 LMMTrait
@@ -76,4 +77,14 @@ struct LMMTrait{T}
     end
     return(new{T}(formulas, mu, vc))
   end
+
+  function LMMTrait(mu, vc::T) where T
+    return(new{T}(String[],mu, vc))
+  end
+
 end
+
+# ## given evaluated mean matrix
+# function LMMTrait(mu::AbstractArray{T, 2}, vc::U) where {T, U}
+#     return(LMMTrait{U}(string.(mu), mu, vc))
+# end

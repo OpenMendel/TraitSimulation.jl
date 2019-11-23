@@ -18,26 +18,26 @@ include("Simulate_RandomGLM.jl")
 
 #With GLMTrait input type 
 """
-GLM_TraitSimulation()
+GLM_trait_simulation()
 Simulates univariate GLM trait from a GLMTrait object.
 First transforms the XB mean of fixed effects using the inverse link,
 and then passes the transformed mean μ and it's link function into the actual simulation function, glm_simulation.
 """
-function GLM_TraitSimulation(GLMTraitobj::GLMTrait)
+function GLM_trait_simulation(GLMTraitobj::GLMTrait)
   μ = GLM.linkinv.(GLMTraitobj.link, GLMTraitobj.mu) # get the transformed mean
-  Simulated_Trait = glm_simulation(μ, GLMTraitobj.dist)
+  Simulated_Trait = GLM_trait_simulation(μ, GLMTraitobj.dist)
   return(Simulated_Trait)
 end
 
 
-function glm_simulation(μ, dist::Type{NegativeBinomial})
+function GLM_trait_simulation(μ, dist::Type{NegativeBinomial})
   r = 1
   μ = 1 ./ (1 .+ μ ./ r)
   Simulated_Trait = [rand(dist(r, i)) for i in μ] #number of failtures before r success occurs
   return(Simulated_Trait)
 end
 
-function glm_simulation(μ, dist::Type{Gamma})
+function GLM_trait_simulation(μ, dist::Type{Gamma})
   β = 1 ./ μ # here β is the rate parameter for gamma distribution
   α = 1
   Simulated_Trait = [rand(dist(α, i)) for i in β] # α is the shape parameter for gamma
@@ -48,7 +48,7 @@ end
 glm_simulation()
 Runs the actual simulation of a univariate GLM trait from the transformed mean μ and its response distribution.
 """
-function glm_simulation(μ, dist::D) where D
+function GLM_trait_simulation(μ, dist::D) where D
   Simulated_Trait = [rand(dist(i)) for i in μ]
   return(Simulated_Trait)
 end
