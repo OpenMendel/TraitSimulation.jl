@@ -5,7 +5,7 @@ ENV["DOCUMENTER_DEBUG"] = "true"
 makedocs(
     format = Documenter.HTML(),
     sitename = "TraitSimulation",
-    authors = "Sarah Ji, Kenneth Lange, Janet Sinsheimer, Eric Sobel"
+    authors = "Sarah Ji, Kenneth Lange, Janet Sinsheimer, Eric Sobel",
     modules = [TraitSimulation]
 )
 
