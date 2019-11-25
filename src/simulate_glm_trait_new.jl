@@ -261,3 +261,7 @@ function weibull_deviate(lambda, alpha)
   return lambda * (- log(rand()))^(one(lambda) / alpha)
 end
 
+
+
+
+

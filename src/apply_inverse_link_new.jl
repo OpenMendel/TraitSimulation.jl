@@ -96,3 +96,7 @@ apply_inverse_link(μ, link::CauchitLink) = cauchit_inverse_link.(μ)
 
 apply_inverse_link(μ, link::CloglogLink) = cloglog_inverse_link.(μ)
 
+# GLM package
+
+#apply_inverse_link(μ, link::GLM.Link) = GLM.linkinv.(link, μ)
+

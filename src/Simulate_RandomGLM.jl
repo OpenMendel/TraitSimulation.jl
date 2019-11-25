@@ -21,12 +21,16 @@ function Generate_Random_Model_Chisq(filepath::String, k::Int64; effectsizes = [
 
 	SNP_data = SnpData(filepath)
 	snpid = SNP_data.snp_info[!, :snpid]
-	#k_indices = rand(1:length(snpid), k)
-	k_indices = 1:k
-	snpid_k = snpid[k_indices]
+	snp_position = SNP_data.snp_info[!, :position]
+	
+	n_filt_snps = sum(colmask)
+	k_indices = rand(1:n_filt_snps, k)
+	#k_indices = 1:k
+	snpid_k = snpid[colmask][k_indices]
+	snp_posk = snp_position[colmask][k_indices]
 
-		genotype_converted = DataFrame(convert(Matrix{Float64}, @view(x[:, k_indices])));
-		names!(genotype_converted, Symbol.(snpid_k))
+	genotype_converted = DataFrame(convert(Matrix{Float64}, @view(x[:, k_indices])));
+	names!(genotype_converted, Symbol.(snpid_k))
 
 	Simulated_ES = ones(k)
 	if isempty(effectsizes)
@@ -42,7 +46,7 @@ function Generate_Random_Model_Chisq(filepath::String, k::Int64; effectsizes = [
 
 	meanformula_k = FixedEffectTerms(Simulated_ES, snpid_k)
 
-	return(meanformula_k, Simulated_ES, genotype_converted)
+	return(meanformula_k, snpid_k, snp_posk, Simulated_ES, genotype_converted)
 end
 
 # simulation
