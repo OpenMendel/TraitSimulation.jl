@@ -89,21 +89,19 @@ SimulateMVN(n_people, n_traits, vc::VarianceComponent)
 For a single Variance Component, algorithm that will transform standard normal distribution. 
 SimulateMVN allows us to preallocate n_people by n_traits and rewrite over this matrix to save memory allocation.
 """
-function SimulateMN!(z::Matrix, vc::VarianceComponent)
+function SimulateMN!(Z::Matrix, vc::VarianceComponent)
 	cholA = vc.CholA # grab (not calculate) the stored Cholesky decomposition of n_traits by n_traits variance component matrix
 	cholB = vc.CholB # grab (not calculate) the stored Cholesky decomposition of n_people by n_people variance component matrix
-	randn!(z)
-	lmul!(cholB.U, z) # z = Bz
-	rmul!(z, cholA.L) # z = BzA
-	#rmul!(z, cholA.U) # z = BtBzAAt
-	#lmul!(cholB.L, z) #multiply on left and save to simulated_trait z = BtBzAAt
-	return(z) #adds onto z the effects of each variance component
+	randn!(Z)
+	lmul!(cholB.L, Z) # Z => (CholB.L)Z
+	rmul!(Z, cholA.U) # Z => (CholB.L)Z(CholA.U) so each Y_i = Z ~ MN(0, A_i = (CholB.L)(CholB.L)^T, B_i = (CholA.U)^T(CholA.U)), i in 1:m
+	return(Z) #adds onto Z the effects of each variance component
 end
 
 function SimulateMN(n_people, n_traits, vc::VarianceComponent)
 	Z = Matrix{Float64}(undef, n_people, n_traits)
 	SimulateMN!(Z, vc::VarianceComponent) # calls the function to apply the cholesky decomposition (we have stored in vc object)and transforms/updates z ~ MN(0, vc)
-	return(z) #returns the allocated and now transformed z
+	return(Z) #returns the allocated and now transformed Z
 end
 
 """
@@ -113,10 +111,13 @@ For a single Variance Component object, without computing mean from dataframe an
 function LMM_trait_simulation(mu, vc::VarianceComponent)
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
-	z = SimulateMN(n_people, n_traits, vc)
-	z += mu
-	return z
+	Z = SimulateMN(n_people, n_traits, vc)
+	Z += mu
+	return Z
 end
+
+mn1 = MatrixNormal(m0, V[1], Σ[1])
+
 
 """
 Aggregate_VarianceComponents(z, total_variance, vc)
@@ -137,11 +138,11 @@ For a vector of Variance Component objects, without computing mean from datafram
 function LMM_trait_simulation(mu::Matrix, vc::Vector{VarianceComponent})
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
-	simulated_trait = zeros(n_people*n_traits) #preallocate memory for the returned dataframe simulated_trait
-	Z = Matrix{Float64}(undef, n_people, n_traits)
-	Aggregate_VarianceComponents!(Z, simulated_trait, vc)
-	simulated_trait = reshape(simulated_trait, (n_people, n_traits))
-	simulated_trait += mu
+	simulated_trait = zeros(n_people*n_traits) #preallocate memory for MVN np x 1 vector later to be reshaped into matrix n x p
+	Z = Matrix{Float64}(undef, n_people, n_traits) 
+	Aggregate_VarianceComponents!(Z, simulated_trait, vc) # sum up the m independent, np x 1 vectors, Y = sum( Yi ~ MVN(0, A_i ⊗ B_i) , i in 1:m)
+	simulated_trait = reshape(simulated_trait, (n_people, n_traits)) # reshape the np x 1 vector Y back into matrix form n x p
+	simulated_trait += mu # add the mean matrix
 	return simulated_trait
 end
 

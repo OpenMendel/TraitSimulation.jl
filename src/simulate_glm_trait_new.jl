@@ -261,21 +261,7 @@ function weibull_deviate(lambda, alpha)
   return lambda * (- log(rand()))^(one(lambda) / alpha)
 end
 
-## GLM package input
-function simulate_glm_trait(μ, dist::UnivariateDistribution)
-  if dist == Normal || dist == Bernoulli || dist == Poisson
-    # l = canonicallink(dist())
-    clamp!(μ, -20, 20)
-    y = [rand(dist(i)) for i in μ]
-elseif dist == NegativeBinomial
-    r = 1
-    clamp!(μ, -20, 20)
-    y = [rand(dist(r, i)) for i in μ] #number of failtures before nn success occurs
-elseif d == Gamma
-    β = 1 ./ μ # here β is the rate parameter for gamma distribution
-    y = [rand(dist(α, i)) for i in β] # α is the shape parameter for gamma
-    y = Float64.(y)
-    return(y)
-end
+
+
 
 
