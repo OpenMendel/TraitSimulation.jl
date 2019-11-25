@@ -48,17 +48,17 @@ end
 copy!(V[m], Diagonal(ones(n))) # last covarianec matrix is idendity
 
 # a tuple of m d-by-d variance component parameters
-\Sigma = ntuple(x -> zeros(d, d), m) 
+? = ntuple(x -> zeros(d, d), m) 
 for i in 1:m
-  \Sigma_i = [j ? i ? i * (d - j + 1) : j * (d - i + 1) for i in 1:d, j in 1:d]
-  copy!(\Sigma[i], \Sigma_i' * \Sigma_i)
+  ?_i = [j ? i ? i * (d - j + 1) : j * (d - i + 1) for i in 1:d, j in 1:d]
+  copy!(?[i], ?_i' * ?_i)
 end
 
-Random_VCM_Trait = DataFrame(VCM_simulation(X, B, V, \Sigma), [:SimTrait1, :SimTrait2])
+Random_VCM_Trait = DataFrame(VCM_simulation(X, B, V, ?), [:SimTrait1, :SimTrait2])
 ```
 
 ```julia
-@benchmark VCM_simulation(X, B, V, \Sigma)
+@benchmark VCM_simulation(X, B, V, ?)
 ```
     BenchmarkTools.Trial: 
       memory estimate:  152.81 MiB
@@ -75,7 +75,7 @@ Random_VCM_Trait = DataFrame(VCM_simulation(X, B, V, \Sigma), [:SimTrait1, :SimT
 # Comparing with the MatrixNormal from the distributions package for a single variance component, we beat! 
 
 ```julia
-@benchmark LMM_trait_simulation(X*B, VarianceComponent(\Sigma[1], V[1]))
+@benchmark LMM_trait_simulation(X*B, VarianceComponent(?[1], V[1]))
 ```
     BenchmarkTools.Trial: 
       memory estimate:  15.31 MiB
@@ -91,11 +91,11 @@ Random_VCM_Trait = DataFrame(VCM_simulation(X, B, V, \Sigma), [:SimTrait1, :SimT
 
 ```julia
 using Distributions
-function MN_J(X, B, V, \Sigma)
-    return(rand(MatrixNormal(X*B, V, \Sigma)))
+function MN_J(X, B, V, ?)
+    return(rand(MatrixNormal(X*B, V, ?)))
 end
 
-@benchmark MN_J(X, B, V[1], \Sigma[2])
+@benchmark MN_J(X, B, V[1], ?[2])
 ```
 
     BenchmarkTools.Trial: 
