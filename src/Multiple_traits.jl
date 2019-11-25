@@ -116,9 +116,6 @@ function LMM_trait_simulation(mu, vc::VarianceComponent)
 	return Z
 end
 
-mn1 = MatrixNormal(m0, V[1], Σ[1])
-
-
 """
 Aggregate_VarianceComponents(z, total_variance, vc)
 Update the simulated trait with the effect of each variance component. We note the exclamation is to indicate this function will mutate or override the values that its given.
