@@ -1,19 +1,15 @@
 using Documenter, TraitSimulation
 
+ENV["DOCUMENTER_DEBUG"] = "true"
+
 makedocs(
     format = Documenter.HTML(),
-    sitename = "TraitSimulation.jl",
-    authors = "Sarah Ji, Kenneth Lange, Janet Sinsheimer, Eric Sobel",
-    clean = true,
-    debug = true,
-    pages = [
-        "index.md"
-    ]
+    sitename = "TraitSimulation",
+    authors = "Sarah Ji, Kenneth Lange, Janet Sinsheimer, Eric Sobel"
+    modules = [TraitSimulation]
 )
 
 deploydocs(
     repo   = "github.com/OpenMendel/TraitSimulation.jl.git",
-    target = "build",
-    deps   = nothing,
-    make   = nothing
+    target = "build"
 )
