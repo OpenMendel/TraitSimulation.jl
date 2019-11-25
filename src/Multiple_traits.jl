@@ -184,8 +184,3 @@ end
 # end
 
 # #[VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-
-
-# mn1 = MatrixNormal(m0, V[1], Σ[1])
-# mn2 = MatrixNormal(zeros(size(m0)), V[2], Σ[2])
-
