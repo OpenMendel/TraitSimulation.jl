@@ -95,8 +95,8 @@ function SimulateMN!(z::Matrix, vc::VarianceComponent)
 	randn!(z)
 	lmul!(cholB.U, z) # z = Bz
 	rmul!(z, cholA.L) # z = BzA
-	rmul!(z, cholA.U) # z = BzAAt
-	lmul!(cholB.L, z) #multiply on left and save to simulated_trait z = BtBzAAt
+	#rmul!(z, cholA.U) # z = BtBzAAt
+	#lmul!(cholB.L, z) #multiply on left and save to simulated_trait z = BtBzAAt
 	return(z) #adds onto z the effects of each variance component
 end
 
@@ -125,7 +125,7 @@ Update the simulated trait with the effect of each variance component. We note t
 function Aggregate_VarianceComponents!(Z::Matrix, total_variance, vc::Vector{VarianceComponent})
 	for i in 1:length(vc)
 		SimulateMN!(Z, vc[i])
-		total_variance += Z #add the effects of each variance component
+		total_variance += vec(Z) #add the effects of each variance component
 	end
 	return total_variance
 end
@@ -137,9 +137,10 @@ For a vector of Variance Component objects, without computing mean from datafram
 function LMM_trait_simulation(mu::Matrix, vc::Vector{VarianceComponent})
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
-	simulated_trait = zeros(n_people, n_traits) #preallocate memory for the returned dataframe simulated_trait
+	simulated_trait = zeros(n_people*n_traits) #preallocate memory for the returned dataframe simulated_trait
 	Z = Matrix{Float64}(undef, n_people, n_traits)
 	Aggregate_VarianceComponents!(Z, simulated_trait, vc)
+	simulated_trait = reshape(simulated_trait, (n_people, n_traits))
 	simulated_trait += mu
 	return simulated_trait
 end
