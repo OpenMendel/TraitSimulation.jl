@@ -122,7 +122,7 @@ Update the simulated trait with the effect of each variance component. We note t
 """
 function Aggregate_VarianceComponents!(Z::Matrix, total_variance, vc::Vector{VarianceComponent})
 	for i in 1:length(vc)
-		SimulateMN!(Z, vc[i])
+		SimulateMN!(Z, vc[i]) # this returns LZUt -> vec(LZUt) ~ MVN(0, Σ_i ⊗ V_i)
 		total_variance += Z #add the effects of each variance component
 	end
 	return total_variance
@@ -143,17 +143,23 @@ function LMM_trait_simulation(mu::Matrix, vc::Vector{VarianceComponent})
 end
 
 #from huas package 
-function VCM_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, V, Σ) where T
+function VCM_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, Σ, V) where T
 	n, p = size(X)
 	m = length(V)
 	d = size(Σ, 1)
-	Vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+	VC = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
 	mean = X*B
-	VCM_Model = LMMTrait(mean, Vc)
+	VCM_Model = LMMTrait(mean, VC)
+	VCM_trait = simulate(VCM_Model)
+	return(VCM_trait)
+end
+
+function VCM_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, VC::Vector{VarianceComponent}) where T
+	mean = X*B
+	VCM_Model = LMMTrait(mean, VC)
 	VCM_trait = simulate(VCM_Model)
 	return(VCM_trait)
 end 
-
 
 # using Random
 # Random.seed!(1234);
