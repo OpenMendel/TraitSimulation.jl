@@ -16,9 +16,6 @@ include("Model_Framework.jl")
 
 include("Simulate_RandomGLM.jl")
 
-include("rand.jl")
-
-
   """
   ```
   simulate(trait, n_reps)
@@ -26,13 +23,14 @@ include("rand.jl")
   this for simulating a single GLM trait, n_reps times. 
   """
   function simulate(glmtraitmodel::GLMTrait)
-      simulated_trait = rand(GLMTrait.responsedist)
+      simulated_trait = rand(glmtraitmodel.responsedist)
       return(simulated_trait)
   end
 
   function simulate(glmtraitmodel::GLMTrait, n_reps::Int64)
     n_people = length(glmtraitmodel.mu)
-    rep_simulation = Vector{Float64}(undef, n_reps)
+    T = eltype(glmtraitmodel.responsedist)
+    rep_simulation = Vector{T}(undef, n_reps)
     for i in 1:n_reps
       rep_simulation[i] = simulate(glmtraitmodel)
     end

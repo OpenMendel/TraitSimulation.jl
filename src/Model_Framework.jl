@@ -12,24 +12,24 @@ GLM.transmu stores the transformed mean using the canonical inverse link functio
 GLM.link stores the link function, by default canonical link. For Gamma and the NegativeBinomial responde distributions, we use the LogLink() function by default.
 GLM.responsedist stores the vector of distributions to run the simulate function on. 
 """
-struct GLMTrait{D, Dtype, L<:GLM.Link} <: AbstractTrait
+struct GLMTrait{D, T, L<:GLM.Link} <: AbstractTrait
   formula::String
   mu::Float64
   transmu::Float64
-  dist::Type{D}
+  dist::Type{D} # most metttttaaa
   link::L
-  responsedist::Vector{Dtype}
+  responsedist::T # second most meta type 
 
   function GLMTrait(formula, mu, dist::D, link::L) where {D, L}
     transmu = GLM.linkinv(link, mu)
     responsedist = buildresponsedist(dist, mu, transmu)
-    return(new{D, eltype(responsedist), L}(formula, mu, transmu, dist, link, responsedist))
+    return(new{dist, typeof(responsedist), L}(formula, mu, transmu, dist, link, responsedist))
   end
 
   function GLMTrait(mu, dist::D, link::L) where {D, L}
     transmu = GLM.linkinv(link, mu)
     responsedist = buildresponsedist(dist, mu, transmu)
-    return(new{D, eltype(responsedist), L}("", mu, transmu, dist, link, responsedist))
+    return(new{dist, typeof(responsedist), L}("", mu, transmu, dist, link, responsedist))
   end
 end
 
