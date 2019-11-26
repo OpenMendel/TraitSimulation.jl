@@ -5,8 +5,6 @@ using StatsModels # useful distributions #lots more useful distributions
 using LinearAlgebra
 using Random
 using SpecialFunctions
-using SnpArrays
-using Revise
 
 include("calculate_mean_vector.jl")
 
@@ -14,7 +12,7 @@ include("Multiple_traits.jl")
 
 include("Model_Framework.jl")
 
-include("Simulate_RandomGLM.jl")
+include("Random_model.jl")
 
   """
   ```
@@ -22,27 +20,28 @@ include("Simulate_RandomGLM.jl")
   ```
   this for simulating a single GLM trait, n_reps times. 
   """
-  function simulate(glmtraitmodel::GLMTrait)
-      simulated_trait = rand(glmtraitmodel.responsedist)
+  function simulate(trait::GLMTrait)
+      simulated_trait = rand(trait.responsedist)
       return(simulated_trait)
   end
 
-  function simulate(glmtraitmodel::GLMTrait, n_reps::Int64)
-    n_people = length(glmtraitmodel.mu)
-    T = eltype(glmtraitmodel.responsedist)
+  function simulate(trait::GLMTrait, n_reps::Int64)
+    n_people = length(trait.mu)
+    T = eltype(trait.responsedist)
     rep_simulation = Vector{T}(undef, n_reps)
     for i in 1:n_reps
-      rep_simulation[i] = simulate(glmtraitmodel)
+      rep_simulation[i] = simulate(trait)
     end
       return(rep_simulation)
   end
 
-  function simulate(glmtraitmodel::Vector{GLMTrait}, n_reps::Int64)
-    n_traits = length(glmtraitmodel)
-    rep_simulation = Matrix{Float64}(undef, n_reps, n_traits)
+  function simulate(traits::Vector{GLMTrait}, n_reps::Int64)
+    n_traits = length(traits)
+    T = eltype(traits[1].responsedist)
+    rep_simulation = Matrix{T}(undef, n_reps, n_traits)
     for i in 1:n_traits
       for j in 1:n_reps
-        rep_simulation[j, i] = simulate(glmtraitmodel[i])
+        rep_simulation[j, i] = simulate(traits[i])
       end
     end
     return(rep_simulation)
