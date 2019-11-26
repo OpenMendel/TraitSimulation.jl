@@ -13,28 +13,27 @@ GLM.link stores the link function, by default canonical link. For Gamma and the 
 GLM.responsedist stores the vector of distributions to run the simulate function on. 
 """
 struct GLMTrait{D, T, L<:GLM.Link} <: AbstractTrait
-  formula::String
   mu::Float64
   transmu::Float64
   dist::Type{D} # most metttttaaa
   link::L
   responsedist::T # second most meta type 
 
-  function GLMTrait(formula, mu, dist::D, link::L) where {D, L}
-    transmu = GLM.linkinv(link, mu)
-    responsedist = buildresponsedist(dist, mu, transmu)
-    return(new{dist, typeof(responsedist), L}(formula, mu, transmu, dist, link, responsedist))
-  end
-
   function GLMTrait(mu, dist::D, link::L) where {D, L}
     transmu = GLM.linkinv(link, mu)
     responsedist = buildresponsedist(dist, mu, transmu)
-    return(new{dist, typeof(responsedist), L}("", mu, transmu, dist, link, responsedist))
+    return(new{dist, typeof(responsedist), L}(mu, transmu, dist, link, responsedist))
   end
 end
 
+function GLMTrait(mu, dist::D; link = canonicallink(dist())) where D 
+  if (dist == NegativeBinomial || dist == Gamma)
+    link = GLM.LogLink()
+  end
+  return(GLMTrait(mu, dist, link))
+end
+
 function buildresponsedist(dist::Type{NegativeBinomial}, mu, transmu)
-  copyto!(transmu, GLM.LogLink(mu))
   r = 1
   μ = 1 / (1 + transmu / r)
   responsedist =  dist(r, μ)
@@ -42,7 +41,6 @@ function buildresponsedist(dist::Type{NegativeBinomial}, mu, transmu)
 end
 
 function buildresponsedist(dist::Type{Gamma}, mu, transmu)
-  copyto!(transmu, GLM.LogLink(mu))
   r = 1
   μ = 1 / (1 + transmu / r)
   responsedist = dist(r, μ)
@@ -54,33 +52,7 @@ function buildresponsedist(dist::D, mu, transmu) where D
   return(responsedist)
 end
 
-# ## given evaluated mean vector
-# function GLMTrait(mu::Number, df, dist::D; link = canonicallink(dist())) where D
-#     return(GLMTrait(string(mu), repeat([mu], size(df, 1)), dist, link))
-# end
-
-# ## given formula and dataframe for mean vector evaluation
-# function GLMTrait(formula::String, df, dist::D; link = canonicallink(dist())) where {D, L}
-#     mu = mean_formula(formula, df)
-#     Simulated_Trait = [rand(dist(i)) for i in μ]
-#     return(GLMTrait(formula, mu, dist, link))
-# end
-
-
-# function Multiple_GLMTraits(formulas, df, dist::D; link = canonicallink(dist())) where D
-#   vec = [GLMTrait(formulas[i], df, dist, link) for i in 1:length(formulas)] #vector of GLMTrait objects
-#   return(vec)
-# end
-
-# we put type of the dist vector as Any since we want to allow for any ResponseType{Poisson(), LogLink()}, ResponseType{Normal(), IdentityLink()}
-# function Multiple_GLMTraits(formulas::Vector{String}, df::DataFrame, dist::Vector; link = canonicallink.(dist[i]() for i in 1:length(dist)))
-#   vec = [GLMTrait(formulas[i], df, dist[i], link[i]) for i in 1:length(formulas)]
-#   return(vec)
-# end
-
-
-
-# lmm: multiple traits (MVN)
+# lmm: multiple traits
 """
 LMMTrait
 LMMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
