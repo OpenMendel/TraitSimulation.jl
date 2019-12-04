@@ -1,3 +1,5 @@
+using SnpArrays
+
 """
 Generate_Random_Model_Chisq(filepath, k; effectsizes, min_success_rate_per_row, min_maf, min_hwe_pval, maxiters)
 

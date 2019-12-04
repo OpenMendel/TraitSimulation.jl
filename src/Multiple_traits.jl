@@ -13,7 +13,7 @@ struct VarianceComponent
 	CholA::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of A
 	CholB::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of B
 	function VarianceComponent(A, B) #inner constructor given A, B 
-		return(new(A, B, cholesky(A), cholesky(B))) # stores these values (this is helpful so we don't have it inside the loop)
+		return(new(A, B, cholesky(Symmetric(A)), cholesky(Symmetric(B)))) # stores these values (this is helpful so we don't have it inside the loop)
 	end
 end
 
@@ -28,7 +28,7 @@ function LMM_trait_simulation(mu, vc::AbstractArray{T, 2}) where T
 	n_traits = size(mu)[2]
 	simulated_trait = zeros(n_people, n_traits)
 	z = Matrix{Float64}(undef, n_people, n_traits)
-	chol_Σ = cholesky(vc) #for a single evaluated matrix as the specified covariance matrix
+	chol_Σ = cholesky(Symmetric(vc)) #for a single evaluated matrix as the specified covariance matrix
 	randn!(z) #generate from standard normal
 	lmul!(chol_Σ.L, z)
 	simulated_trait += z
@@ -123,7 +123,7 @@ Update the simulated trait with the effect of each variance component. We note t
 function Aggregate_VarianceComponents!(Z::Matrix, total_variance, vc::Vector{VarianceComponent})
 	for i in 1:length(vc)
 		SimulateMN!(Z, vc[i]) # this returns LZUt -> vec(LZUt) ~ MVN(0, Σ_i ⊗ V_i)
-		total_variance += Z #add the effects of each variance component
+		total_variance .+= Z #add the effects of each variance component
 	end
 	return total_variance
 end
