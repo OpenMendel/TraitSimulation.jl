@@ -120,12 +120,13 @@ end
 Aggregate_VarianceComponents(z, total_variance, vc)
 Update the simulated trait with the effect of each variance component. We note the exclamation is to indicate this function will mutate or override the values that its given.
 """
-function Aggregate_VarianceComponents!(Z::Matrix, total_variance, vc::Vector{VarianceComponent})
+function Aggregate_VarianceComponents!(Z::Matrix, vc::Vector{VarianceComponent})
+	simulated_trait = zeros(size(Z))
 	for i in 1:length(vc)
 		SimulateMN!(Z, vc[i]) # this returns LZUt -> vec(LZUt) ~ MVN(0, Σ_i ⊗ V_i)
-		total_variance += Z #add the effects of each variance component
+		simulated_trait += Z #add the effects of each variance component
 	end
-	return total_variance
+	return simulated_trait
 end
 
 """
@@ -135,9 +136,9 @@ For a vector of Variance Component objects, without computing mean from datafram
 function LMM_trait_simulation(mu::Matrix, vc::Vector{VarianceComponent})
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
-	simulated_trait = zeros(n_people, n_traits) #preallocate memory for MVN np x 1 vector later to be reshaped into matrix n x p
 	Z = Matrix{Float64}(undef, n_people, n_traits) 
-	Aggregate_VarianceComponents!(Z, simulated_trait, vc) # sum up the m independent, np x 1 vectors, Y = sum( Yi ~ MVN(0, A_i ⊗ B_i) , i in 1:m)
+	 #preallocate memory for MVN np x 1 vector later to be reshaped into matrix n x p
+	simulated_trait = Aggregate_VarianceComponents!(Z, vc) # sum up the m independent, np x 1 vectors, Y = sum( Yi ~ MVN(0, A_i ⊗ B_i) , i in 1:m)
 	simulated_trait += mu # add the mean matrix
 	return simulated_trait
 end
