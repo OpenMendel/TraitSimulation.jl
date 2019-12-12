@@ -1,16 +1,18 @@
 
-# Trait Simulation Tutorial
+# TraitSimulation.jl Tutorial
 
 
 Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange
 
-### Double check that you are using Julia version 1.0 or higher by checking the machine information
+
+##Installation
+Double check that you are using Julia version 1.0 or higher by checking the machine information
 
 
 ```julia
 versioninfo()
 ```
-# Add any missing packages needed for this tutorial:
+Add any missing packages needed for this tutorial:
 
 You can also use the package manager to add the `TraitSimulation.jl` package by running the following link: 
 
@@ -19,7 +21,7 @@ pkg> add "https://github.com/sarah-ji/TraitSimulation.jl"
 ```
 
 
-## Example of M variance components
+## Example of M Random Variance Components
 
 Here for m = 10 random Variance Components, we generate m random covariance matrices, a random design matrix and p regression coefficients to illustrate the simulation of a d-dimensional response matrix for a sample of n = 1000 people.
 
@@ -72,7 +74,8 @@ Random_VCM_Trait = DataFrame(VCM_simulation(X, B, V, ?), [:SimTrait1, :SimTrait2
       samples:          25
       evals/sample:     1
 
-# Comparing with the MatrixNormal from the distributions package for a single variance component, we beat! 
+
+Comparing with the MatrixNormal from the distributions package for a single variance component, we beat! 
 
 ```julia
 @benchmark LMM_trait_simulation(X*B, VarianceComponent(?[1], V[1]))

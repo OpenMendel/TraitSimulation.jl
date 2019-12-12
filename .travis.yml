@@ -13,8 +13,8 @@ notifications:
 git:
   depth: 99999999
 
-# after_script:
-#   - julia -e 'using Pkg, TraitSimulation; cd(joinpath(dirname(pathof(TraitSimulation)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
+after_script:
+  - julia -e 'using Pkg, TraitSimulation; cd(joinpath(dirname(pathof(TraitSimulation)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
 
 
 jobs:
