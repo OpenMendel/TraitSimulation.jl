@@ -8,22 +8,22 @@ function generateSPDmatrix(n)
 	end
 
 
-function RVCModel(n::Int64, p::Int64, d::Int64, m::Int64)
+function generateRandomVCM(n::Int64, p::Int64, d::Int64, m::Int64)
 
 	# n-by-p design matrix
 	X = randn(n, p)
 
 	# p-by-d mean component regression coefficient for each trait
-	B = hcat(ones(p, 1), rand(p))  
+	B = hcat(ones(p, 1), rand(p))
 
-	V = ntuple(x -> zeros(n, n), m) 
+	V = ntuple(x -> zeros(n, n), m)
 	for i = 1:m-1
 	  copy!(V[i], generateSPDmatrix(n))
 	end
 	copy!(V[end], Diagonal(ones(n))) # last covarianec matrix is identity
 
 	# a tuple of m d-by-d variance component parameters
-	Σ = ntuple(x -> zeros(d, d), m) 
+	Σ = ntuple(x -> zeros(d, d), m)
 	for i in 1:m
 	  copy!(Σ[i], generateSPDmatrix(d))
 	end
@@ -56,8 +56,6 @@ function MN_Jm(X, B, Σ, V; n_reps = 1)
     end
     return(sim)
 end
-
-
 
 function CompareWithJulia(X, B, Σ, V; n_reps = 1)
 	d = size(B, 2)
