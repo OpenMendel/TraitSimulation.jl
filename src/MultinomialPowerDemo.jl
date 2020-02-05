@@ -1,4 +1,27 @@
 using OrdinalMultinomialModels, DataFrames
+export realistic_ordinal_power
+function realistic_ordinal_power(
+    nsim::Int, γs::Vector{Float64}, traitobject::OrdinalTrait, randomseed::Int)
+    #power estimate
+    pvaluepolr = Array{Float64}(undef, nsim, length(γs))
+    β_original = traitobject.β[end]
+    Random.seed!(randomseed)
+    #generate the data
+    for j in eachindex(γs)
+        for i in 1:nsim
+            β = traitobject.β
+            β[end] = γs[j]
+            #simulate the trait
+            y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
+
+            #compute the power from the ordinal model
+            ornull = polr(traitobject.X, y, traitobject.link)
+            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, traitobject.X[:, end][:, :]))
+        end
+    end
+    traitobject.β[end] = β_original
+    return pvaluepolr
+end
 
 """
 ```
@@ -44,7 +67,7 @@ function realistic_multinomial_power(
 
             #compute the power from the ordinal model
             ornull = polr(@formula(y ~ 0 + age + sex), ydata, link)
-            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull.model, g[:,:]))
+            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull.model, traitobject.X[:, end]))
         end
     end
     return pvaluepolr
@@ -52,7 +75,7 @@ end
 
 """
 ```
-power(p1, p2, p3, α)
+power(P, α)
 ```
 This function computes the simulated power of the simulation p-values calculated using the realistic_multinomial_powers() function,
 at the user specified level of significance α.  Specifically, this case is concerned with pvaluelinear, pvaluelogistic, pvaluepolr as input for p1, p2, p3.
