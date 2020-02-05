@@ -59,7 +59,7 @@ at the user specified level of significance α.  Specifically, this case is conc
 """
 function power(P, alpha)
     power_ES = zeros(size(P, 2))
-    for i in eachindex(pvalues_ES)
+    for i in eachindex(power_ES)
         power_ES[i] = mean(P[:, i] .< alpha)
     end
     return power_ES

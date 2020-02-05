@@ -1,4 +1,4 @@
-using StatsBase
+using StatsBase, SnpArrays
 
 function snparray_simulation(maf::Vector{Float64}, n::Int)
     genotype = genotype_sim.(maf, n)
