@@ -1,22 +1,26 @@
 using OrdinalMultinomialModels, DataFrames
-export realistic_ordinal_power
+
 function realistic_ordinal_power(
     nsim::Int, γs::Vector{Float64}, traitobject::OrdinalTrait, randomseed::Int)
     #power estimate
     pvaluepolr = Array{Float64}(undef, nsim, length(γs))
     β_original = traitobject.β[end]
     Random.seed!(randomseed)
+
     #generate the data
+    X_null = traitobject.X[:, 1:(end - 1)]
+    causal_snp = traitobject.X[:, end][:, :]
     for j in eachindex(γs)
         for i in 1:nsim
             β = traitobject.β
             β[end] = γs[j]
+            #println(traitobject.β)
             #simulate the trait
             y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
 
             #compute the power from the ordinal model
-            ornull = polr(traitobject.X, y, traitobject.link)
-            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, traitobject.X[:, end][:, :]))
+            ornull = polr(X_null, y, traitobject.link)
+            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
         end
     end
     traitobject.β[end] = β_original
