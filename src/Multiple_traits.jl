@@ -12,7 +12,7 @@ struct VarianceComponent
 	B::Matrix{Float64} # n_people by n_people
 	CholA::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of A
 	CholB::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of B
-	function VarianceComponent(A, B) #inner constructor given A, B 
+	function VarianceComponent(A, B) #inner constructor given A, B
 		return(new(A, B, cholesky(Symmetric(A)), cholesky(Symmetric(B)))) # stores these values (this is helpful so we don't have it inside the loop)
 	end
 end
@@ -22,7 +22,7 @@ end
 LMM_trait_simulation
 single LMM trait with given evaluated covariance matrix so not a VarianceComponent type
  i.e given an evaluated matrix of means, simulate from LMM.
-""" 
+"""
 function LMM_trait_simulation(mu, vc::AbstractArray{T, 2}) where T
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
@@ -39,7 +39,7 @@ end
 """
 append_terms
 Allows us to append terms to create a VarianceComponent type
-""" 
+"""
 function append_terms!(AB, summand)
 	A_esc = esc(summand.args[2])	# elements in args are symbols,
 	B_esc = esc(summand.args[3])
@@ -55,7 +55,7 @@ macro vc(expression)
 	n = length(expression.args)
 	AB = :(VarianceComponent[]) # AB is an empty vector of variance components list of symbols
 	if expression.args[1] != :+ #if first argument is not plus (only one vc)
-		summand = expression 
+		summand = expression
 		append_terms!(AB, summand)
 	else #MULTIPLE VARIANCE COMPONENTS if the first argument is a plus (Sigma is a sum multiple variance components)
 		for i in 2:n
@@ -63,8 +63,8 @@ macro vc(expression)
 			append_terms!(AB, summand)
 		end
 	end
-	return(:($AB)) 
-end 
+	return(:($AB))
+end
 
 """
 vcobjectuple(vcobject)
@@ -86,7 +86,7 @@ end
 """
 SimulateMVN!(z, vc)
 SimulateMVN(n_people, n_traits, vc::VarianceComponent)
-For a single Variance Component, algorithm that will transform standard normal distribution. 
+For a single Variance Component, algorithm that will transform standard normal distribution.
 SimulateMVN allows us to preallocate n_people by n_traits and rewrite over this matrix to save memory allocation.
 """
 function SimulateMN!(Z::Matrix, vc::VarianceComponent)
@@ -136,14 +136,14 @@ function LMM_trait_simulation(mu::Matrix, vc::Vector{VarianceComponent})
 	n_people = size(mu)[1]
 	n_traits = size(mu)[2]
 	simulated_trait = zeros(n_people, n_traits) #preallocate memory for MVN np x 1 vector later to be reshaped into matrix n x p
-	Z = Matrix{Float64}(undef, n_people, n_traits) 
+	Z = Matrix{Float64}(undef, n_people, n_traits)
 	Aggregate_VarianceComponents!(Z, simulated_trait, vc) # sum up the m independent, np x 1 vectors, Y = sum( Yi ~ MVN(0, A_i ⊗ B_i) , i in 1:m)
 	simulated_trait += mu # add the mean matrix
 	return simulated_trait
 end
 
-#from huas package 
-function VCM_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, Σ, V) where T
+#from huas package
+function LMM_trait_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, Σ, V) where T
 	n, p = size(X)
 	m = length(V)
 	d = size(Σ, 1)
@@ -154,12 +154,12 @@ function VCM_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, Σ, V) where
 	return(VCM_trait)
 end
 
-function VCM_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, VC::Vector{VarianceComponent}) where T
+function LMM_trait_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, VC::Vector{VarianceComponent}) where T
 	mean = X*B
 	VCM_Model = LMMTrait(mean, VC)
 	VCM_trait = simulate(VCM_Model)
 	return(VCM_trait)
-end 
+end
 
 # using Random
 # Random.seed!(1234);
@@ -172,17 +172,17 @@ end
 # X = randn(n, p)
 
 # # p-by-d mean component regression coefficient
-# B = ones(p, d)  
+# B = ones(p, d)
 
 # # a tuple of m covariance matrices
-# V = ntuple(x -> zeros(n, n), m) 
+# V = ntuple(x -> zeros(n, n), m)
 # for i = 1:m-1
 #   Vi = [j ≥ i ? i * (n - j + 1) : j * (n - i + 1) for i in 1:n, j in 1:n]
 #   copy!(V[i], Vi * Vi')
 # end
 # copy!(V[m], Diagonal(ones(n))) # last covarianec matrix is idendity
 # # a tuple of m d-by-d variance component parameters
-# Σ = ntuple(x -> zeros(d, d), m) 
+# Σ = ntuple(x -> zeros(d, d), m)
 # for i in 1:m
 #   Σi = [j ≥ i ? i * (d - j + 1) : j * (d - i + 1) for i in 1:d, j in 1:d]
 #   copy!(Σ[i], Σi' * Σi)

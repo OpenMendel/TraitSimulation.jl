@@ -77,9 +77,13 @@ struct LMMTrait{T} <: AbstractTrait
   function LMMTrait(mu, vc::T) where T
     return(new{T}(String[], mu, vc))
   end
+
+  function LMMTrait(formulas::Vector{String}, mu::Matrix{Float64}, vc::T) where T
+    return(new{T}(formulas, mu, vc))
+  end
 end
 
-function LMMTrait(formulas, df, vc::T) where T
+function LMMTrait(formulas::Vector{String}, df, vc::T) where T
   n_traits = length(formulas)
   n_people = size(df)[1]
   mu = zeros(n_people, n_traits)
@@ -87,7 +91,7 @@ function LMMTrait(formulas, df, vc::T) where T
     #calculate the mean vector
     mu[:, i] += mean_formula(formulas[i], df)
   end
-  return(new{T}(formulas, mu, vc))
+  return(LMMTrait(formulas, mu, vc))
 end
 # ## given evaluated mean matrix
 # function LMMTrait(mu::AbstractArray{T, 2}, vc::U) where {T, U}
