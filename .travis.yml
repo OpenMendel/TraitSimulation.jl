@@ -14,7 +14,8 @@ git:
 
 before_script: # install dependent unregistered packages
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.add([PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git")]);'
+  - julia -e 'using Pkg; Pkg.add([PackageSpec(name = "SnpArrays", url="https://github.com/OpenMendel/SnpArrays.jl.git")]);'
+  - julia -e 'using Pkg; Pkg.add([PackageSpec(name = "OrdinalMultinomialModels", url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git")]);'
 
 after_script:
   - julia -e 'using Pkg, TraitSimulation; cd(joinpath(dirname(pathof(TraitSimulation)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
