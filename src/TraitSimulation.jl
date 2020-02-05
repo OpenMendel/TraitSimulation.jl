@@ -12,7 +12,9 @@ include("Multiple_traits.jl")
 
 include("Model_Framework.jl")
 
-include("RVCModel.jl")
+include("Random_VCM.jl")
+
+include("MultinomialPowerDemo.jl")
 
 include("SnpArraySimulation.jl")
 
@@ -89,9 +91,9 @@ include("SnpArraySimulation.jl")
     return(rep_simulation)
   end
 
-  export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, append_terms!, LMM_trait_simulation
-  export GLMTrait, OrdinalTrait, LMMTrait, VCM_simulation, simulate, @vc, vcobjtuple, SimulateMVN, SimulateMVN!, Aggregate_VarianceComponents
-  export Generate_Random_Model_Chisq, RVCModel, CompareWithJulia
-  export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers
+  export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, LMM_trait_simulation
+  export GLMTrait, OrdinalTrait, LMMTrait, simulate, @vc, vcobjtuple
+  export generateRandomVCM, CompareWithJulia
+  export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers, power_multinomial_models
 
 end #module
