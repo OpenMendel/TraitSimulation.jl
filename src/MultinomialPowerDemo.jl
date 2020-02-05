@@ -1,6 +1,62 @@
 using OrdinalMultinomialModels, DataFrames
+"""
+```
+realistic_power_simulation(n, n_sim, maf, γs, traitobject, link, randomseed)
+```
+This function aims to design a study around the effect of a causal snp on a  GLM trait of interest, controlling for sex and age.
+The user can explore the potential of their study design with TraitSimulation.jl input types.
+n_sim: number of simulations
+γs: vector of effect sizes of the causal snp (last column of design matrix) to be detected
+traitobject: this function is type dispatched for the OrdinalTrait type in TraitSimulation, and simulates the trait of the fields of the object.
+link: link function from GLM.jl
+randomseed: The random seed used for the simulations for reproducible results
+"""
+function realistic_power_simulation(
+    nsim::Int, γs::Vector{Float64}, traitobject::GLMTrait, randomseed::Int)
+    #power estimate
+    pvaluepolr = Array{Float64}(undef, nsim, length(γs))
+    β_original = traitobject.β[end]
+    Random.seed!(randomseed)
 
-function realistic_ordinal_power(
+    #generate the data
+    X_null = traitobject.X[:, 1:(end - 1)]
+    causal_snp = traitobject.X[:, end][:, :]
+    for j in eachindex(γs)
+        for i in 1:nsim
+            β = traitobject.β
+            β[end] = γs[j]
+            #println(traitobject.β)
+            #simulate the trait
+            y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
+            ydata = DataFrame(y = y, mu = traitobject.mu) #for GLM package needs to be in a dataframe
+
+            #now compute the power from the different methods
+            #logistic
+            logit = glm(@formula(ylogit ~ age + sex + g), ydata, Binomial(), LogitLink())
+            pvaluelogistic[i] = coeftable(logit).cols[4][end]
+
+            #compute the power from the ordinal model
+
+            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
+        end
+    end
+    traitobject.β[end] = β_original
+    return pvaluepolr
+end
+
+
+"""
+```
+realistic_ordinal_power(n, n_sim, maf, θ, γs, meanage, varage, pfemale, link, cutoff, randomseed)
+```
+This function aims to design a study around the effect of a causal snp on an Ordinal trait of interest, controlling for sex and age.
+The user can explore the potential of their study design with TraitSimulation.jl input types.
+n_sim: number of simulations
+γs: vector of effect sizes of the causal snp (last column of design matrix) to be detected
+traitobject: this function is type dispatched for the OrdinalTrait type in TraitSimulation, and simulates the trait of the fields of the object.
+randomseed: The random seed used for the simulations for reproducible results
+"""
+function realistic_power_simulation(
     nsim::Int, γs::Vector{Float64}, traitobject::OrdinalTrait, randomseed::Int)
     #power estimate
     pvaluepolr = Array{Float64}(undef, nsim, length(γs))
@@ -38,6 +94,7 @@ n_sim: number of simulations
 meanage, varage: mean and variance of the age of the study sample of interest
 pfemale: proportion of females desired in the study population
 link: link function from GLM.jl
+logistic:  if true then we convert to 0,  1
 randomseed: The random seed used for the simulations for reproducible results
 """
 function realistic_multinomial_power(
@@ -115,7 +172,6 @@ function realistic_multinomial_powers(
     pvaluelogistic = Array{Float64}(undef, nsim)
     pvaluepolr = Array{Float64}(undef, nsim)
     pvaluelinear = Array{Float64}(undef, nsim)
-    #say a is the minor allele, then we will generate the genotype vector according to hardy weinberg equilibrium
     # now simulate the genotype with maf p
     d1 = Bernoulli(pfemale)
     d2 = Normal(meanage, varage)
@@ -151,7 +207,6 @@ function realistic_multinomial_powers(
     end
     return pvaluelinear, pvaluelogistic, pvaluepolr
 end
-
 
 
 """

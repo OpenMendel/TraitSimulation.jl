@@ -28,7 +28,7 @@ Use the backspace key to return to the Julia REPL.
 [docs-latest-url]: https://openmendel.github.io/TraitSimulation.jl/latest/
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://openmendel.github.io/TraitSimulation.jl/latest/
+[docs-stable-url]: https://openmendel.github.io/TraitSimulation.jl/stable/
 
 [travis-img]: https://travis-ci.org/OpenMendel/TraitSimulation.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/OpenMendel/TraitSimulation.jl

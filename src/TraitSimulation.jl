@@ -1,4 +1,3 @@
-__precompile__(false)
 module TraitSimulation
 using GLM # this already defines some useful distribution and link types
 using DataFrames # so we can test it
@@ -96,6 +95,6 @@ include("SnpArraySimulation.jl")
   export GLMTrait, OrdinalTrait, LMMTrait, simulate, @vc, vcobjtuple
   export generateRandomVCM, CompareWithJulia
   export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers, power_multinomial_models
-  export realistic_multinomial_power, power, realistic_ordinal_power
+  export realistic_multinomial_power, power, realistic_power_simulation
 
 end #module
