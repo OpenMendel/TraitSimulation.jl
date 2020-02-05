@@ -123,15 +123,15 @@ We show in the next example, models with additional variance components can also
 
 ## GLM Traits from Unrelated Individuals
 $$
-    Y ∼ Poisson(μ = X\beta)
+    Y \sim Poisson(\mu = X\beta)
 $$
 
 Here we specify the fixed effects and the phenotype distribution, and output for ten simulations per person.
 
 
 ```julia
-β = [1; 0.2; 0.5]
-mu = Matrix(X) * β
+beta = [1; 0.2; 0.5]
+mu = Matrix(X) * beta
 dist = Poisson
 GLMmodel = GLMTrait(mu, dist);
 Simulated_GLM_Traits = DataFrame(PoissonTrait = simulate(GLMmodel))
@@ -142,12 +142,12 @@ Simulated_GLM_Traits = DataFrame(PoissonTrait = simulate(GLMmodel))
 In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects. We simulate data under a linear mixed model so that we can model residual dependency among individuals.
 
 $$
-Y ∼ N(\mu, 4* 2GRM + 2I)
+Y \sim N(\mu, 4* 2GRM + 2I)
 $$
 
 This example is meant to simulate data in a scenario in which a number of rare mutations in a single gene can change a trait value. We model the residual variation among relatives with the additive genetic variance component and we include 20 rare variants in the mean portion of the model, defined as loci with minor allele frequencies greater than 0.002 but less than 0.02.
 
-Specifically we are generating a single normal trait controlling for family structure with residual heritabiity of 67%, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
+Specifically we are generating a single normal trait controlling for family structure with residual heritabiity of 67\%\, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
 
 In practice rare variants have smaller minor allele frequencies, but we are limited in this tutorial by the relatively small size of the data set. Note also that our modeling these effects as part of the mean is not meant to imply that the best way to detect them would be a standard association analysis. Instead we recommend a burden or SKAT test.
 
@@ -410,7 +410,7 @@ We use the following function to generate the p-values for the simulated power e
 
 
 ```julia
-γs =
+effectsizes =
 [0.0
 0.05
 0.1
@@ -426,7 +426,7 @@ We use the following function to generate the p-values for the simulated power e
 
 
 ```julia
-P = realistic_ordinal_power(1000, γs, Multinomial_Model1, 1234)
+P = realistic_ordinal_power(1000, effectsizes, Multinomial_Model1, 1234)
 ```
 
 
@@ -436,7 +436,7 @@ power_ES = power(P, 0.05)
 
 
 ```julia
-plot(γs, power_ES)
+plot(effectsizes, power_ES)
 ```
 
 ## Citations:
