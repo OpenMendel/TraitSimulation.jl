@@ -90,7 +90,7 @@ include("SnpArraySimulation.jl")
     end
     return(rep_simulation)
   end
-
+export glmtrait
   export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, LMM_trait_simulation
   export GLMTrait, OrdinalTrait, LMMTrait, simulate, @vc, vcobjtuple
   export generateRandomVCM, CompareWithJulia
