@@ -142,7 +142,7 @@ function LMM_trait_simulation(mu::Matrix, vc::Vector{VarianceComponent})
 	return simulated_trait
 end
 
-#from huas package
+#
 function LMM_trait_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, Σ, V) where T
 	n, p = size(X)
 	m = length(V)

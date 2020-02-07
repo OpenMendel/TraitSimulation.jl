@@ -30,7 +30,6 @@ include("SnpArraySimulation.jl")
   end
 
   function simulate(trait::GLMTrait, n_reps::Int64)
-    n_people = length(trait.mu)
     T = eltype(trait.responsedist)
     rep_simulation = Vector{T}(undef, n_reps)
     for i in 1:n_reps

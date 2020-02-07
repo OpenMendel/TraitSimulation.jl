@@ -67,23 +67,6 @@ struct OrdinalTrait{T, L<:GLM.Link} <: AbstractTrait
   end
 end
 
-function LMM_trait_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, Σ, V) where T
-	n, p = size(X)
-	m = length(V)
-	d = size(Σ, 1)
-	VC = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-	mean = X*B
-	VCM_Model = LMMTrait(mean, VC)
-	VCM_trait = simulate(VCM_Model)
-	return(VCM_trait)
-end
-
-function LMM_trait_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, VC::Vector{VarianceComponent}) where T
-	mean = X*B
-	VCM_Model = LMMTrait(mean, VC)
-	VCM_trait = simulate(VCM_Model)
-	return(VCM_trait)
-end
 
 # lmm: multiple traits
 """
