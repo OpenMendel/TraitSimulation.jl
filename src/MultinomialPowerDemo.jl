@@ -1,20 +1,63 @@
 using OrdinalMultinomialModels, DataFrames
 """
 ```
-realistic_power_simulation(n, n_sim, maf, γs, traitobject, link, randomseed)
+realistic_power_simulation(n_sim, γs, traitobject, randomseed)
 ```
 This function aims to design a study around the effect of a causal snp on a  GLM trait of interest, controlling for sex and age.
 The user can explore the potential of their study design with TraitSimulation.jl input types.
 n_sim: number of simulations
 γs: vector of effect sizes of the causal snp (last column of design matrix) to be detected
-traitobject: this function is type dispatched for the OrdinalTrait type in TraitSimulation, and simulates the trait of the fields of the object.
+traitobject: this function is type dispatched for the GLMTrait type in TraitSimulation, and simulates the trait of the fields of the object.
 link: link function from GLM.jl
 randomseed: The random seed used for the simulations for reproducible results
 """
 function realistic_power_simulation(
     nsim::Int, γs::Vector{Float64}, traitobject::GLMTrait, randomseed::Int)
     #power estimate
-    pvaluepolr = Array{Float64}(undef, nsim, length(γs))
+    pvalue = zeros(nsim, length(γs))
+    β_original = traitobject.β[end]
+    Random.seed!(randomseed)
+
+    #generate the data
+    X_null = traitobject.X[:, 1:(end - 1)]
+    causal_snp = traitobject.X[:, end]
+    for j in eachindex(γs)
+        for i in 1:nsim
+            β = traitobject.β
+            β[end] = γs[j]
+            #println(traitobject.β)
+            #simulate the trait
+            y = simulate(traitobject)
+            mu_null = X_null*β[1:(end - 1)]
+            locus = causal_snp*β[end]
+            ydata = DataFrame(y = y, mu_null = mu_null, locus = traitobject.X[:, end]*β[end]) #for GLM package needs to be in a dataframe
+
+            glm_modelfit_null = glm(@formula(y ~ mu_null + locus), ydata, traitobject.dist(), traitobject.link)
+            pvalue[i, j] = coeftable(glm_modelfit_null).cols[4][end]
+        end
+    end
+    traitobject.β[end] = β_original
+    return pvalue
+end
+
+"""
+```
+realistic_power_simulation(n_sim, γs, traitobject, randomseed)
+```
+This function aims to design a study around the effect of a causal snp on a  GLM trait of interest, controlling for sex and age.
+The user can explore the potential of their study design with TraitSimulation.jl input types.
+n_sim: number of simulations
+γs: vector of effect sizes of the causal snp (last column of design matrix) to be detected
+traitobject: this function is type dispatched for the LMMTrait type in TraitSimulation, and simulates the trait of the fields of the object.
+randomseed: The random seed used for the simulations for reproducible results
+
+output: Binary Matrix that indexes nsim = number of rows and each column is for each effect size.
+The Matrix uses the LRT performed using VarianceComponentModels.jl (currently this package currently only takes 2 variance components but will be extended in the near future.)
+"""
+function realistic_power_simulation(
+    nsim::Int, γs::Vector{Float64}, traitobject::GLMTrait, randomseed::Int)
+    #power estimate
+    reject_null = zeros(nsim, length(γs))
     β_original = traitobject.β[end]
     Random.seed!(randomseed)
 
@@ -27,23 +70,24 @@ function realistic_power_simulation(
             β[end] = γs[j]
             #println(traitobject.β)
             #simulate the trait
-            y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
-            ydata = DataFrame(y = y, mu = traitobject.mu) #for GLM package needs to be in a dataframe
+            y = simulate(traitobject)
+            mu_null = X_null*β[1:(end - 1)]
+            mu_alt = traitobject.X*β
+            ydata = DataFrame(y = y, mu_null = mu_null, mu_alt = mu_alt) #for GLM package needs to be in a dataframe
 
-            #now compute the power from the different methods
+            #now compute the power from the different models using simulation LRT
             #logistic
-            logit = glm(@formula(ylogit ~ age + sex + g), ydata, Binomial(), LogitLink())
-            pvaluelogistic[i] = coeftable(logit).cols[4][end]
+            glm_modelfit_null = glm(@formula(y ~ mu_null), ydata, traitobject.dist(), traitobject.link)
+            glm_modelfit_alt = glm(@formula(y ~ mu_alt), ydata, traitobject.dist(), traitobject.link)
 
-            #compute the power from the ordinal model
-
-            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
+            if StatsBase.loglikelihood(glm_modelfit_null) < StatsBase.loglikelihood(glm_modelfit_alt)
+                reject_null[i, j] = 1.0
+            end
         end
     end
     traitobject.β[end] = β_original
-    return pvaluepolr
+    return reject_null
 end
-
 
 """
 ```
