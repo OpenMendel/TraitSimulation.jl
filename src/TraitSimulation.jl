@@ -24,14 +24,17 @@ include("SnpArraySimulation.jl")
   ```
   this for simulating a single GLM trait, n_reps times.
   """
-  function simulate(trait::GLMTrait)
+  function uwu(trait::GLMTrait)
       simulated_trait = rand.(trait.responsedist)
+      println(typeof(trait.responsedist))
+      println(eltype(trait.responsedist))
       return(simulated_trait)
   end
 
   function simulate(trait::GLMTrait, n_reps::Int64)
-    T = eltype(trait.responsedist)
-    rep_simulation = Vector{T}(undef, n_reps)
+    n_people = length(trait.responsedist)
+    T = Vector{eltype(trait.dist)}(undef, n_people)
+    rep_simulation = Vector{typeof(T)}(undef, n_reps)
     for i in 1:n_reps
       rep_simulation[i] = simulate(trait)
     end
