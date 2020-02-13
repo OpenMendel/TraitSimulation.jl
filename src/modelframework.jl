@@ -30,7 +30,7 @@ simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
 
 # Now let's define our first concrete type.
 
-struct UnivariateModel{distT,linkT,vecT1,vecT2,matT} <: AbstractTraitModel
+struct GLMTrait{distT,linkT,vecT1,vecT2,matT} <: AbstractTraitModel
     X::matT             # all effects
     β::vecT1            # regression coefficients
     η::vecT2            # linear predictor η = X*β
@@ -38,7 +38,7 @@ struct UnivariateModel{distT,linkT,vecT1,vecT2,matT} <: AbstractTraitModel
     dist::Type{distT}   # univariate, exponential family of distributions
     link::linkT         # link function g(μ) = X*β = η
 
-    function UnivariateModel(X::matT, β::vecT1, η::vecT2, μ::vecT2, distribution::D, link::linkT) where {D,linkT,vecT1,vecT2,matT}
+    function GLMTrait(X::matT, β::vecT1, η::vecT2, μ::vecT2, distribution::D, link::linkT) where {D,linkT,vecT1,vecT2,matT}
         # extract the base type without type parameters
         distT = Base.typename(typeof(distribution)).wrapper
 
@@ -51,7 +51,7 @@ end
 # constructor and any external interfaces we deem convenient
 
 # building from model encoded as mat-vec
-function UnivariateModel(X::AbstractMatrix, β::AbstractVector, distribution, link)
+function GLMTrait(X::AbstractMatrix, β::AbstractVector, distribution, link)
     # define the linear predictor
     η = X * β
 
@@ -59,11 +59,11 @@ function UnivariateModel(X::AbstractMatrix, β::AbstractVector, distribution, li
     μ = linkinv.(link, η)
 
     # create a new instance
-    UnivariateModel(X, β, η, μ, distribution, link)
+    GLMTrait(X, β, η, μ, distribution, link)
 end
 
 # building from linear predictor only
-function UnivariateModel(x::AbstractVector, distribution, link, ismu::Bool = true)
+function GLMTrait(x::AbstractVector, distribution, link, ismu::Bool = true)
     if ismu
         μ = x
         η = linkfun.(link, μ)
@@ -72,78 +72,78 @@ function UnivariateModel(x::AbstractVector, distribution, link, ismu::Bool = tru
         μ = linkinv.(link, η)
     end
 
-    return UnivariateModel(nothing, nothing, η, μ, distribution, link)
+    return GLMTrait(nothing, nothing, η, μ, distribution, link)
 end
 
 # better printing; customize how a type is summarized in a REPL
 import Base: show
 
-function show(io::IO, x::UnivariateModel)
-    print(io, "Univariate Model\n")
+function show(io::IO, x::GLMTrait)
+    print(io, "Generalized Linear Model\n")
     print(io, "  * response distribution: $(x.dist)\n")
     print(io, "  * link function: $(typeof(x.link))\n")
     print(io, "  * sample size: $(nsamples(x))")
 end
 
 # make our new type implement the interface defined above
-nsamples(trait::UnivariateModel) = length(trait.μ)
-neffects(trait::UnivariateModel) = size(trait.X, 2)
+nsamples(trait::GLMTrait) = length(trait.μ)
+neffects(trait::GLMTrait) = size(trait.X, 2)
 
 
-struct OrderedMultinomialModel{matT,vecT1,vecT2, linkT} <: AbstractTraitModel
+struct OrderedMultinomialTrait{matT,vecT1,vecT2, linkT} <: AbstractTraitModel
     X::matT             # all effects
     β::vecT1            # regression coefficients
     θ::vecT2            # must be increasing
 	link::linkT
-	function OrderedMultinomialModel(X::matT, β::vecT1, θ::vecT2, link::linkT)  where {matT, vecT1, vecT2, linkT}
+	function OrderedMultinomialTrait(X::matT, β::vecT1, θ::vecT2, link::linkT)  where {matT, vecT1, vecT2, linkT}
     return new{matT, vecT1, vecT2, linkT}(X, β, θ, link)
   end
 end
 
-function show(io::IO, x::OrderedMultinomialModel)
+function show(io::IO, x::OrderedMultinomialTrait)
     print(io, "Ordinal Multinomial Model\n")
     print(io, "  * number of fixed effects: $(neffects(x))\n")
-	print(io, "  * number of ordinal multinomial outcome categories: $(nsamples(x))")
+	print(io, "  * number of ordinal multinomial outcome categories: $(nsamples(x))\n")
     print(io, "  * link function: $(typeof(x.link))\n")
     print(io, "  * sample size: $(nsamples(x))")
 end
 
 # make our new type implement the interface defined above
-nsamples(trait::OrderedMultinomialModel) = size(trait.X, 1)
-neffects(trait::OrderedMultinomialModel) = size(trait.X, 2)
-ncategories(trait::OrderedMultinomialModel) = length(trait.θ) + 1
+nsamples(trait::OrderedMultinomialTrait) = size(trait.X, 1)
+neffects(trait::OrderedMultinomialTrait) = size(trait.X, 2)
+ncategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
 
 
 """
-VarianceComponentModel
-VarianceComponentModel object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
+VCMTrait
+VCMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
 """
-struct VarianceComponentModel{matT1, matT, vcT} <: AbstractTraitModel
+struct VCMTrait{matT1, matT, vcT} <: AbstractTraitModel
     X::matT             # design matrix
     β::matT1            # regression coefficients
     μ::matT            # expected value of response
 	vc::vcT
-    function VarianceComponentModel(X::matT, β::matT1, μ::matT, vc::vcT) where {matT1, matT, vcT}
+    function VCMTrait(X::matT, β::matT1, μ::matT, vc::vcT) where {matT1, matT, vcT}
         # make a new instance
         new{matT, matT1, vcT}(X, β, μ, vc)
     end
 	# what if here you had one that took formula and df and then vectors of covariances
 end
 
-function VarianceComponentModel(X::AbstractMatrix, β::AbstractMatrix, vc::Vector{vcT}) where vcT
+function VCMTrait(X::AbstractMatrix, β::AbstractMatrix, vc::Vector{vcT}) where vcT
 	μ = X * β
 	# create a new instance
     VarianceComponentModel(X, β, μ, vc)
 end
 
 # building from linear predictor only
-function VarianceComponentModel(x::AbstractMatrix, vc::Vector{vcT}) where vcT
+function VCMTrait(x::AbstractMatrix, vc::Vector{vcT}) where vcT
 	μ = x
 	VarianceComponentModel(nothing, nothing, μ, vc)
 end
 
 
-function VarianceComponentModel(X::AbstractMatrix, β::AbstractMatrix, Σ::Tuple, V::Tuple)
+function VCMTrait(X::AbstractMatrix, β::AbstractMatrix, Σ::Tuple, V::Tuple)
   n_traits = size(β, 2)
   n_people = size(X, 1)
   μ	= zeros(n_people, n_traits)
@@ -152,11 +152,11 @@ function VarianceComponentModel(X::AbstractMatrix, β::AbstractMatrix, Σ::Tuple
     #calculate the mean vector
     μ[:, i] .+= X*β[:, i]
   end
-  VarianceComponentModel(X, β, μ, vc)
+  VCMTrait(X, β, μ, vc)
 end
 
 
-function VarianceComponentModel(formulas::Vector{String}, df, Σ, V)
+function VCMTrait(formulas::Vector{String}, df, Σ, V)
   n_traits = length(formulas)
   n_people = size(df)[1]
   μ	= zeros(n_people, n_traits)
@@ -165,10 +165,10 @@ function VarianceComponentModel(formulas::Vector{String}, df, Σ, V)
     #calculate the mean vector
     μ[:, i] += mean_formula(formulas[i], df)
   end
-  return VarianceComponentModel(nothing, nothing, μ, vc)
+  return VCMTrait(nothing, nothing, μ, vc)
 end
 
-function VarianceComponentModel(formulas::Vector{String}, df, vc::vcT) where vcT
+function VCMTrait(formulas::Vector{String}, df, vc::vcT) where vcT
   n_traits = length(formulas)
   n_people = size(df)[1]
   μ = zeros(n_people, n_traits)
@@ -176,11 +176,11 @@ function VarianceComponentModel(formulas::Vector{String}, df, vc::vcT) where vcT
     #find the beta and x from mean_formula **todo
 	μ[:, i] += mean_formula(formulas[i], df)
   end
-  return VarianceComponentModel(nothing, nothing, μ, vc)
+  return VCMTrait(nothing, nothing, μ, vc)
 end
 
 ##  Variance Component Model
-function show(io::IO, x::VarianceComponentModel)
+function show(io::IO, x::VCMTrait)
     print(io, "Variance Component Model\n")
     print(io, "  * number of traits: $(nsamples(x))\n")
 	print(io, "  * number of variance components: $(nvc(x))\n")
@@ -189,9 +189,9 @@ function show(io::IO, x::VarianceComponentModel)
 end
 
 # make our new type implement the interface defined above
-nsamples(trait::VarianceComponentModel) = size(trait.X, 1)
-neffects(trait::VarianceComponentModel) = size(trait.X, 2)
-nvc(trait::VarianceComponentModel) = length(trait.vc)
+nsamples(trait::VCMTrait) = size(trait.X, 1)
+neffects(trait::VCMTrait) = size(trait.X, 2)
+nvc(trait::VCMTrait) = length(trait.vc)
 
 
 # """
