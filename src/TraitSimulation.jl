@@ -5,6 +5,7 @@ using StatsModels # useful distributions #lots more useful distributions
 using LinearAlgebra
 using Random
 using SpecialFunctions
+using OrdinalMultinomialModels
 
 include("calculate_mean_vector.jl")
 
@@ -22,56 +23,105 @@ include("SnpArraySimulation.jl")
   ```
   simulate(trait, n_reps)
   ```
-  this for simulating a single GLM trait, n_reps times.
+  this for simulating a single univariate trait, n_reps times.
   """
-  function uwu(trait::GLMTrait)
-      simulated_trait = rand.(trait.responsedist)
-      println(typeof(trait.responsedist))
-      println(eltype(trait.responsedist))
-      return(simulated_trait)
+  function simulate(trait::UnivariateModel)
+      # pre-allocate output
+      y = Vector{eltype(trait.dist)}(undef, nsamples(trait))
+      # do the simulation
+      simulate!(y, trait)
+
+      return y
   end
 
-  function simulate(trait::GLMTrait, n_reps::Int64)
-    n_people = length(trait.responsedist)
-    T = Vector{eltype(trait.dist)}(undef, n_people)
-    rep_simulation = Vector{typeof(T)}(undef, n_reps)
-    for i in 1:n_reps
-      rep_simulation[i] = simulate(trait)
-    end
-      return(rep_simulation)
-  end
+  function simulate!(y, trait::UnivariateModel)
+      dist = trait.dist
 
-
-  """
-  ```
-  simulate(OrdinalTrait)
-  ```
-  this for simulating a single Ordinal trait once.
-  """
-  function simulate(trait::OrdinalTrait; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
-      simulated_trait = rpolr(trait.X, trait.β, trait.θ, trait.link)
-      if Logistic
-        threshold == nothing && error("I need the cutoff for case/control")
-        simulated_trait .= Int64.(simulated_trait .> threshold) #makes J/2 the default cutoff for case/control
+      # in a for-loop
+      for i in eachindex(y)
+          # push the work of forming a distribution to a
+          # helper function yet-to-be defined
+          y[i] = rand(__get_distribution(dist, trait.μ[i]))
       end
-      return(simulated_trait)
+      return y
   end
-# simulate.(uvec, Logistic = true, threshold = threshold)
-  """
-  ```
-  simulate(OrdinalTrait, n_reps)
-  ```
-  this for simulating a single Ordinal trait, n_reps times.
-  """
 
-  function simulate(trait::OrdinalTrait, n_reps::Int64)
-    n_people = size(trait.X, 1)
-    rep_simulation = Vector{T}(undef, n_reps)
-    for i in 1:n_reps
-      rep_simulation[i] = simulate(trait)
-    end
-      return(rep_simulation)
+  # default behavior for UnivariateDistribution
+  function __get_distribution(dist::Type{D}, μ) where D <: UnivariateDistribution
+      return dist(μ)
   end
+
+  # specific to Gamma
+  function __get_distribution(dist::Type{Gamma}, μ)
+      return dist(1, 1 / (1 + μ)) # r = 1
+  end
+
+  # specific to NegativeBinomial
+  function __get_distribution(dist::Type{NegativeBinomial}, μ)
+      return dist(1, 1 / (1 + μ)) # r = 1
+  end
+
+  function simulate(trait::UnivariateModel, n::Integer)
+      # pre-allocate output
+      Y = Matrix{eltype(trait.dist)}(undef, nsamples(trait), n)
+
+      # do the simulation n times, storing each result in a column
+      for k in 1:n
+          @views simulate!(Y[:, k], trait)
+      end
+
+      return Y
+  end
+  
+  # function simulate(trait::OrderedMultinomialModel; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
+  #     Y = rpolr(trait.X, trait.β, trait.θ, trait.link)
+  #     if Logistic
+  #       threshold == nothing && error("I need the cutoff for case/control")
+  #       Y .= Int64.(Y .> threshold) #makes J/2 the default cutoff for case/control
+  #     end
+  #     return Y
+  # end
+
+  # function simulate(trait::OrderedMultinomialModel)
+  #     Y = rpolr(trait.X, trait.β, trait.θ, trait.link)
+  #     if Logistic
+  #       threshold == nothing && error("I need the cutoff for case/control")
+  #       Y .= Int64.(Y .> threshold) #makes J/2 the default cutoff for case/control
+  #     end
+  #     return Y
+  # end
+
+  """
+  ```
+  simulate(OrderedMultinomialModel, n_reps)
+  ```
+  this for simulating a single Ordinal trait, n times.
+  """
+  function simulate(trait::OrderedMultinomialModel)
+      # do the simulation
+     y = Vector{Int64}(undef, nsamples(trait))
+     simulate!(y, trait)
+     return y
+  end
+
+  function simulate!(y, trait::OrderedMultinomialModel)
+      # in a for-loop
+      y = rpolr(trait.X, trait.β, trait.θ, trait.link)
+      return y
+  end
+
+  function simulate(trait::OrderedMultinomialModel, n::Integer)
+      # pre-allocate output
+      Y = Matrix{Int64}(undef, nsamples(trait), n)
+
+      # do the simulation n times, storing each result in a column
+      for k in 1:n
+          @views simulate!(Y[:, k], trait)
+      end
+
+      return Y
+  end
+
 
   """
   ```
@@ -79,12 +129,12 @@ include("SnpArraySimulation.jl")
   ```
   this for simulating multiple LMMtraits, n_reps times.
   """
-  function simulate(trait::LMMTrait)
+  function simulate(trait::VarianceComponentModel)
     rep_simulation = LMM_trait_simulation(trait.mu, trait.vc)
     return(rep_simulation)
   end
 
-  function simulate(trait::LMMTrait, n_reps::Int64)
+  function simulate(trait::VarianceComponentModel, n_reps::Int64)
     n_people, n_traits = size(trait.mu)
     rep_simulation = zeros(n_people, n_traits, n_reps)
     for i in 1:n_reps
@@ -92,9 +142,9 @@ include("SnpArraySimulation.jl")
     end
     return(rep_simulation)
   end
-export glmtrait
+
   export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, LMM_trait_simulation
-  export GLMTrait, OrdinalTrait, LMMTrait, simulate, @vc, vcobjtuple
+  export UnivariateModel, OrderedMultinomialModel, VarianceComponentModel, simulate, @vc, vcobjtuple
   export generateRandomVCM, CompareWithJulia
   export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers, power_multinomial_models
   export realistic_multinomial_power, power, realistic_power_simulation
