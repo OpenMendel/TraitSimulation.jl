@@ -7,17 +7,17 @@ using Random
 using SpecialFunctions
 using OrdinalMultinomialModels
 
-include("calculate_mean_vector.jl")
+include("meanformulaparser.jl")
 
-include("Multiple_traits.jl")
+include("variancecomponents.jl")
 
-include("Model_Framework.jl")
+include("modelframework.jl")
 
-include("Random_VCM.jl")
+include("randvcm.jl")
 
-include("MultinomialPowerDemo.jl")
+include("orderedmultinomialpower.jl")
 
-include("SnpArraySimulation.jl")
+include("simulatesnparray.jl")
 
   """
   ```
@@ -72,7 +72,7 @@ include("SnpArraySimulation.jl")
 
       return Y
   end
-  
+
   # function simulate(trait::OrderedMultinomialModel; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
   #     Y = rpolr(trait.X, trait.β, trait.θ, trait.link)
   #     if Logistic
@@ -143,7 +143,7 @@ include("SnpArraySimulation.jl")
     return(rep_simulation)
   end
 
-  export ResponseType, GLM_trait_simulation, mean_formula, VarianceComponent, LMM_trait_simulation
+  export mean_formula, VarianceComponent, LMM_trait_simulation
   export UnivariateModel, OrderedMultinomialModel, VarianceComponentModel, simulate, @vc, vcobjtuple
   export generateRandomVCM, CompareWithJulia
   export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers, power_multinomial_models

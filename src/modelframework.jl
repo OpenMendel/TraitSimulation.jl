@@ -114,137 +114,144 @@ neffects(trait::OrderedMultinomialModel) = size(trait.X, 2)
 ncategories(trait::OrderedMultinomialModel) = length(trait.θ) + 1
 
 
-# """
-# VarianceComponentModel
-# VarianceComponentModel object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
-# """
-# struct VarianceComponentModel{matT1, matT, vcT} <: AbstractTraitModel
-#     X::matT             # design matrix
-#     β::matT1            # regression coefficients
-#     μ::matT            # expected value of response
-# 	vc::vcT
-#     function VarianceComponentModel(X::matT, β::matT1, μ::matT, vc::vcT) where {matT1, matT, vcT}
-#         # make a new instance
-#         new{matT, matT1, vcT}(X, β, μ, vc)
-#     end
-# 	# what if here you had one that took formula and df and then vectors of covariances
-# end
-#
-# function VarianceComponentModel(X::AbstractMatrix, β::AbstractMatrix, vc::Vector{vcT}) where vcT
-# 	μ = X * β
-# 	# create a new instance
-#     VarianceComponentModel(X, β, μ, vc)
-# end
-#
-# function VarianceComponentModel(X::AbstractMatrix, β::AbstractMatrix, Σ::Tuple, V::Tuple)
-#   n_traits = size(β, 2)
-#   n_people = size(X, 1)
-#   μ	= zeros(n_people, n_traits)
-# 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-#   for i in 1:n_traits
-#     #calculate the mean vector
-#     μ[:, i] .+= X*β[:, i]
-#   end
-#   VarianceComponentModel(X, β, μ, vc)
-# end
-#
-#
-# function VarianceComponentModel(formulas::Vector{String}, df, Σ, V)
-#   n_traits = length(formulas)
-#   n_people = size(df)[1]
-#   μ	= zeros(n_people, n_traits)
-# 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-#   for i in 1:n_traits
-#     #calculate the mean vector
-#     μ[:, i] += mean_formula(formulas[i], df)
-#   end
-#   return VarianceComponentModel(nothing, nothing, μ, vc)
-# end
-#
-# function VarianceComponentModel(formulas::Vector{String}, df, vc::vcT) where vcT
-#   n_traits = length(formulas)
-#   n_people = size(df)[1]
-#   μ = zeros(n_people, n_traits)
-#   for i in 1:n_traits
-#     #find the beta and x from mean_formula **todo
-# 	μ[:, i] += mean_formula(formulas[i], df)
-#   end
-#   return VarianceComponentModel(nothing, nothing, μ, vc)
-# end
-
-###  Variance Component Model
-# function show(io::IO, x::VarianceComponentModel)
-#     print(io, "Variance Component Model\n")
-#     print(io, "  * number of traits: $(nsamples(x))\n")
-# 	print(io, "  * number of variance components: $(nvc(x))\n")
-# 	print(io, "  * number of linear predictors: $(neffects(x))\n")
-#     print(io, "  * sample size: $(nsamples(x))")
-# end
-
-# # make our new type implement the interface defined above
-# nsamples(trait::VarianceComponentModel) = size(trait.X, 1)
-# neffects(trait::VarianceComponentModel) = size(trait.X, 2)
-# nvc(trait::VarianceComponentModel) = length(trait.vc)
-#
-
 """
 VarianceComponentModel
 VarianceComponentModel object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
 """
-struct VarianceComponentModel{T} <: AbstractTraitModel
-  mu::Matrix{Float64}
-  vc::T
-  function VarianceComponentModel(mu, vc::T) where T
-    return(new{T}(mu, vc))
-  end
-
-  function VarianceComponentModel(mu::Matrix{Float64}, vc::T) where T
-    return(new{T}(mu, vc))
-  end
+struct VarianceComponentModel{matT1, matT, vcT} <: AbstractTraitModel
+    X::matT             # design matrix
+    β::matT1            # regression coefficients
+    μ::matT            # expected value of response
+	vc::vcT
+    function VarianceComponentModel(X::matT, β::matT1, μ::matT, vc::vcT) where {matT1, matT, vcT}
+        # make a new instance
+        new{matT, matT1, vcT}(X, β, μ, vc)
+    end
+	# what if here you had one that took formula and df and then vectors of covariances
 end
 
-function VarianceComponentModel(formulas::Vector{String}, df, vc::T) where T
-  n_traits = length(formulas)
-  n_people = size(df)[1]
-  mu = zeros(n_people, n_traits)
+function VarianceComponentModel(X::AbstractMatrix, β::AbstractMatrix, vc::Vector{vcT}) where vcT
+	μ = X * β
+	# create a new instance
+    VarianceComponentModel(X, β, μ, vc)
+end
+
+# building from linear predictor only
+function VarianceComponentModel(x::AbstractMatrix, vc::Vector{vcT}) where vcT
+	μ = x
+	VarianceComponentModel(nothing, nothing, μ, vc)
+end
+
+
+function VarianceComponentModel(X::AbstractMatrix, β::AbstractMatrix, Σ::Tuple, V::Tuple)
+  n_traits = size(β, 2)
+  n_people = size(X, 1)
+  μ	= zeros(n_people, n_traits)
+	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
   for i in 1:n_traits
     #calculate the mean vector
-    mu[:, i] += mean_formula(formulas[i], df)
+    μ[:, i] .+= X*β[:, i]
   end
-  return VarianceComponentModel(mu, vc)
+  VarianceComponentModel(X, β, μ, vc)
 end
+
 
 function VarianceComponentModel(formulas::Vector{String}, df, Σ, V)
   n_traits = length(formulas)
   n_people = size(df)[1]
-  mu = zeros(n_people, n_traits)
+  μ	= zeros(n_people, n_traits)
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
   for i in 1:n_traits
     #calculate the mean vector
-    mu[:, i] += mean_formula(formulas[i], df)
+    μ[:, i] += mean_formula(formulas[i], df)
   end
-  return VarianceComponentModel(mu, vc)
+  return VarianceComponentModel(nothing, nothing, μ, vc)
 end
 
-function VarianceComponentModel(X::AbstractArray{S, 2}, β::Matrix{Float64}, vc::Vector{T}) where {S, T}
-  n_traits = size(β, 2)
-  n_people = size(X, 1)
-  mu = zeros(n_people, n_traits)
+function VarianceComponentModel(formulas::Vector{String}, df, vc::vcT) where vcT
+  n_traits = length(formulas)
+  n_people = size(df)[1]
+  μ = zeros(n_people, n_traits)
   for i in 1:n_traits
-    #calculate the mean vector
-    mu[:, i] .+= X*β[:, i]
+    #find the beta and x from mean_formula **todo
+	μ[:, i] += mean_formula(formulas[i], df)
   end
-  return VarianceComponentModel(mu, vc)
+  return VarianceComponentModel(nothing, nothing, μ, vc)
 end
 
-function VarianceComponentModel(X::AbstractArray{S, 2}, β::Matrix{Float64},  Σ, V) where {S, T}
-  n_traits = size(β, 2)
-  n_people = size(X, 1)
-  mu = zeros(n_people, n_traits)
-	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-  for i in 1:n_traits
-    #calculate the mean vector
-    mu[:, i] .+= X*β[:, i]
-  end
-  return VarianceComponentModel(mu, vc)
+##  Variance Component Model
+function show(io::IO, x::VarianceComponentModel)
+    print(io, "Variance Component Model\n")
+    print(io, "  * number of traits: $(nsamples(x))\n")
+	print(io, "  * number of variance components: $(nvc(x))\n")
+	print(io, "  * number of linear predictors: $(neffects(x))\n")
+    print(io, "  * sample size: $(nsamples(x))")
 end
+
+# make our new type implement the interface defined above
+nsamples(trait::VarianceComponentModel) = size(trait.X, 1)
+neffects(trait::VarianceComponentModel) = size(trait.X, 2)
+nvc(trait::VarianceComponentModel) = length(trait.vc)
+
+
+# """
+# VarianceComponentModel
+# VarianceComponentModel object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.
+# """
+# struct VarianceComponentModel{T} <: AbstractTraitModel
+#   mu::Matrix{Float64}
+#   vc::T
+#   function VarianceComponentModel(mu, vc::T) where T
+#     return(new{T}(mu, vc))
+#   end
+#
+#   function VarianceComponentModel(mu::Matrix{Float64}, vc::T) where T
+#     return(new{T}(mu, vc))
+#   end
+# end
+#
+# function VarianceComponentModel(formulas::Vector{String}, df, vc::T) where T
+#   n_traits = length(formulas)
+#   n_people = size(df)[1]
+#   mu = zeros(n_people, n_traits)
+#   for i in 1:n_traits
+#     #calculate the mean vector
+#     mu[:, i] += mean_formula(formulas[i], df)
+#   end
+#   return VarianceComponentModel(mu, vc)
+# end
+#
+# function VarianceComponentModel(formulas::Vector{String}, df, Σ, V)
+#   n_traits = length(formulas)
+#   n_people = size(df)[1]
+#   mu = zeros(n_people, n_traits)
+# 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+#   for i in 1:n_traits
+#     #calculate the mean vector
+#     mu[:, i] += mean_formula(formulas[i], df)
+#   end
+#   return VarianceComponentModel(mu, vc)
+# end
+#
+# function VarianceComponentModel(X::AbstractArray{S, 2}, β::Matrix{Float64}, vc::Vector{T}) where {S, T}
+#   n_traits = size(β, 2)
+#   n_people = size(X, 1)
+#   mu = zeros(n_people, n_traits)
+#   for i in 1:n_traits
+#     #calculate the mean vector
+#     mu[:, i] .+= X*β[:, i]
+#   end
+#   return VarianceComponentModel(mu, vc)
+# end
+#
+# function VarianceComponentModel(X::AbstractArray{S, 2}, β::Matrix{Float64},  Σ, V) where {S, T}
+#   n_traits = size(β, 2)
+#   n_people = size(X, 1)
+#   mu = zeros(n_people, n_traits)
+# 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+#   for i in 1:n_traits
+#     #calculate the mean vector
+#     mu[:, i] .+= X*β[:, i]
+#   end
+#   return VarianceComponentModel(mu, vc)
+# end

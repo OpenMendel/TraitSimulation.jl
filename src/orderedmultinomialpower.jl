@@ -11,33 +11,33 @@ traitobject: this function is type dispatched for the GLMTrait type in TraitSimu
 link: link function from GLM.jl
 randomseed: The random seed used for the simulations for reproducible results
 """
-function realistic_power_simulation(
-    nsim::Int, γs::Vector{Float64}, traitobject::GLMTrait, randomseed::Int)
-    #power estimate
-    pvalue = zeros(nsim, length(γs))
-    β_original = traitobject.β[end]
-    Random.seed!(randomseed)
-
-    #generate the data
-    X_null = traitobject.X[:, 1:(end - 1)]
-    causal_snp = traitobject.X[:, end]
-    for j in eachindex(γs)
-        for i in 1:nsim
-            β = traitobject.β
-            β[end] = γs[j]
-            #println(traitobject.β)
-            #simulate the trait
-            y = simulate(traitobject)
-            mu_null = X_null*β[1:(end - 1)]
-            locus = causal_snp*β[end]
-            ydata = DataFrame(y = y, mu_null = mu_null, locus = traitobject.X[:, end]*β[end]) #for GLM package needs to be in a dataframe
-            glm_modelfit = glm(@formula(y ~ mu_null + locus), ydata, traitobject.dist(), traitobject.link)
-            pvalue[i, j] = coeftable(glm_modelfit).cols[4][end]
-        end
-    end
-    traitobject.β[end] = β_original
-    return pvalue
-end
+# function realistic_power_simulation(
+#     nsim::Int, γs::Vector{Float64}, traitobject::UnivariateModel, randomseed::Int)
+#     #power estimate
+#     pvalue = zeros(nsim, length(γs))
+#     β_original = traitobject.β[end]
+#     Random.seed!(randomseed)
+#
+#     #generate the data
+#     X_null = traitobject.X[:, 1:(end - 1)]
+#     causal_snp = traitobject.X[:, end]
+#     for j in eachindex(γs)
+#         for i in 1:nsim
+#             β = traitobject.β
+#             β[end] = γs[j]
+#
+#             #simulate the trait
+#             y = simulate(traitobject)
+#             mu_null = X_null*β[1:(end - 1)]
+#             locus = causal_snp*β[end]
+#             ydata = DataFrame(y = y, mu_null = mu_null, locus = traitobject.X[:, end]*β[end]) #for GLM package needs to be in a dataframe
+#             glm_modelfit = glm(@formula(y ~ mu_null + locus), ydata, traitobject.dist(), traitobject.link)
+#             pvalue[i, j] = coeftable(glm_modelfit).cols[4][end]
+#         end
+#     end
+#     traitobject.β[end] = β_original
+#     return pvalue
+# end
 
 """
 ```
@@ -50,32 +50,32 @@ n_sim: number of simulations
 traitobject: this function is type dispatched for the OrdinalTrait type in TraitSimulation, and simulates the trait of the fields of the object.
 randomseed: The random seed used for the simulations for reproducible results
 """
-function realistic_power_simulation(
-    nsim::Int, γs::Vector{Float64}, traitobject::OrdinalTrait, randomseed::Int)
-    #power estimate
-    pvaluepolr = Array{Float64}(undef, nsim, length(γs))
-    β_original = traitobject.β[end]
-    Random.seed!(randomseed)
-
-    #generate the data
-    X_null = traitobject.X[:, 1:(end - 1)]
-    causal_snp = traitobject.X[:, end][:, :]
-    for j in eachindex(γs)
-        for i in 1:nsim
-            β = traitobject.β
-            β[end] = γs[j]
-            #println(traitobject.β)
-            #simulate the trait
-            y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
-
-            #compute the power from the ordinal model
-            ornull = polr(X_null, y, traitobject.link)
-            pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
-        end
-    end
-    traitobject.β[end] = β_original
-    return pvaluepolr
-end
+# function realistic_power_simulation(
+#     nsim::Int, γs::Vector{Float64}, traitobject::OrdinalModel, randomseed::Int)
+#     #power estimate
+#     pvaluepolr = Array{Float64}(undef, nsim, length(γs))
+#     β_original = traitobject.β[end]
+#     Random.seed!(randomseed)
+#
+#     #generate the data
+#     X_null = traitobject.X[:, 1:(end - 1)]
+#     causal_snp = traitobject.X[:, end][:, :]
+#     for j in eachindex(γs)
+#         for i in 1:nsim
+#             β = traitobject.β
+#             β[end] = γs[j]
+#             #println(traitobject.β)
+#             #simulate the trait
+#             y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
+#
+#             #compute the power from the ordinal model
+#             ornull = polr(X_null, y, traitobject.link)
+#             pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
+#         end
+#     end
+#     traitobject.β[end] = β_original
+#     return pvaluepolr
+# end
 
 """
 ```

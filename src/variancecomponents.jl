@@ -13,7 +13,7 @@ struct VarianceComponent
 	CholA::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of A
 	CholB::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of B
 	function VarianceComponent(A, B) #inner constructor given A, B
-		return(new(A, B, cholesky(Symmetric(A)), cholesky(Symmetric(B)))) # stores these values (this is helpful so we don't have it inside the loop)
+		return new(A, B, cholesky(Symmetric(A)), cholesky(Symmetric(B))) # stores these values (this is helpful so we don't have it inside the loop)
 	end
 end
 
@@ -50,7 +50,6 @@ end
 this vc macro allows us to create a vector of VarianceComponent objects for simulation so with_bigfloat_precis, precision::Integer)
 so that the user can type out @vc V[1] ⊗ Σ[1] + V[2] ⊗ Σ[2] + .... + V[m] ⊗ Σ[m]
 """
-
 macro vc(expression)
 	n = length(expression.args)
 	AB = :(VarianceComponent[]) # AB is an empty vector of variance components list of symbols
@@ -151,41 +150,12 @@ function LMM_trait_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, Σ, V)
 	mean = X*B
 	VCM_Model = LMMTrait(mean, VC)
 	VCM_trait = simulate(VCM_Model)
-	return(VCM_trait)
+	return VCM_trait
 end
 
-function LMM_trait_simulation(X::AbstractArray{T, 2}, B::Matrix{Float64}, VC::Vector{VarianceComponent}) where T
+function LMM_trait_simulation(X::AbstractArray{T, 2}, B::AbstractArray{Float64}, VC::Vector{VarianceComponent}) where T
 	mean = X*B
 	VCM_Model = LMMTrait(mean, VC)
 	VCM_trait = simulate(VCM_Model)
-	return(VCM_trait)
+	return VCM_trait
 end
-
-# using Random
-# Random.seed!(1234);
-# n = 1000   # no. observations
-# d = 2      # dimension of responses
-# m = 2      # no. variance components
-# p = 2      # no. covariates
-
-# # n-by-p design matrix
-# X = randn(n, p)
-
-# # p-by-d mean component regression coefficient
-# B = ones(p, d)
-
-# # a tuple of m covariance matrices
-# V = ntuple(x -> zeros(n, n), m)
-# for i = 1:m-1
-#   Vi = [j ≥ i ? i * (n - j + 1) : j * (n - i + 1) for i in 1:n, j in 1:n]
-#   copy!(V[i], Vi * Vi')
-# end
-# copy!(V[m], Diagonal(ones(n))) # last covarianec matrix is idendity
-# # a tuple of m d-by-d variance component parameters
-# Σ = ntuple(x -> zeros(d, d), m)
-# for i in 1:m
-#   Σi = [j ≥ i ? i * (d - j + 1) : j * (d - i + 1) for i in 1:d, j in 1:d]
-#   copy!(Σ[i], Σi' * Σi)
-# end
-
-# #[VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
