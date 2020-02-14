@@ -13,21 +13,14 @@ include("variancecomponents.jl")
 
 include("modelframework.jl")
 
-include("randvcm.jl")
-
 include("orderedmultinomialpower.jl")
 
 include("simulatesnparray.jl")
 
-  """
-  ```
-  simulate(trait, n_reps)
-  ```
-  this for simulating a single univariate trait, n_reps times.
-  """
+
   function simulate(trait::GLMTrait)
       # pre-allocate output
-      y = Vector{eltype(trait.dist)}(undef, nsamples(trait))
+      y = Vector{eltype(trait.dist)}(undef, nsamplesize(trait))
       # do the simulation
       simulate!(y, trait)
 
@@ -61,9 +54,15 @@ include("simulatesnparray.jl")
       return dist(1, 1 / (1 + μ)) # r = 1
   end
 
+  """
+  ```
+  simulate(trait, n_reps)
+  ```
+  this for simulating a single univariate trait, n_reps times. By default the simulate(trait) function will run a single simulation
+  """
   function simulate(trait::GLMTrait, n::Integer)
       # pre-allocate output
-      Y = Matrix{eltype(trait.dist)}(undef, nsamples(trait), n)
+      Y = Matrix{eltype(trait.dist)}(undef, nsamplesize(trait), n)
 
       # do the simulation n times, storing each result in a column
       for k in 1:n
@@ -80,7 +79,7 @@ include("simulatesnparray.jl")
   this for simulating a single Ordinal trait, n times. By default we simulate the multinomial ordered outcome, but with the specification of the Logistic and threshold arguments, we can do the transformation to ordinal logistic.
   """
   function simulate(trait::OrderedMultinomialTrait; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
-     y = Vector{Int64}(undef, nsamples(trait)) # preallocate
+     y = Vector{Int64}(undef, nsamplesize(trait)) # preallocate
      simulate!(y, trait; Logistic = Logistic, threshold = threshold) # do the simulation
      return y
   end
@@ -97,40 +96,38 @@ include("simulatesnparray.jl")
 
   function simulate(trait::OrderedMultinomialTrait, n::Integer; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
       # pre-allocate output
-      Y = Matrix{Int64}(undef, nsamples(trait), n)
+      Y = Matrix{Int64}(undef, nsamplesize(trait), n)
       # do the simulation n times, storing each result in a column
       for k in 1:n
           @views simulate!(Y[:, k], trait; Logistic = Logistic, threshold = threshold)
       end
-
       return Y
   end
 
-
-  """
-  ```
-  simulate(trait, nreps)
-  ```
-  this for simulating multiple VarianceComponentModel, n_reps times.
-  """
   function simulate(trait::VCMTrait)
-    rep_simulation = LMM_trait_simulation(trait.mu, trait.vc)
-    return(rep_simulation)
+     Y = Matrix{eltype(trait.mu)}(undef, size(trait.mu)) # preallocate
+     simulate!(Y, trait) # do the simulation
+     return Y
   end
 
-  function simulate(trait::VCMTrait, n_reps::Int64)
-    n_people, n_traits = size(trait.mu)
-    rep_simulation = zeros(n_people, n_traits, n_reps)
-    for i in 1:n_reps
-      rep_simulation[:, :, i] = simulate(trait)
-    end
-    return(rep_simulation)
+  function simulate!(Y, trait::VCMTrait)
+      Y .= VCM_trait_simulation(trait.mu, trait.vc)
+      return Y
   end
 
-  export mean_formula, VarianceComponent, LMM_trait_simulation
+  function simulate(trait::VCMTrait, n::Integer)
+      # pre-allocate output
+      Y_n = ntuple(x -> zeros(size(trait.mu)), n)
+      # do the simulation n times, storing each result in a column
+      for k in 1:n
+          @views simulate!(Y_n[k], trait)
+      end
+      return Y_n
+  end
+
+
+  export mean_formula, VarianceComponent, VCM_trait_simulation
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, simulate, @vc, vcobjtuple
-  export generateRandomVCM, CompareWithJulia
   export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers, power_multinomial_models
-  export realistic_multinomial_power, power, realistic_power_simulation
-
+  export ordinal_multinomial_power, power, realistic_power_simulation
 end #module

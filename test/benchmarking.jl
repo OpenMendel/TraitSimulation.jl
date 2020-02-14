@@ -1,6 +1,5 @@
-#generate the Random model
-using Distributions
-
+# using Distributions, BenchmarkTools
+#
 function generateSPDmatrix(n)
 	    A = rand(n)
 	    m = 0.5 * (A * A')
@@ -60,7 +59,7 @@ end
 function CompareWithJulia(X, B, Σ, V; n_reps = 1)
 	d = size(B, 2)
 	vecVC = [VarianceComponent(Σ[i], V[i]) for i in eachindex(V)]
-	LMMtraitobjm = LMMTrait(X*B, vecVC)
+	LMMtraitobjm = VCMTrait(X*B, vecVC)
 	m1trait = simulate(LMMtraitobjm, n_reps)
 
 	m1julia = MN_Jm(X, B, Σ, V; n_reps = n_reps)[:]
@@ -73,17 +72,3 @@ function CompareWithJulia(X, B, Σ, V; n_reps = 1)
 	dfwrite = DataFrame(hcat(m1traitlong, m1julialong))
 	return(dfwrite)
 end
-
-
-#X, B, Σ, V = GenerateRandomVCModel(1000, 2, 2, 10)
-#LMMtraitobj = LMMTrait(X*B, VarianceComponent(Σ[1], V[1]))
-#m1julia = MN_J(X, B, Σ[1], V[1])
-#vc_vector = [VarianceComponent(Σ[i], V[i]) for i in eachindex(V)]
-#vecVC = VCM_simulation(X, B, vc_vector)
-
-#using CSV, BenchmarkTools
-#@benchmark m1trait = simulate(LMMtraitobj)
-
-#@benchmark MN_J($X, $B, $Σ[1], $V[1])
-
-#CSV.write("outputfilen1000.csv", dfwrite)
