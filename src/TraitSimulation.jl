@@ -7,9 +7,9 @@ using Random
 using SpecialFunctions
 using OrdinalMultinomialModels
 
-include("meanformulaparser.jl")
+include("modelparameterparsers.jl")
 
-include("variancecomponents.jl")
+include("simulatematrixnormal.jl")
 
 include("modelframework.jl")
 

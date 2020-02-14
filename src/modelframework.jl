@@ -17,18 +17,20 @@ nsamplesize(trait::AbstractTraitModel) = __default_behavior(trait)
 "Check the number of linear predictors."
 neffects(trait::AbstractTraitModel) = __default_behavior(trait)
 
-"Simulate the trait under the given model for each observation independently."
+"Check the number of variance components."
+nvc(trait::AbstractTraitModel) = __default_behavior(trait)
+
+"Simulate the trait under the given model."
 simulate(trait::AbstractTraitModel) = __default_behavior(trait)
 
-"Simulate a trait `n` times (independently)."
+"Simulate a trait `n` times independently."
 simulate(trait::AbstractTraitModel, n::Integer) = __default_behavior(trait)
 
-"Simulate a trait and store the result in `y`."
+"Simulate a trait and store the result in y."
 simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
 
 
 # Now let's define our first concrete type.
-
 struct GLMTrait{distT, linkT, vecT1, vecT2, matT} <: AbstractTraitModel
     X::matT             # all effects
     β::vecT1            # regression coefficients
