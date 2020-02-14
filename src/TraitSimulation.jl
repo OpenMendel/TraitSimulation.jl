@@ -6,17 +6,17 @@ using LinearAlgebra
 using Random
 using SpecialFunctions
 using OrdinalMultinomialModels
-
-include("modelparameterparsers.jl")
+import Base: show
 
 include("simulatematrixnormal.jl")
+
+include("modelparameterparsers.jl")
 
 include("modelframework.jl")
 
 include("orderedmultinomialpower.jl")
 
 include("simulatesnparray.jl")
-
 
   function simulate(trait::GLMTrait)
       # pre-allocate output
@@ -105,13 +105,13 @@ include("simulatesnparray.jl")
   end
 
   function simulate(trait::VCMTrait)
-     Y = Matrix{eltype(trait.mu)}(undef, size(trait.mu)) # preallocate
+     Y = zeros(size(trait.mu)) # preallocate
      simulate!(Y, trait) # do the simulation
      return Y
   end
 
   function simulate!(Y, trait::VCMTrait)
-      Y .= VCM_trait_simulation(trait.mu, trait.vc)
+      VCM_trait_simulation(Y, trait.mu, trait.vc)
       return Y
   end
 
@@ -126,7 +126,7 @@ include("simulatesnparray.jl")
   end
 
 
-  export mean_formula, VarianceComponent, VCM_trait_simulation
+  export mean_formula, VarianceComponent, TotalVarianceComponent
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, simulate, @vc, vcobjtuple
   export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers, power_multinomial_models
   export ordinal_multinomial_power, power, realistic_power_simulation

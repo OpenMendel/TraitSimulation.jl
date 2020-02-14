@@ -1,7 +1,7 @@
 using Random, SnpArrays
 Random.seed!(1234)
 include("benchmarking.jl")
-import TraitSimulation: generateRandomVCM, snparray_simulation
+import TraitSimulation: snparray_simulation
 n = 10
 p = 2
 d = 2
@@ -30,7 +30,8 @@ end
 # traitversion1 = VCMTrait(X, B, Σ, V)
 # variancecomponent = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
 
-@test X, B, Σ, V = generateRandomVCM(n, p, d, m) VCMTrait(X, B, Σ, V).vc[1].A - (@vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])[1].A == zeros(2, 2)
+X, B, Σ, V = generateRandomVCM(n, p, d, m)
+@test VCMTrait(X, B, Σ, V).vc[1].A - (@vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])[1].A == zeros(2, 2)
 
 #testing for types
 maf  = 0.2

@@ -76,21 +76,6 @@ function FixedEffectTerms(effectsizes::AbstractVecOrMat, snps::AbstractVecOrMat)
     return String(fixed_terms)
 end
 
-# Specifying Variance Components
-"""
-VarianceComponent
-this VarianceComponent type stores A, B , CholA and CholB so we don't have to compute the cholesky decomposition inside the loop.
-"""
-struct VarianceComponent
-	A::Matrix{Float64} # n_traits by n_traits
-	B::Matrix{Float64} # n_people by n_people
-	CholA::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of A
-	CholB::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of B
-	function VarianceComponent(A, B) #inner constructor given A, B
-		return new(A, B, cholesky(Symmetric(A)), cholesky(Symmetric(B))) # stores these values (this is helpful so we don't have it inside the loop)
-	end
-end
-
 """
 append_terms
 Allows us to append terms to create a VarianceComponent type
@@ -126,22 +111,13 @@ This function creates a tuple of Variance Components, given a vector of variance
 """
 function  vcobjtuple(vcobject::Vector{VarianceComponent})
 	m = length(vcobject)
-	d = size(vcobject[1].A, 1)
-	n = size(vcobject[1].B, 1)
+	d = size(vcobject[1].Σ, 1)
+	n = size(vcobject[1].V, 1)
 	Σ = ntuple(x -> zeros(d, d), m)
 	V = ntuple(x -> zeros(n, n), m)
 	for i in eachindex(vcobject)
-		copyto!(V[i], vcobject[i].B)
-		copyto!(Σ[i], vcobject[i].A)
+		copyto!(V[i], vcobject[i].V)
+		copyto!(Σ[i], vcobject[i].Σ)
 	end
 	return(Σ, V)
-end
-
-#Update the simulated trait with the effect of each variance component. We note the exclamation is to indicate this function will mutate or override the values that its given.
-function aggregate_variance_components!(Z::Matrix, total_variance, vc::Vector{VarianceComponent})
-	for i in 1:length(vc)
-		simulate_matrix_normal!(Z, vc[i]) # this returns LZUt -> vec(LZUt) ~ MVN(0, Σ_i ⊗ V_i)
-		total_variance .+= Z #add the effects of each variance component
-	end
-	return total_variance
 end

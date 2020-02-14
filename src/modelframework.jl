@@ -72,8 +72,7 @@ function GLMTrait(x::AbstractVector, distribution, link, ismu::Bool = true)
 end
 
 # better printing; customize how a type is summarized in a REPL
-import Base: show
-function show(io::IO, x::GLMTrait)
+function Base.show(io::IO, x::GLMTrait)
     print(io, "Generalized Linear Model\n")
     print(io, "  * response distribution: $(x.dist)\n")
     print(io, "  * link function: $(typeof(x.link))\n")
@@ -84,7 +83,7 @@ end
 nsamplesize(trait::GLMTrait) = length(trait.μ)
 neffects(trait::GLMTrait) = size(trait.X, 2)
 
-struct OrderedMultinomialTrait{matT,vecT1,vecT2, linkT} <: AbstractTraitModel
+struct OrderedMultinomialTrait{matT, vecT1, vecT2, linkT} <: AbstractTraitModel
     X::matT             # all effects
     β::vecT1            # regression coefficients
     θ::vecT2            # must be increasing
@@ -95,7 +94,7 @@ struct OrderedMultinomialTrait{matT,vecT1,vecT2, linkT} <: AbstractTraitModel
   end
 end
 
-function show(io::IO, x::OrderedMultinomialTrait)
+function Base.show(io::IO, x::OrderedMultinomialTrait)
     print(io, "Ordinal Multinomial Model\n")
     print(io, "  * number of fixed effects: $(neffects(x))\n")
 	print(io, "  * number of ordinal multinomial outcome categories: $(noutcomecategories(x))\n")
@@ -113,18 +112,20 @@ noutcomecategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
 VCMTrait
 VCMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Variance Component Model Framework.
 """
-struct VCMTrait{T} <: AbstractTraitModel
-  mu::Matrix{Float64}
-  vc::T
-  function VCMTrait(mu, vc::T) where T
-    return new{T}(mu, vc)
-  end
-  function VCMTrait(mu::Matrix{Float64}, vc::T) where T
-    return new{T}(mu, vc)
+struct VCMTrait{muT, T} <: AbstractTraitModel
+  mu::muT
+  vc::Vector{T}
+  function VCMTrait(mu::muT, vc::Vector{T}) where {muT, T}
+    return new{muT, T}(mu, vc)
   end
 end
 
-function VCMTrait(formulas::Vector{String}, df, vc::T) where T
+function VCMTrait(mu::muT, Ω::AbstractMatrix) where muT
+	vc = TotalVarianceComponent(Ω)
+  return VCMTrait(mu, [vc])
+end
+
+function VCMTrait(formulas::Vector{String}, df::DataFrame, vc::T) where T
   n_traits = length(formulas)
   n_people = size(df)[1]
   mu = zeros(n_people, n_traits)
@@ -135,7 +136,7 @@ function VCMTrait(formulas::Vector{String}, df, vc::T) where T
   return VCMTrait(mu, vc)
 end
 
-function VCMTrait(formulas::Vector{String}, df, Σ, V)
+function VCMTrait(formulas::Vector{String}, df::DataFrame, Σ, V)
   n_traits = length(formulas)
   n_people = size(df)[1]
   mu = zeros(n_people, n_traits)
@@ -158,7 +159,7 @@ function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, vc::Vector{T}) w
   return VCMTrait(mu, vc)
 end
 
-function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ, V) where {T1, T}
+function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ, V) where T1
   n_traits = size(β, 2)
   n_people = size(X, 1)
   mu = zeros(n_people, n_traits)
@@ -171,7 +172,7 @@ function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ, V) where {T1
 end
 
 ##  Variance Component Model
-function show(io::IO, x::VCMTrait)
+function Base.show(io::IO, x::VCMTrait)
     print(io, "Variance Component Model\n")
     print(io, "  * number of traits: $(ntraits(x))\n")
 	print(io, "  * number of variance components: $(nvc(x))\n")
