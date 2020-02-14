@@ -31,7 +31,7 @@ end
 # variancecomponent = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
 
 X, B, Σ, V = generateRandomVCM(n, p, d, m)
-@test VCMTrait(X, B, Σ, V).vc[1].A - (@vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])[1].A == zeros(2, 2)
+@test VCMTrait(X, B, Σ, V).vc[1].Σ - (@vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])[1].Σ == zeros(2, 2)
 
 #testing for types
 maf  = 0.2
