@@ -34,7 +34,7 @@ Using just a few calls on the command line to the appropriate packages within th
 
 There is a lack of software available to geneticists who wish to calculate power and sample sizes in designing a study on genetics data. Typically, the study power depends on assumptions about the underlying disease model.  Many power calculating software tools operate as a black box and do not allow for customization.  To develop custom tests, researchers can develop their own simulation procedures to carry out power calculations.  One limitation with many existing methods for simulating traits conditional on genotypes is that these methods are limited to normally distributed traits and to fixed effects.
 
-This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. This package gives users the ability to easily simulate phenotypic traits under GLMs or LMMs conditional on PLINK formatted genotype data [3]. In addition, we include customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. We demonstrate these simulation utilities on the example dataset described below.
+This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. This package gives users the ability to easily simulate phenotypic traits under GLMs or VCMs conditional on PLINK formatted genotype data [3]. In addition, we include customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. We demonstrate these simulation utilities on the example dataset described below.
 
 
 ## Demonstration
@@ -109,22 +109,20 @@ In this example we first demonstrate how to use the GLM.jl package to simulate a
 
 The notebook is organized as follows:
 
-$\textbf{Example 1: Standard Models}$
-
 For the first example, we show how to simulate traits from standard models users in the genetics community will recognize.
 
-Users can specify to simulate phenotypes from unrelateds or families with user-specified Generalized Linear Models (GLMs) or Linear Mixed Models (LMMs), respectively. Researchers who feel more comfortable viewing the latter as a Variance Component Model(VCM) an additive genetic variance component and environmental variance component, we welcome you to do so.
+Users can specify to simulate phenotypes from unrelateds or families with user-specified Generalized Linear Models (GLMs) or Variance Component Models (VCMs), respectively. 
 
-$$ 1 . \text{GLM}: Y_{n \times 1} \sim \text{Poisson}(\mathbf{\mu}_{n \times 1} = g^{-1}{(XB)}, \Sigma_{n \times n} = \sigma_A \times \Phi + \sigma_E \times I_n) $$
+1 . GLM: Y ~ Poisson (mu = ginverse(XB), Sigma = sigmaA * 2GRM + sigmaE * I_n) 
 
-$$ 2 . \text{LMM/VCM}: Y_{n \times p} \sim \text{MatrixNormal}(\mathbf{M}_{n \times p} = XB, \Omega_{np \times np} = \Sigma_A \otimes \Phi + \Sigma_E \otimes I_n)$$
+2 . VCM: Y ~ MatrixNormal}(M = XB, Omega = SigmaA ? 2GRM + SigmaE ? I_n)
 
 We show in the next example, models with additional variance components can also be specified, as long as they are sensible (positive semi definite).
 
 ## GLM Traits from Unrelated Individuals
-$$
-    Y \sim Poisson(\mu = X\beta)
-$$
+
+    Y ~ Poisson(mu = ginverse(XB))
+
 
 Here we specify the fixed effects and the phenotype distribution, and output for ten simulations per person.
 
@@ -133,21 +131,21 @@ Here we specify the fixed effects and the phenotype distribution, and output for
 beta = [1; 0.2; 0.5]
 mu = Matrix(X) * beta
 dist = Poisson
-GLMmodel = GLMTrait(mu, dist);
+GVCModel = GLMTrait(mu, dist);
 Simulated_GLM_Traits = DataFrame(PoissonTrait = simulate(GLMmodel))
 ```
 
-## Rare Variant LMM Related Individuals
+## Rare Variant VCM Related Individuals
 
-In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects. We simulate data under a linear mixed model so that we can model residual dependency among individuals.
+In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects. We simulate data under a variance component model so that we can model residual dependency among individuals.
 
-$$
-Y \sim N(\mu, 4* 2GRM + 2I)
-$$
+
+Y ~ N(mu, 4* 2GRM + 2I_n)
+
 
 This example is meant to simulate data in a scenario in which a number of rare mutations in a single gene can change a trait value. We model the residual variation among relatives with the additive genetic variance component and we include 20 rare variants in the mean portion of the model, defined as loci with minor allele frequencies greater than 0.002 but less than 0.02.
 
-Specifically we are generating a single normal trait controlling for family structure with residual heritabiity of 67\%\, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
+Specifically we are generating a single normal trait controlling for family structure with residual heritability of 67\%\, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
 
 In practice rare variants have smaller minor allele frequencies, but we are limited in this tutorial by the relatively small size of the data set. Note also that our modeling these effects as part of the mean is not meant to imply that the best way to detect them would be a standard association analysis. Instead we recommend a burden or SKAT test.
 
@@ -162,9 +160,9 @@ We first subset only the rare SNP's, then we simulate traits on the 20 of the ra
 
 
 ```julia
-# filter out rare SNPS, get a subset of uncommon SNPs with 0.002 < MAF ≤ 0.02
+# filter out rare SNPS, get a subset of uncommon SNPs with 0.002 < MAF .< 0.02
 minor_allele_frequency = maf(EUR)
-rare_index = (0.002 .< minor_allele_frequency .≤ 0.02)
+rare_index = (0.002 .< minor_allele_frequency .< 0.02)
 filtsnpdata = SnpArrays.filter(EUR_data, rowmask, rare_index, des = "rare_filtered_28data");
 ```
 
@@ -195,18 +193,15 @@ effsizes = simulate_effect_size(minor_allele_frequency[rare_index][1:20])
 X_rare = rare_snps[:, 1:20]
 mu = Matrix(X_rare) * effsizes
 mu_n = reshape(mu, 379, 1)
-rare_20_snp_model = LMMTrait(mu_n, 4*(2*GRM) + 2*(I))
+rare_20_snp_model = VCMTrait(mu_n, 4*(2*GRM) + 2*(I))
 trait_rare_20_snps = DataFrame(SimTrait = simulate(rare_20_snp_model)[:])
 ```
 
 # Example 2: Multiple Traits, Multiple Variance Components? Easy.
 
+This example extends the variance component model in the previous example to demo how to efficiently account for any number of other random effects, in addition to the additive genetic and environmental variance components. In this example we show alternative ways to specify the simulation parameters for the VCM and benchmark it against the available MatrixNormal distribution in Julia package, Distributions.jl.
 
-$\textbf{Example 2: M > 2 Variance Components? Easy.}$
-
-This example extends the linear mixed model in the previous example to demo how to efficiently account for any number of other random effects, in addition to the additive genetic and environmental variance components. In this example we show alternative ways to specify the simulation parameters for the LMM/VCM and benchmark it against the available MatrixNormal distribution in Julia package, Distributions.jl.
-
-$$Y_{n \times p} \sim \text{MatrixNormal}(\mathbf{M}_{n \times p} = XB, \Omega_{np \times np} = \sum_{k=1}^m \Sigma_k \otimes V_k)$$
+Y ~ MatrixNormal(M= XB, Omega = Sum_[k=1^m] Sigma_k  ? V_k)
 
 Say that you have the the classical setting in genetics, two variance components, one for the additive genetic variance and one for the environmental variance.
 
@@ -220,7 +215,7 @@ V_A = [4 1; 1 4]
 V_E = [2.0 0.0; 0.0 2.0];
 
 # @vc is a macro that creates a 'VarianceComponent' Type for simulation
-variance_formula = @vc V_A ⊗ 2GRM + V_E ⊗ I_n;
+variance_formula = @vc V_A  ? 2GRM + V_E  ?�� I_n;
 ```
 
 
@@ -231,7 +226,7 @@ X
 
 ```julia
 #revise()
-genetic_model = LMMTrait(formulas, X, variance_formula)
+genetic_model = VCMTrait(formulas, X, variance_formula)
 simulate(genetic_model)
 ```
 
@@ -282,10 +277,10 @@ p = 2;      # no. covariates
 
 ```julia
 X_sim, B_sim, Σ_sim, V_sim = generateRandomVCM(n, p, d, m);
-Random_VCM_Trait = DataFrame(LMM_trait_simulation(X_sim, B_sim, Σ_sim, V_sim), [:SimTrait1, :SimTrait2])
+Random_VCM_Trait = DataFrame(VCM_trait_simulation(X_sim, B_sim, Σ_sim, V_sim), [:SimTrait1, :SimTrait2])
 ```
 
-In our VarianceComponent type, we store the cholesky decomposition of each $\Sigma_i$ and $V_i$, computed outside of simulation within the vc_vector of VarianceComponent types. This is important since the more often than not, users have to run the simulation many times for their desired goal.
+In our VarianceComponent type, we store the cholesky decomposition of each Sigma_i and V_i, computed outside of simulation within the vc_vector of VarianceComponent types. This is important since the more often than not, users have to run the simulation many times for their desired goal.
 
 From our benchmarking below, we show that when we use the simulation package to simulate traits n_reps times, using the VariaceComponent type is much faster and memory efficient than calling the available julia MatrixNormal distribution m times.
 
@@ -295,8 +290,8 @@ For only one variance component we are roughly four 2x more memory efficient and
 
 
 ```julia
-LMMtraitobj = LMMTrait(X_sim*B_sim, VarianceComponent(Σ_sim[1], V_sim[1]))
-@benchmark simulate(LMMtraitobj)
+VCMtraitobj = VCMTrait(X_sim*B_sim, VarianceComponent(Σ_sim[1], V_sim[1]))
+@benchmark simulate(VCMtraitobj)
 ```
 
 
@@ -320,8 +315,8 @@ still about 2x memory efficient but now 3.2x faster compared to the Distribution
 
 ```julia
 vc_vector = [VarianceComponent(Σ_sim[i], V_sim[i]) for i in eachindex(V_sim)]
-LMMtraitobjm = LMMTrait(X_sim*B_sim, vc_vector);
-@benchmark simulate(LMMtraitobjm)
+VCMtraitobjm = VCMTrait(X_sim*B_sim, vc_vector);
+@benchmark simulate(VCMtraitobjm)
 ```
 
 
@@ -343,8 +338,6 @@ end
 ```
 
 # Example 3: Power Calculation
-
-$\textbf{Example 3: Custom Models- Power Demonstration}$
 
 For the last example, we show how to simulate from customized simulation models that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. This example illustrates the use of the simulations to generates data sets allowing researchers to accurately check the validity of programs and to calculate power for their proposed studies.
 
