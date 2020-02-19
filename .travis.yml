@@ -24,7 +24,7 @@ jobs:
   include:
     - stage: "Documentation"
       julia: 1.2
-      os: osx
+      os: linux
       script:
         - julia -e 'using Pkg; Pkg.add("Documenter")'
         - julia -e 'using TraitSimulation; include(joinpath(dirname(pathof(TraitSimulation)), "..", "docs", "make.jl"))'
