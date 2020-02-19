@@ -25,10 +25,10 @@ Use the backspace key to return to the Julia REPL.
 | [![Stable][docs-stable-img]][docs-stable-url] [![Latest][docs-latest-img]][docs-latest-url] | [![Travis][travis-img]][travis-url] [![Appveyor][appveyor-img]][appveyor-url] | [![Coverage Status][coveralls-img]][coveralls-url] [![codecov.io][codecov-img]][codecov-url] |
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-latest-url]: https://openmendel.github.io/TraitSimulation.jl/latest/
+[docs-latest-url]: https://openmendel.github.io/TraitSimulation.jl/dev/
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://openmendel.github.io/TraitSimulation.jl/stable/
+[docs-stable-url]: https://openmendel.github.io/TraitSimulation.jl/dev/
 
 [travis-img]: https://travis-ci.org/OpenMendel/TraitSimulation.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/OpenMendel/TraitSimulation.jl
