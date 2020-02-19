@@ -1,6 +1,6 @@
 # TraitSimulation
 
-*An efficient tool to simulate traits from user specified generalized linear model (GLM) and Linear Mixed Models (LMM) *
+*An efficient tool to simulate traits from user specified generalized linear model (GLM) and Variance Component Models (VCM) *
 
 | **Documentation** | **Build Status** |
 |-------------------|------------------|
@@ -8,7 +8,7 @@
 
 ## Installation
 
-Start Julia, press `]` to enter package manager mode, and type the following (after `pkg>`):
+Start Julia, enter package manager mode, and type the following (after `pkg>`):
 ```
 (v1.2) pkg> add https://github.com/OpenMendel/SnpArrays.jl
 (v1.2) pkg> add https://github.com/OpenMendel/MendelSearch.jl
