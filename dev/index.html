@@ -1,537 +1,184 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Trait Simulation Tutorial · TraitSimulation.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>TraitSimulation.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href>Trait Simulation Tutorial</a><ul class="internal"><li class="toplevel"><a class="toctext" href="#Add-any-missing-packages-needed-for-this-tutorial:-1">Add any missing packages needed for this tutorial:</a></li><li class="toplevel"><a class="toctext" href="#Reproducibility-1">Reproducibility</a></li><li class="toplevel"><a class="toctext" href="#The-notebook-is-organized-as-follows:-1">The notebook is organized as follows:</a></li><li><a class="toctext" href="#Example-1:-Generalized-Linear-Model-1">Example 1: Generalized Linear Model</a></li><li><a class="toctext" href="#Example-2:-Linear-Mixed-Model-1">Example 2: Linear Mixed Model</a></li><li><a class="toctext" href="#(b)-Multiple-Correlated-Traits:-(Mendel-Example-28e-Simulation)-1">(b) Multiple Correlated Traits: (Mendel Example 28e Simulation)</a></li><li><a class="toctext" href="#Saving-Simulation-Results-to-Local-Machine-1">Saving Simulation Results to Local Machine</a></li><li class="toplevel"><a class="toctext" href="#Example-2:-Linear-Mixed-Model-(with-additive-genetic-variance-component).-1">Example 2: Linear Mixed Model (with additive genetic variance component).</a></li><li><a class="toctext" href="#The-Variance-Covariance-Matrix-1">The Variance Covariance Matrix</a></li><li><a class="toctext" href="#Saving-Simulation-Results-to-Local-Machine-2">Saving Simulation Results to Local Machine</a></li><li><a class="toctext" href="#Citations:-1">Citations:</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Trait Simulation Tutorial</a></li></ul><a class="edit-page" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/master/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Trait Simulation Tutorial</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Trait-Simulation-Tutorial-1" href="#Trait-Simulation-Tutorial-1">Trait Simulation Tutorial</a></h1><p>Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.BernoulliResponse" href="#TraitSimulation.BernoulliResponse"><code>TraitSimulation.BernoulliResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>BernoulliResponse Bernoulli distributed TRAITS, with location.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L71-L74">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.BinomialResponse" href="#TraitSimulation.BinomialResponse"><code>TraitSimulation.BinomialResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>BinomialResponse Binomial distributed TRAITS, with the number of trials.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L83-L86">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.GLMTrait" href="#TraitSimulation.GLMTrait"><code>TraitSimulation.GLMTrait</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>GLMTrait GLMTrait object is one of the two model framework objects. Stores information about the simulation of a single trait, under the Generalized Linear Model Framework.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Model_Framework.jl#L1-L4">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.GammaResponse" href="#TraitSimulation.GammaResponse"><code>TraitSimulation.GammaResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>GammaResponse Gamma distributed TRAITS, with shape parameter.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L98-L101">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.InverseGaussianResponse" href="#TraitSimulation.InverseGaussianResponse"><code>TraitSimulation.InverseGaussianResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>InverseGaussianResponse Inverse Gaussian distributed TRAITS, with shape parameter.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L120-L123">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.LMMTrait" href="#TraitSimulation.LMMTrait"><code>TraitSimulation.LMMTrait</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>LMMTrait LMMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Linear Mixed Model Framework.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Model_Framework.jl#L34-L37">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.NormalResponse" href="#TraitSimulation.NormalResponse"><code>TraitSimulation.NormalResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>NormalResponse Normally distributed TRAITS, with scale.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L56-L59">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.PoissonResponse" href="#TraitSimulation.PoissonResponse"><code>TraitSimulation.PoissonResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>PoissonResponse Poisson distributed TRAITS, with location parameter. </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L42-L45">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.TResponse" href="#TraitSimulation.TResponse"><code>TraitSimulation.TResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>TResponse STUDENT-T distributed TRAITS, T distribution with v degrees of freedom </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L10-L13">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.VarianceComponent" href="#TraitSimulation.VarianceComponent"><code>TraitSimulation.VarianceComponent</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>VarianceComponent this VarianceComponent type stores A, B , CholA and CholB so we don&#39;t have to compute the cholesky decomposition inside the loop.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L6-L9">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.WeibullResponse" href="#TraitSimulation.WeibullResponse"><code>TraitSimulation.WeibullResponse</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>WeibullResponse Weibull distributed TRAITS, with shape parameter. </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L26-L29">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.Aggregate_VarianceComponents!-Tuple{Any,Any,Array{VarianceComponent,1}}" href="#TraitSimulation.Aggregate_VarianceComponents!-Tuple{Any,Any,Array{VarianceComponent,1}}"><code>TraitSimulation.Aggregate_VarianceComponents!</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>Aggregate<em>VarianceComponents(z, total</em>variance, vc) Update the simulated trait with the effect of each variance component. We note the exclamation is to indicate this function will mutate or override the values that its given.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L167-L170">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.LMM_trait_simulation-Tuple{Any,Array{VarianceComponent,1}}" href="#TraitSimulation.LMM_trait_simulation-Tuple{Any,Array{VarianceComponent,1}}"><code>TraitSimulation.LMM_trait_simulation</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>LMM<em>trait</em>simulation(mu, vc::Vector{VarianceComponent}) For a vector of Variance Component objects, without computing mean from dataframe and formulas i.e given an evaluated matrix of means, simulate from LMM.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L181-L184">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.LMM_trait_simulation-Tuple{Any,VarianceComponent}" href="#TraitSimulation.LMM_trait_simulation-Tuple{Any,VarianceComponent}"><code>TraitSimulation.LMM_trait_simulation</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>LMM<em>trait</em>simulation(mu, vc::VarianceComponent) For a single Variance Component object, without computing mean from dataframe and formulas i.e given an evaluated matrix of means, simulate from LMM.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L144-L147">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.LMM_trait_simulation-Union{Tuple{T}, Tuple{Any,Array{T,2}}} where T" href="#TraitSimulation.LMM_trait_simulation-Union{Tuple{T}, Tuple{Any,Array{T,2}}} where T"><code>TraitSimulation.LMM_trait_simulation</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>LMM<em>trait</em>simulation single LMM trait with given evaluated matrix of Variance components</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L21-L24">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.SimulateMVN!-Tuple{Any,VarianceComponent}" href="#TraitSimulation.SimulateMVN!-Tuple{Any,VarianceComponent}"><code>TraitSimulation.SimulateMVN!</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>SimulateMVN!(z, vc) SimulateMVN(n<em>people, n</em>traits, vc::VarianceComponent) For a single Variance Component, algorithm that will transform standard normal distribution. SimulateMVN allows us to preallocate n<em>people by n</em>traits and rewrite over this matrix to save memory allocation.</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L106-L110">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.append_terms!-Tuple{Any,Any}" href="#TraitSimulation.append_terms!-Tuple{Any,Any}"><code>TraitSimulation.append_terms!</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>append_terms Allows us to append terms to create a VarianceComponent type</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L55-L58">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.mean_formula-Tuple{String,DataFrames.DataFrame}" href="#TraitSimulation.mean_formula-Tuple{String,DataFrames.DataFrame}"><code>TraitSimulation.mean_formula</code></a> — <span class="docstring-category">Method</span>.</div><div><div><pre><code class="language-julia">mean_formula(user_formula_string, df)</code></pre><p>Construction of the evaluated mean vector, given user formula string and named dataframe of covariates. This function is the main mean_formula function.</p><p>This function makes calls to find<em>variables, search</em>variables. </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/calculate_mean_vector.jl#L46-L52">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.simulate-Tuple{GLMTrait}" href="#TraitSimulation.simulate-Tuple{GLMTrait}"><code>TraitSimulation.simulate</code></a> — <span class="docstring-category">Method</span>.</div><div><div><pre><code class="language-julia">simulate(trait, n_reps)</code></pre><p>this for simulating a single GLM trait, n_reps times. </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/TraitSimulation.jl#L30-L35">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.simulate-Tuple{LMMTrait}" href="#TraitSimulation.simulate-Tuple{LMMTrait}"><code>TraitSimulation.simulate</code></a> — <span class="docstring-category">Method</span>.</div><div><div><pre><code class="language-julia">simulate(trait, nreps)</code></pre><p>this for simulating multiple LMMtraits, n_reps times. </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/TraitSimulation.jl#L50-L55">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.vcobjtuple-Tuple{Array{VarianceComponent,1}}" href="#TraitSimulation.vcobjtuple-Tuple{Array{VarianceComponent,1}}"><code>TraitSimulation.vcobjtuple</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>vcobjectuple(vcobject) This function creates a tuple of Variance Components, given a vector of variancecomponent objects to be compatible with VarianceComponentModels.jl</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/Multiple_traits.jl#L87-L90">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.ResponseDistribution" href="#TraitSimulation.ResponseDistribution"><code>TraitSimulation.ResponseDistribution</code></a> — <span class="docstring-category">Type</span>.</div><div><div><p>ResponseDistribution This super type of all response distribution types</p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/simulate_glm_trait_new.jl#L4-L7">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.find_variables-Tuple{Any}" href="#TraitSimulation.find_variables-Tuple{Any}"><code>TraitSimulation.find_variables</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>find<em>variables(x) Find and return the variable names in the expression x. This function is called in the main function mean</em>formula. </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/calculate_mean_vector.jl#L1-L4">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="TraitSimulation.search_variables!-Tuple{Expr,Symbol}" href="#TraitSimulation.search_variables!-Tuple{Expr,Symbol}"><code>TraitSimulation.search_variables!</code></a> — <span class="docstring-category">Method</span>.</div><div><div><p>search<em>variables(x, var) Search the expression x for the variable name in var, and then create the julia interpretable expression. We extend this function to allow for recursion on the variable vars... This function is called in the main function mean</em>formula. </p></div></div><a class="source-link" target="_blank" href="https://github.com/sarah-ji/TraitSimulation.jl/blob/bfdf2b00867fa73ea7af7b6cb187e911b7ac3474/src/calculate_mean_vector.jl#L24-L27">source</a></section><p>In this notebook we show how to use the <code>TraitSimulation.jl</code> package to simulate traits from genotype data from unrelateds or families with user-specified Generalized Linear Models (GLMs) or Linear Mixed Models (LMMs), respectively. For simulating under either GLM or LMMs, the user can specify the number of repitions for each simulation model. By default, the simulation will return the result of a single simulation. </p><p>The data we will be using are from the Mendel version 16[1] sample files. The data are described in examples under Option 28e in the Mendel Version 16 Manual <a href="http://software.genetics.ucla.edu/download?file=202">Section 28.1,  page 279</a>. It consists of simulated data where the two traits of interest have one contributing SNP and a sex effect.</p><p>We use the OpenMendel package <a href="https://openmendel.github.io/SnpArrays.jl/latest/">SnpArrays.jl</a> to read in the PLINK formatted SNP data. In example 1, we simulate generalized linear models assuming that everyone is unrelated. So in example 1,  the only data used from option 28e is the genotype for a specific locus in the snp file and the sex of the individual. The pedigree structure and relationship matrix are irrelevant.   In example 2 we simulate data under a linear mixed model so that we can model residual dependency among individuals.  In example 2b, we use the same parameters as were used in Mendel Option 28e with the simulation parameters for Trait1 and Trait2 in Ped28e.out as shown below.</p><p>In both examples, you can specify your own arbitrary fixed effect sizes, variance components and simulation parameters as desired. You can also specify the number of replicates for each Trait simulation in the <code>simulate</code> function.</p><p>In the <span>$\mathbf{Generating}$</span> <span>$\mathbf{Effect}$</span> <span>$\mathbf{Sizes}$</span> Section of Example 2), we show how the user can generate effect sizes that depend on the minor allele frequencies from the chisquare distribution. To aid the user when they wish to include a large number of loci in the model, we created a function that automatically writes out the mean components for simulation.</p><div>\[\textbf{At the end of Examples 1 and 3}\]</div><p>, we demo how to <span>$\textbf{write the results}$</span> of the simulation to a file on your own machine.</p><h3><a class="nav-anchor" id="Double-check-that-you-are-using-Julia-version-1.0-or-higher-by-checking-the-machine-information-1" href="#Double-check-that-you-are-using-Julia-version-1.0-or-higher-by-checking-the-machine-information-1">Double check that you are using Julia version 1.0 or higher by checking the machine information</a></h3><pre><code class="language-julia">versioninfo()</code></pre><pre><code class="language-none">Julia Version 1.1.1
-Commit 55e36cc (2019-05-16 04:10 UTC)
-Platform Info:
-  OS: macOS (x86_64-apple-darwin15.6.0)
-  CPU: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
-  WORD_SIZE: 64
-  LIBM: libopenlibm
-  LLVM: libLLVM-6.0.1 (ORCJIT, skylake)</code></pre><h1><a class="nav-anchor" id="Add-any-missing-packages-needed-for-this-tutorial:-1" href="#Add-any-missing-packages-needed-for-this-tutorial:-1">Add any missing packages needed for this tutorial:</a></h1><p>Note: For demonstration purposes, the generation of this Jupyter Notebook requires the use of the following registered packages: <code>DataFrames.jl</code>, <code>SnpArrays.jl</code>, <code>StatsModels.jl</code>, <code>Random.jl</code>, <code>DelimitedFiles.jl</code>, <code>StatsBase.jl</code>, and <code>StatsFuns.jl</code>. </p><p>If it is your first time using these registered packages, you will first have to add the registered packages: DataFrames, SnpArrays, StatsModels, Random, LinearAlgebra, DelimitedFiles, Random, StatsBase by running the following code chunk in Julia&#39;s package manager:</p><pre><code class="language-">pkg&gt; add DataFrames
-pkg&gt; add SnpArrays
-...
-pkg&gt; add StatsFuns</code></pre><p>You can also use the package manager to add the <code>TraitSimulation.jl</code> package by running the following link: &lt;/br&gt;</p><pre><code class="language-">pkg&gt; add &quot;https://github.com/sarah-ji/TraitSimulation.jl&quot;</code></pre><p>Only after all of the necessary packages have been added, load them into your working environment with the <code>using</code> command:</p><pre><code class="language-julia">using DataFrames, SnpArrays, StatsModels, Random, LinearAlgebra, DelimitedFiles, StatsBase, TraitSimulation, StatsFuns
-using CSV</code></pre><h1><a class="nav-anchor" id="Reproducibility-1" href="#Reproducibility-1">Reproducibility</a></h1><p>For reproducibility, we set a random seed using the <code>Random.jl</code> package for each simulation using <code>Random.seed!(1234)</code>.  If you wish to end up with different data, you will need to comment out these commands or use another value in Random.seed!().</p><pre><code class="language-julia">Random.seed!(1234);</code></pre><h1><a class="nav-anchor" id="The-notebook-is-organized-as-follows:-1" href="#The-notebook-is-organized-as-follows:-1">The notebook is organized as follows:</a></h1><h2><a class="nav-anchor" id="Example-1:-Generalized-Linear-Model-1" href="#Example-1:-Generalized-Linear-Model-1">Example 1: Generalized Linear Model</a></h2><p>In this example we show how to generate multiple traits from GLM&#39;s with a genetic variant in the fixed effects, but no residual familial correlation.</p><h3><a class="nav-anchor" id="Single-Trait:-1" href="#Single-Trait:-1">Single Trait:</a></h3><div>\[Y âŒ N(\mu, \sigma^{2})\]</div><p>In example (1a) we simulate a <span>$\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$</span>, with simulation parameters: <span>$\mu = 20 + 3*sex - 1.5*locus$</span>, <span>$\sigma^{2} = 2$</span>. By default, without specifying a number of replicates for the user specified GLM (like this example), the <code>simulate</code> function returns a single simulated trait.</p><h2><a class="nav-anchor" id="Example-2:-Linear-Mixed-Model-1" href="#Example-2:-Linear-Mixed-Model-1">Example 2: Linear Mixed Model</a></h2><p>In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects.</p><p>For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient. However, if you like you can specify your own variance components and their design matrices as long as they are positive semi definite using the <code>@vc</code> macro demonstrated in this example. We run this simulation 1000 times, and store the simulation results in a vector of DataFrames.</p><h3><a class="nav-anchor" id="(a)-Multiple-Independent-Traits:-1" href="#(a)-Multiple-Independent-Traits:-1">(a) Multiple Independent Traits:</a></h3><div>\[Y âŒ N(\mu, 4* 2GRM + 2I, n_{reps} = 10)\]</div><p>In example (2a) we simulate <span>$\textbf{MULTIPLE 2 INDEPENDENT TRAITS CONTROLLING FOR FAMILY STRUCTURE}$</span>, with the corresponding Mendel Example 28e Simulation parameters, location : <span>$\mu = 40 + 3*sex - 1.5*locus$</span>, scale : <span>$V$</span> = 4* 2GRM + 2I<span>$.$</span> We run this simulation 1000 times.</p><h2><a class="nav-anchor" id="(b)-Multiple-Correlated-Traits:-(Mendel-Example-28e-Simulation)-1" href="#(b)-Multiple-Correlated-Traits:-(Mendel-Example-28e-Simulation)-1">(b) Multiple Correlated Traits: (Mendel Example 28e Simulation)</a></h2>$<p>Y =  \begin{bmatrix} Y<em>{1}\
-Y</em>{2} \end{bmatrix}, Y<em>{1} \not!\perp!!!\perp Y</em>{2} $</p><div>\[Y \sim N(\mathbf{\mu},\Sigma  = V_{a} \otimes (2GRM) + V_{e} \otimes I_{n}) ,\]</div><div>\[
-\mathbf{\mu} = \begin{bmatrix}
-\mu_1 \\
-\mu_2 \\
-\end{bmatrix}
-= \begin{bmatrix}
-40 + 3(sex) - 1.5(locus)\\
-20 + 2(sex) - 1.5(locus)\\
-\end{bmatrix} , V_{a} = \begin{bmatrix}
-4 &amp; 1\\
-1 &amp; 4\\
-\end{bmatrix} , V_e 
-= \begin{bmatrix}
-2 &amp; 0\\
-0 &amp; 2\\
-\end{bmatrix}
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>TraitSimulation.jl Tutorial · TraitSimulation.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TraitSimulation.jl</span></div><form class="docs-search" action="search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>TraitSimulation.jl Tutorial</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#Trait-Simulation-Tutorial-1"><span>Trait Simulation Tutorial</span></a></li><li><a class="tocitem" href="#Background-1"><span>Background</span></a></li><li><a class="tocitem" href="#Demonstration-1"><span>Demonstration</span></a></li><li class="toplevel"><a class="tocitem" href="#Reading-genotype-data-using-SnpArrays-1"><span>Reading genotype data using SnpArrays</span></a></li><li class="toplevel"><a class="tocitem" href="#Example-1:-Standard-Models-1"><span>Example 1: Standard Models</span></a></li><li><a class="tocitem" href="#GLM-Traits-from-Unrelated-Individuals-1"><span>GLM Traits from Unrelated Individuals</span></a></li><li><a class="tocitem" href="#Random-M-Variance-Components-Simulation-1"><span>Random M Variance Components Simulation</span></a></li><li><a class="tocitem" href="#Compare-simulation-for-m-1-variance-component-1"><span>Compare simulation for m = 1 variance component</span></a></li><li><a class="tocitem" href="#Compare-simulation-for-m-10-variance-components-1"><span>Compare simulation for m = 10 variance components</span></a></li><li class="toplevel"><a class="tocitem" href="#Example-3:-Power-Calculation-1"><span>Example 3: Power Calculation</span></a></li><li><a class="tocitem" href="#Genotype-Simulation:-1"><span>Genotype Simulation:</span></a></li><li><a class="tocitem" href="#Phenotype-Simulation:-1"><span>Phenotype Simulation:</span></a></li><li><a class="tocitem" href="#Citations:-1"><span>Citations:</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>TraitSimulation.jl Tutorial</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>TraitSimulation.jl Tutorial</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/OpenMendel/TraitSimulation.jl/blob/master/docs/src/index.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="TraitSimulation.jl-Tutorial-1"><a class="docs-heading-anchor" href="#TraitSimulation.jl-Tutorial-1">TraitSimulation.jl Tutorial</a><a class="docs-heading-anchor-permalink" href="#TraitSimulation.jl-Tutorial-1" title="Permalink"></a></h1><p>Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange</p><p>##Installation Double check that you are using Julia version 1.0 or higher by checking the machine information</p><pre><code class="language-julia">versioninfo()</code></pre><p>Add any missing packages needed for this tutorial:</p><p>You can also use the package manager to add the <code>TraitSimulation.jl</code> package by running the following link:</p><pre><code class="language-">pkg&gt; add &quot;https://github.com/sarah-ji/TraitSimulation.jl&quot;</code></pre><h1 id="Trait-Simulation-Tutorial-1"><a class="docs-heading-anchor" href="#Trait-Simulation-Tutorial-1">Trait Simulation Tutorial</a><a class="docs-heading-anchor-permalink" href="#Trait-Simulation-Tutorial-1" title="Permalink"></a></h1><p>Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange</p><p>In this notebook we show how to use the <code>TraitSimulation.jl</code> package we illustrate how TraitSimulation.jl can easily simulate traits from genotype data, all within the OpenMendel universe. Operating within this universe brings potential advantages over the available software(s) when needed for downstream analysis or study design.</p><p>Using just a few calls on the command line to the appropriate packages within the OpenMendel, we demonstrate in three easy examples the utilities of the TraitSimulation.jl package.</p><h2 id="Background-1"><a class="docs-heading-anchor" href="#Background-1">Background</a><a class="docs-heading-anchor-permalink" href="#Background-1" title="Permalink"></a></h2><p>There is a lack of software available to geneticists who wish to calculate power and sample sizes in designing a study on genetics data. Typically, the study power depends on assumptions about the underlying disease model.  Many power calculating software tools operate as a black box and do not allow for customization.  To develop custom tests, researchers can develop their own simulation procedures to carry out power calculations.  One limitation with many existing methods for simulating traits conditional on genotypes is that these methods are limited to normally distributed traits and to fixed effects.</p><p>This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. This package gives users the ability to easily simulate phenotypic traits under GLMs or LMMs conditional on PLINK formatted genotype data [3]. In addition, we include customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. We demonstrate these simulation utilities on the example dataset described below.</p><h2 id="Demonstration-1"><a class="docs-heading-anchor" href="#Demonstration-1">Demonstration</a><a class="docs-heading-anchor-permalink" href="#Demonstration-1" title="Permalink"></a></h2><h5 id="Example-Data-1"><a class="docs-heading-anchor" href="#Example-Data-1">Example Data</a><a class="docs-heading-anchor-permalink" href="#Example-Data-1" title="Permalink"></a></h5><p>We use the OpenMendel package <a href="https://openmendel.github.io/SnpArrays.jl/latest/">SnpArrays.jl</a> to both read in and write out PLINK formatted files. Available in the data directory under the <a href="https://openmendel.github.io/SnpArrays.jl/latest/#Example-data-1">Example_Data</a> section of this package, we use the file <code>&quot;EUR_SUBSET&quot;</code> for the demonstration how to simulate phenotypic traits on PLINK formatted data. For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient.</p><p>In each example the user can specify the simulation model parameters, along with the number of repitions for each simulation model as desired. By default, the simulation will return the result of a single simulation.</p><p>These are the packages required for this demonstration.</p><pre><code class="language-julia">using Revise, Plots
+using DataFrames, LinearAlgebra, Random, SnpArrays, Distributions, TraitSimulation, BenchmarkTools, StatsBase, GLM, OrdinalMultinomialModels
+Random.seed!(1234);</code></pre><h1 id="Reading-genotype-data-using-SnpArrays-1"><a class="docs-heading-anchor" href="#Reading-genotype-data-using-SnpArrays-1">Reading genotype data using SnpArrays</a><a class="docs-heading-anchor-permalink" href="#Reading-genotype-data-using-SnpArrays-1" title="Permalink"></a></h1><p>First use <code>SnpArrays.jl</code> to read in the genotype data. We use PLINK formatted data with the same prefixes for the .bim, .fam, .bed files.</p><p>SnpArrays is a very useful utility and can do a lot more than just read in the data. More information about all the functionality of SnpArrays can be found at: https://openmendel.github.io/SnpArrays.jl/latest/</p><p>As missing genotypes are often due to problems making the calls, the called genotypes at a marker with too much missing genotypes are potentially unreliable. By default, SnpArrays filters to keep only the genotypes with success rates greater than 0.98 and the minimum minor allele frequency to be 0.01. If the user wishes to change the stringency, she should change the number given in filter according to https://openmendel.github.io/SnpArrays.jl/latest/#Fitering-1.</p><pre><code class="language-julia">filename = &quot;EUR_subset&quot;
+EUR = SnpArray(SnpArrays.datadir(filename * &quot;.bed&quot;));</code></pre><pre><code class="language-julia">rowmask, colmask =  SnpArrays.filter(EUR)
+minor_allele_frequency = maf(EUR);
+# rows are people; columns are SNPs
+people, snps = size(EUR)</code></pre><pre><code class="language-julia">EUR_data = SnpData(SnpArrays.datadir(filename));</code></pre><p>Here we will use the rarest snp in our dataset, rs150018646, as the causal snp in our model for demonstration. Additionally, we will control for sex, with females as the baseline group, <code>sex = 0.0</code>. We want to find the index of this causal locus in the snp_definition (.bim) file and then subset that locus from the genetic marker data above.</p><p>For users who wish to identify by name, which locus to include, first subset the names of all the loci into a vector called <code>snpid</code>  and then call the following command to store our design matrix for the model that includes sex and locus of choice.</p><p><code>snpid  = bimfile[!, :snpid]</code></p><p><code>causal_snp_index = findall(x -&gt; x == &quot;rs150018646&quot;, snpid)</code></p><p>To comform to common convention we also transform sex variable from M/F to 1/0.</p><pre><code class="language-julia">bimfile = EUR_data.snp_info
+causal_snp_index = findmin(minor_allele_frequency)[2]
+locus = convert(Vector{Float64}, @view(EUR[:, causal_snp_index]))
+
+famfile = EUR_data.person_info
+sex = map(x -&gt; strip(x) == &quot;F&quot; ? 0.0 : 1.0, famfile[!, :sex]) # note julia&#39;s ternary operator &#39;?&#39;
+X = DataFrame(intercept = ones(length(sex)), sex = sex, locus = locus)</code></pre><h1 id="Example-1:-Standard-Models-1"><a class="docs-heading-anchor" href="#Example-1:-Standard-Models-1">Example 1: Standard Models</a><a class="docs-heading-anchor-permalink" href="#Example-1:-Standard-Models-1" title="Permalink"></a></h1><p>In this example we first demonstrate how to use the GLM.jl package to simulate a trait from unrelated individuals. We then show how to use our TraitSimulation.jl package to simulate a trait from families.  </p><p>The notebook is organized as follows:</p><div>\[\textbf{Example 1: Standard Models}\]</div><p>For the first example, we show how to simulate traits from standard models users in the genetics community will recognize.</p><p>Users can specify to simulate phenotypes from unrelateds or families with user-specified Generalized Linear Models (GLMs) or Linear Mixed Models (LMMs), respectively. Researchers who feel more comfortable viewing the latter as a Variance Component Model(VCM) an additive genetic variance component and environmental variance component, we welcome you to do so.</p>$<p>1 . \text{GLM}: Y<em>{n \times 1} \sim \text{Poisson}(\mathbf{\mu}</em>{n \times 1} = g^{-1}{(XB)}, \Sigma<em>{n \times n} = \sigma</em>A \times \Phi + \sigma<em>E \times I</em>n) $</p>$<p>2 . \text{LMM/VCM}: Y<em>{n \times p} \sim \text{MatrixNormal}(\mathbf{M}</em>{n \times p} = XB, \Omega<em>{np \times np} = \Sigma</em>A \otimes \Phi + \Sigma<em>E \otimes I</em>n)$</p><p>We show in the next example, models with additional variance components can also be specified, as long as they are sensible (positive semi definite).</p><h2 id="GLM-Traits-from-Unrelated-Individuals-1"><a class="docs-heading-anchor" href="#GLM-Traits-from-Unrelated-Individuals-1">GLM Traits from Unrelated Individuals</a><a class="docs-heading-anchor-permalink" href="#GLM-Traits-from-Unrelated-Individuals-1" title="Permalink"></a></h2><div>\[
+    Y \sim Poisson(\mu = X\beta)
 $$
 
-
-We simulate $\textbf{TWO CORRELATED TRAITS CONTROLLING FOR FAMILY STRUCTURE}$ with simulation parameters, location = $\mu$ and scale = $\Sigma$. By default, without specifying a number of replicates for the user specified LMM (like this example), the `simulate` function returns a single set of simulated traits.
-
-
-## Example 3: Rare Variant Linear Mixed Model 
-
-This example is meant to simulate data in a scenario in which a number of rare mutations in a single gene can change a trait value.  In this example we model the residual variation among relatives with the additive genetic variance component and we include 20 rare variants in the mean portion of the model, defined as loci with minor allele frequencies greater than 0.002 but less than 0.02.  In practice rare variants have smaller minor allele frequencies, but we are limited in this tutorial by the relatively small size of the data set. Note also that our modeling these effects as part of the mean is not meant to imply that the best way to detect them would be a standard association analysis. Instead we recommend a burden or SKAT test. &lt;br&gt;
-
-Specifically we are generating a single normal trait controlling for family structure with residual heritabiity of 67%, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
-
-We run this simulation 1000 times, and store the simulation results in a vector of DataFrames. At the end of this example we write the results of the first of the 1000 replicates to a file on your own machine.
-
-$$ Y âŒ N(\mu_{rare20}, 4* 2GRM + 2I, n_{reps} = 1000)
-$$
-
-# Reading the Mendel 28a data using SnpArrays
-
-First use `SnpArrays.jl` to read in the genotype data. The value 212 is the number of individuals in the genotype data set. 
-
+Here we specify the fixed effects and the phenotype distribution, and output for ten simulations per person.
 
 
 ```julia
-snpdata = SnpArray(&quot;traitsim28e.bed&quot;, 212)
+beta = [1; 0.2; 0.5]
+mu = Matrix(X) * beta
+dist = Poisson
+GLMmodel = GLMTrait(mu, dist);
+Simulated_GLM_Traits = DataFrame(PoissonTrait = simulate(GLMmodel))
 ```
 
+## Rare Variant LMM Related Individuals
 
-
-
-    212Ã253141 SnpArray:
-     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x02  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x02  0x02  0x03     0x00  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x03  0x02  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x00  0x00  0x00  0x00  0x03
-     0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x03  0x00  0x03
-     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x03  0x00  0x03
-     0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x02  0x00  0x02  0x00  0x03
-     0x03  0x02  0x00  0x03  0x03  0x03     0x03  0x03  0x00  0x03  0x00  0x03
-     0x03  0x02  0x00  0x03  0x03  0x03     0x00  0x02  0x00  0x02  0x00  0x03
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x02  0x00  0x02  0x00  0x03
-     0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x02  0x00  0x02  0x00  0x03
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x02  0x02  0x02
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x02  0x00  0x00  0x03  0x00
-     0x03  0x02  0x00  0x02  0x02  0x03     0x02  0x03  0x00  0x03  0x00  0x03
-     0x03  0x03  0x00  0x02  0x02  0x03     0x02  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x02  0x02  0x00
-     0x03  0x03  0x00  0x02  0x02  0x03     0x02  0x03  0x00  0x00  0x02  0x02
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
-     0x03  0x02  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x00  0x02  0x02
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x02  0x03  0x00  0x00  0x03  0x00
-     0x03  0x03  0x00  0x03  0x03  0x03     0x00  0x03  0x00  0x02  0x02  0x02
-
-
-
-The first line gives the size of the matrix. 212 individuals by 253141, the number of loci.
-
-The binary codes correspond to genotypes, A1,A1=0x00, missing=0x01, A1,A2=0x02 and A2,A2=0x03
-
-SnpArrays is a very useful utility and can do a lot more than just read in the data. More information about all the functionality of SnpArrays can be found at:
-https://openmendel.github.io/SnpArrays.jl/latest/
-
-Store the FamID and PersonID of Individuals in Mendel 28e data
-
-
-```julia
-famfile = readdlm(&quot;traitsim28e.fam&quot;, &#39;,&#39;)
-Fam_Person_id = DataFrame(FamID = famfile[:, 1], PID = famfile[:, 2])
-```
-
-
-Note: Because later we will want to compare our results to Mendel 28e results,  we subset `Traits_Mendel28e` 
-
-
-```julia
-Traits_Mendel28e = DataFrame(Trait1 = famfile[:, 7], Trait2 = famfile[:, 8])
-```
-
-
-Transform sex variable from M/F to 1/-1 as is done in the older version of Mendel.  If you prefer you can use the more common convention of making one of the sexes the reference sex (coding it as zero) and make the other sex have the value 1 but then you will have to work a little harder to compare the results to the older version of Mendel. 
-
-
-```julia
-sex = map(x -&gt; strip(x) == &quot;F&quot; ? -1.0 : 1.0, famfile[:, 5]) # note julia&#39;s ternary operator &#39;?&#39;
-```
-
-    212-element Array{Float64,1}:
-     -1.0
-     -1.0
-      1.0
-      1.0
-     -1.0
-     -1.0
-      1.0
-      1.0
-     -1.0
-      1.0
-     -1.0
-      1.0
-     -1.0
-      1.0
-      1.0
-      1.0
-     -1.0
-      1.0
-      1.0
-      1.0
-      1.0
-      1.0
-      1.0
-      1.0
-      1.0
-
-
-
-### Names of Variants:
-
-We will use snp rs10412915 as a covariate in our model.  We want to find the index of this causal locus in the snp_definition file and then subset that locus from the genetic marker data above. 
-We first subset the names of all the loci into a vector called `snpid`
-
-
-```julia
-snpdef28_1 = readdlm(&quot;traitsim28e.bim&quot;, Any; header = false)
-snpid = map(x -&gt; strip(string(x)), snpdef28_1[:, 1]) # strip mining in the data 
-```
-
-
-
-
-    253141-element Array{SubString{String},1}:
-     &quot;rs3020701&quot;  
-     &quot;rs56343121&quot; 
-     &quot;rs143501051&quot;
-     &quot;rs56182540&quot; 
-     &quot;rs7260412&quot;  
-     &quot;rs11669393&quot; 
-     &quot;rs181646587&quot;
-     &quot;rs8106297&quot;  
-     &quot;rs8106302&quot;  
-     &quot;rs183568620&quot;
-     &quot;rs186451972&quot;
-     &quot;rs189699222&quot;
-     &quot;rs182902214&quot;        
-     &quot;rs188169422&quot;
-     &quot;rs144587467&quot;
-     &quot;rs139879509&quot;
-     &quot;rs143250448&quot;
-     &quot;rs145384750&quot;
-     &quot;rs149215836&quot;
-     &quot;rs139221927&quot;
-     &quot;rs181848453&quot;
-     &quot;rs138318162&quot;
-     &quot;rs186913222&quot;
-     &quot;rs141816674&quot;
-     &quot;rs150801216&quot;
-
-
-
-We next need to find the position of the snp rs10412915.  If you wish to use another snp as the causal locus just change the rs number to another one that is found in the available genotype data, for example rs186913222.
-
-
-```julia
-ind_rs10412915 = findall(x -&gt; x == &quot;rs10412915&quot;, snpid)[1]
-```
-
-    236074
-
-
-
-We see that rs10412915, is the 236074th locus in the dataset.
-
-Let&#39;s create a design matrix for the model that includes sex and locus rs10412915.
-
-
-```julia
-locus = convert(Vector{Float64}, @view(snpdata[:, ind_rs10412915]))
-X = DataFrame(sex = sex, locus = locus)
-```
-
-# Example 1 Generalized Linear Model:
-
-This example simulates a case where three snps have fixed effects on the trait. Any apparent genetic correlation between relatives for the trait is due to the effect of these snps, so once these effects of these snps are modelled there should be no residual correlation among relatives. Note that by default, individuals with missing genotype values will have missing phenotype values, unless the user specifies the argument `impute = true` in the convert function above.
-Be sure to change Random.seed!(1234) to something else (or comment out) if you want to generate a new data set. 
-
-
-### Example 1a: Single Trait
-$$Y âŒ N(\mu, \sigma^{2})\]</div><p>In example (1a) we simulate a <span>$\textbf{SINGLE INDEPENDENT NORMAL TRAIT}$</span>, with simulation parameters: <span>$\mu = 20 + 3*sex - 1.5*locus$</span>, <span>$\sigma^{2} = 2$</span></p><pre><code class="language-julia">mean_formula = &quot;20 + 3(sex) - 1.5(locus)&quot;
-GLM_trait_model = GLMTrait(mean_formula, X, NormalResponse(2), IdentityLink())
-Simulated_GLM_trait = simulate(GLM_trait_model)</code></pre><pre><code class="language-julia">describe(Simulated_GLM_trait, stats = [:mean, :std, :min, :q25, :median, :q75, :max, :eltype])</code></pre><h2><a class="nav-anchor" id="Saving-Simulation-Results-to-Local-Machine-1" href="#Saving-Simulation-Results-to-Local-Machine-1">Saving Simulation Results to Local Machine</a></h2><p>Write the newly simulated trait into a comma separated (csv) file for later use. Note that the user can specify the separator to &#39;\t&#39; for tab separated, or another separator of choice. </p><p>Here we output the simulated trait and covariates for each of the 212 individuals, labeled by their pedigree ID and person ID.</p><pre><code class="language-julia">Trait1_GLM = hcat(Fam_Person_id, Simulated_GLM_trait, X)</code></pre><pre><code class="language-julia">#cd(&quot;/Users&quot;) #change to home directory
-CSV.write(&quot;Trait1_GLM.csv&quot;, Trait1_GLM)</code></pre><pre><code class="language-none">&quot;Trait1_GLM.csv&quot;</code></pre><h1><a class="nav-anchor" id="Example-2:-Linear-Mixed-Model-(with-additive-genetic-variance-component).-1" href="#Example-2:-Linear-Mixed-Model-(with-additive-genetic-variance-component).-1">Example 2: Linear Mixed Model (with additive genetic variance component).</a></h1><p>Examples 2a simulates a single trait, while Example 2b simulates two correlated traits.</p><p>Note you can scale the function to simulate the trait multiple times by specifying the argument, <code>n_reps</code>.  Also, you can extend the model in Example 2b to include more than 2 variance components using the <code>@vc</code> macro.</p><h2><a class="nav-anchor" id="The-Variance-Covariance-Matrix-1" href="#The-Variance-Covariance-Matrix-1">The Variance Covariance Matrix</a></h2><p>Recall : <span>$E(\mathbf{GRM}) = \Phi$</span></p><p>We use the <a href="https://github.com/OpenMendel/SnpArrays.jl">SnpArrays.jl</a> package to find an estimate of the Kinship (<span>$\Phi$</span>), the Genetic Relationship Matrix (GRM). </p><p>We will use the same values of <span>$\textbf{GRM, V_a, and V_e}$</span> in the bivariate covariance matrix for both the mixed effect example and for the rare variant example.</p><p>Note that the residual covariance among two relatives is the additive genetic variance, <span>$\textbf{V_a}$</span>, times twice the kinship coefficient, <span>$\Phi$</span>. The kinship matrix is derived from the genetic relationship matrix <span>$\textbf{GRM}$</span> across the common SNPs with minor allele frequency at least 0.05.</p><pre><code class="language-julia">GRM = grm(snpdata, minmaf = 0.05)</code></pre><pre><code class="language-none">212Ã212 Array{Float64,2}:
-  0.498264     0.0080878    0.0164327   âŠ   0.0246825    0.00181856
-  0.0080878    0.498054    -0.0212599      -0.0285927   -0.0226525 
-  0.0164327   -0.0212599    0.499442       -0.0219661   -0.00748536
-  0.253627    -0.00160532   0.282542        0.00612693  -0.00339125
-  0.126098     0.253365     0.128931       -0.0158446   -0.00633959
- -0.014971    -0.00266073  -0.00243384  âŠ   0.00384757   0.0145936 
- -0.0221357    0.0100492   -0.0107012      -0.0148443   -0.00127783
- -0.01629     -0.00749253  -0.015372       -0.0163305   -0.00258392
- -0.016679     0.00353587  -0.0128844      -0.0332489   -0.00707839
- -0.0176101   -0.00996912  -0.0158473      -0.00675875  -0.0122339 
- -0.0162558    0.00938592   0.0064231   âŠ  -0.00510882   0.0168778 
- -0.0167487    0.00414544  -0.00936538     -0.0134863    0.0020952 
- -0.031148     0.00112387  -0.010794        0.00383105   0.0198635 
-  â®                                     â±   â®                      
- -0.00865735  -0.00335548  -0.0148433   âŠ   0.00806601  -0.0211537 
-  0.00296028   0.0043655   -0.0183683       0.0012496    0.00898193
- -0.0204601   -0.0270898   -0.00194048     -0.0185883   -0.0116621 
- -0.0174561   -0.0128509   -0.0155773      -0.0274183   -0.0063823 
- -0.00170995   0.0154211   -0.00168146     -0.00684865  -0.0067438 
-  0.00718047  -0.00525265  -0.00283975  âŠ   0.0309601    0.0261103 
- -0.0170218   -0.00661916   0.0020924      -0.022858     0.0037451 
-  0.0142551    0.0208073    0.0096287       0.00598877   0.0094809 
- -0.00586031  -0.00733706   0.0339257       0.0109116   -0.0177771 
-  0.00299024  -0.0134027    0.0150825       0.00799507   0.0150077 
-  0.0246825   -0.0285927   -0.0219661   âŠ   0.593999     0.0497083 
-  0.00181856  -0.0226525   -0.00748536      0.0497083    0.491743</code></pre><h3><a class="nav-anchor" id="Example-2a:-Single-Trait-1" href="#Example-2a:-Single-Trait-1">Example 2a: Single Trait</a></h3><div>\[
-Y âŒ N(ÎŒ, 4* 2GRM + 2I, n_{reps} = 1000)\]</div><p>We simulate a Normal Trait controlling for family structure, location = <span>$\mu = 40 + 3(sex) - 1.5(locus)$</span> and scale =  <span>$\mathbf{V} = 2*V_a \Phi + V_e I = 4* 2GRM + 2I$</span>. </p><pre><code class="language-julia">mean_formula = [&quot;40 + 3(sex) - 1.5(locus)&quot;]</code></pre><pre><code class="language-none">1-element Array{String,1}:
- &quot;40 + 3(sex) - 1.5(locus)&quot;</code></pre><pre><code class="language-julia">I_n = Matrix{Float64}(I, size(GRM));
-LMM_trait_model = LMMTrait(mean_formula, X, 4*(2*GRM) + 2*(I_n))
-Simulated_LMM_Trait = simulate(LMM_trait_model, 1000)</code></pre><p>Let&#39;s look at summary statistics of just the first of the 1000 simulation results.</p><pre><code class="language-julia">describe(Simulated_LMM_Trait[1], stats = [:mean, :std, :min, :q25, :median, :q75, :max, :eltype])</code></pre><h3><a class="nav-anchor" id="Example-2b:-Multiple-Correlated-Traits-(Mendel-Example-28e-Simulation)-1" href="#Example-2b:-Multiple-Correlated-Traits-(Mendel-Example-28e-Simulation)-1">Example 2b: Multiple Correlated Traits (Mendel Example 28e Simulation)</a></h3><p>We simulate two correlated Normal Traits controlling for family structure, location = <span>$ÎŒ$</span> and scale = <span>$\mathbf\Sigma$</span>.  The corresponding bivariate variance covariance matrix as specified Mendel Option 28e, <span>$\mathbf{Î£}$</span>, is generated here.</p><div>\[
-Y âŒ N(ÎŒ, \mathbf\Sigma)
-$$ 
+In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects. We simulate data under a linear mixed model so that we can model residual dependency among individuals.
 
 $$
-\mathbf{\mu} = \begin{vmatrix}
-\mu_1 \\
-\mu_2 \\
-\end{vmatrix}
-= \begin{vmatrix}
-40 + 3(sex) - 1.5(locus)\\
-20 + 2(sex) - 1.5(locus)\\
-\end{vmatrix}
-\\
+Y \sim N(\mu, 4* 2GRM + 2I)
 $$
 
-$$
-\mathbf\Sigma  = V_a \otimes (2GRM) + V_e \otimes I_n
-$$
+This example is meant to simulate data in a scenario in which a number of rare mutations in a single gene can change a trait value. We model the residual variation among relatives with the additive genetic variance component and we include 20 rare variants in the mean portion of the model, defined as loci with minor allele frequencies greater than 0.002 but less than 0.02.
 
+Specifically we are generating a single normal trait controlling for family structure with residual heritabiity of 67\%\, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
 
-&amp;nbsp; $FYI$: To create a trait with different variance components change the elements of $\mathbf\Sigma$. We create the variance component object `variance_formula` below, to simulate our traits in example 2b. While this tutorial only uses 2 variance components, we make note that the `@vc` macro is designed to handle as many variance components as needed. 
-
-As long as each Variance Component is specified correctly, we can create a `VarianceComponent` Julia object for Trait Simulation:
-
-&amp;nbsp; 
-Example) Specifying more than 2 variance components (let V_H indicate an additional Household Variance component and V_D indicate a dominance genetic effect) 
-
-```{julia}
-    multiple_variance_formula = @vc V_A â 2GRM + V_E â I_n + V_D â Î + V_H â H;
-```
-
-V_E is multiplies a 212 by 212 identity matrix, which we creat along with the V_E and V_A matrices. 
+In practice rare variants have smaller minor allele frequencies, but we are limited in this tutorial by the relatively small size of the data set. Note also that our modeling these effects as part of the mean is not meant to imply that the best way to detect them would be a standard association analysis. Instead we recommend a burden or SKAT test.
 
 
 ```julia
-V_A = [4 1; 1 4]
-V_E = [2.0 0.0; 0.0 2.0];
+GRM = grm(EUR, minmaf = 0.05);
 ```
+
+## Filtering
+
+We first subset only the rare SNP&#39;s, then we simulate traits on the 20 of the rare SNP&#39;s. For this demo, we subset the fist k = 20 rare snps. Change the parameters and the number of SNPs for simulation to model different regions of the genome. The number 20 is arbitrary and you can use more or less than 20 if you desire by changing the final number.
 
 
 ```julia
-# @vc is a macro that creates a &#39;VarianceComponent&#39; Type for simulation
-variance_formula = @vc V_A â 2GRM + V_E â I_n;
-```
-
-These are the formulas for the fixed effects, as specified by Mendel Option 28e.
-
-
-```julia
-mean_formulas = [&quot;40 + 3(sex) - 1.5(locus)&quot;, &quot;20 + 2(sex) - 1.5(locus)&quot;]
-```
-
-
-
-
-    2-element Array{String,1}:
-     &quot;40 + 3(sex) - 1.5(locus)&quot;
-     &quot;20 + 2(sex) - 1.5(locus)&quot;
-
-
-
-
-```julia
-Multiple_LMM_traits_model = LMMTrait(mean_formulas, X, variance_formula)
-Simulated_LMM_Traits = simulate(Multiple_LMM_traits_model)
-```
-
-
-### Summary Statistics of Our Simulated Traits
-
-
-```julia
-describe(Simulated_LMM_Traits, stats = [:mean, :std, :min, :max, :eltype])
-```
-
-
-
-### Summary Statistics of the Original Mendel 28e dataset Traits:
-
-Note we want to see similar values from our simulated traits!
-
-
-```julia
-describe(Traits_Mendel28e, stats = [:mean, :std, :min, :max, :eltype])
-```
-
-
-
-# Example 3: Rare Variant Linear Mixed Model
-
-
-$$
-Y âŒ N(\mu_{rare20}, 4* 2GRM + 2I)
-$$
-
-In this example we first subset only the rare SNP&#39;s with minor allele frequency greater than 0.002 but less than 0.02, then we simulate traits on 20 of the rare SNP&#39;s as fixed effects. For this demo, the indexing `snpid[rare_index][1:2:40]` allows us to subset every other rare snp in the first 40 SNPs, to get our list of 20 rare SNPs. Change the range and number of SNPs to simulate with more or less SNPs and from different regions of the genome. The number 20 is arbitrary and you can use more or less than 20 if you desire by changing the final number. You can change the spacing of the snps by changing the second number. 
-For example, `snpid[rare_index][1:5:500]` would give you 100 snps.
-
-Here are the 20 SNP&#39;s that will be used for trait simulation in this example.  
-
-In this demo, we run this simulation 1000 times. You can change the number of repitions by changing the second argument in the `simulate(rare_20_snp_model, 1000)` function to any integer.
-
-
-```julia
-# filter out rare SNPS, get a subset of uncommon SNPs with 0.002 &lt; MAF â€ 0.02
-minor_allele_frequency = maf(snpdata)
-rare_index = (0.002 .&lt; minor_allele_frequency .â€ 0.02)
-data_rare = @view(snpdata[:, rare_index]);
+# filter out rare SNPS, get a subset of uncommon SNPs with 0.002 &lt; MAF ≤ 0.02
+minor_allele_frequency = maf(EUR)
+rare_index = (0.002 .&lt; minor_allele_frequency .≤ 0.02)
+filtsnpdata = SnpArrays.filter(EUR_data, rowmask, rare_index, des = &quot;rare_filtered_28data&quot;);
 ```
 
 
 ```julia
-maf_20_rare_snps = minor_allele_frequency[rare_index][1:2:40]
-rare_snps_for_simulation = snpid[rare_index][1:2:40]
+rare_snps = SnpArray(&quot;rare_filtered_28data.bed&quot;);
 ```
 
-
-
-
-    20-element Array{SubString{String},1}:
-     &quot;rs3020701&quot;  
-     &quot;rs181646587&quot;
-     &quot;rs182902214&quot;
-     &quot;rs184527030&quot;
-     &quot;rs10409990&quot; 
-     &quot;rs185166611&quot;
-     &quot;rs181637538&quot;
-     &quot;rs186213888&quot;
-     &quot;rs184010370&quot;
-     &quot;rs11667161&quot; 
-     &quot;rs188819713&quot;
-     &quot;rs182378235&quot;
-     &quot;rs146361744&quot;
-     &quot;rs190575937&quot;
-     &quot;rs149949827&quot;
-     &quot;rs117671630&quot;
-     &quot;rs149171388&quot;
-     &quot;rs188520640&quot;
-     &quot;rs142722885&quot;
-     &quot;rs146938393&quot;
-
-
-
-## Generating Effect Sizes (Based on MAF)
-
-In practice rare SNPs have smaller minor allele frequencies but we are limited in this tutorial by the number of individuals in the data set. We use generated effect sizes to evaluate $\mu_{rare20}$ on the following Dataframe: &lt;br&gt; 
-
-
-```julia
-geno_rare_converted = convert(Matrix{Float64}, data_rare);
-```
-
-
-```julia
-geno_rare20_converted = convert(DataFrame, geno_rare_converted[:, 1:2:40])
-names!(geno_rare20_converted, Symbol.(rare_snps_for_simulation))
-```
-
-### Chisquared Distribution (df = 1)
+### Simulation
 
 For demonstration purposes, we simulate effect sizes from the Chi-squared(df = 1) distribution, where we use the minor allele frequency (maf) as x and find f(x) where f is the pdf for the Chi-squared (df = 1) density, so that the rarest SNP&#39;s have the biggest effect sizes. The effect sizes are rounded to the second digit, throughout this example. Notice there is a random +1 or -1, so that there are effects that both increase and decrease the simulated trait value.
 
-
 ```julia
+
 # Generating Effect Sizes from Chisquared(df = 1) density
-n = length(maf_20_rare_snps)
+
+n = length(rare_snps)
 chisq_coeff = zeros(n)
 
 for i in 1:n
-    chisq_coeff[i] = rand([-1, 1]) .* (0.1 / sqrt.(maf_20_rare_snps[i] .* (1 - maf_20_rare_snps[i])))
+    chisq_coeff[i] = rand([-1, 1]) .* (0.1 / sqrt.(maf_rare_snps[i] .* (1 - maf_rare_snps[i])))
 end
 ```
 
-Take a look at the simulated coefficients on the left, next to the corresponding minor allele frequency. Notice the rarer SNPs have the largest absolute values for their effect sizes.
-
 
 ```julia
-Ex3_rare = round.([chisq_coeff maf_20_rare_snps], digits = 3)
-Ex3_rare = DataFrame(Chisq_Coefficient = Ex3_rare[:, 1] , MAF_rare = Ex3_rare[:, 2] )
+effsizes = simulate_effect_size(minor_allele_frequency[rare_index][1:20])
+X_rare = rare_snps[:, 1:20]
+mu = Matrix(X_rare) * effsizes
+mu_n = reshape(mu, 379, 1)
+rare_20_snp_model = LMMTrait(mu_n, 4*(2*GRM) + 2*(I))
+trait_rare_20_snps = DataFrame(SimTrait = simulate(rare_20_snp_model)[:])
 ```
 
-
-```julia
-simulated_effectsizes_chisq = Ex3_rare[:, 1]
-```
+# Example 2: Multiple Traits, Multiple Variance Components? Easy.
 
 
+$\textbf{Example 2: M &gt; 2 Variance Components? Easy.}$
 
+This example extends the linear mixed model in the previous example to demo how to efficiently account for any number of other random effects, in addition to the additive genetic and environmental variance components. In this example we show alternative ways to specify the simulation parameters for the LMM/VCM and benchmark it against the available MatrixNormal distribution in Julia package, Distributions.jl.
 
-    20-element Array{Float64,1}:
-     -0.785
-     -0.847
-      1.034
-     -0.735
-      1.034
-     -1.459
-      1.193
-     -1.034
-     -1.193
-      2.062
-      0.847
-      1.459
-      2.062
-     -1.459
-      0.735
-      2.062
-      2.062
-     -2.062
-      0.735
-     -1.459
+$$Y_{n \times p} \sim \text{MatrixNormal}(\mathbf{M}_{n \times p} = XB, \Omega_{np \times np} = \sum_{k=1}^m \Sigma_k \otimes V_k)\]</div><p>Say that you have the the classical setting in genetics, two variance components, one for the additive genetic variance and one for the environmental variance.</p><p>Users can specify their covariance structures as follows. We note that this form can also accompany more than 2 variance components.</p><pre><code class="language-julia">formulas = [&quot;1 + 2.0*sex + 0.5*locus&quot;, &quot;20 + 2.0*sex + 1.0*locus&quot;]
+I_n = Matrix{Float64}(I, size(GRM))
+V_A = [4 1; 1 4]
+V_E = [2.0 0.0; 0.0 2.0];
 
-
-
-## Function for Mean Model Expression
-
-In some cases a large number of variants may be used for simulation. Thus, in this example we create a function where the user inputs a vector of coefficients and a vector of variants for simulation, then the function outputs the mean model expression. 
-
-The function `FixedEffectTerms`, creates the proper evaluated expression for the simulation process, using the specified vectors of coefficients and snp names. The function outputs `evaluated_fixed_expression` which will be used to estimate the mean effect, `ÎŒ` in our mixed effects model. We make use of this function in this example, instead of having to write out all 20 of the coefficients and variant locus names.
-
-
-```julia
-rare_snps_for_simulation
-```
-
-
-
-
-    20-element Array{SubString{String},1}:
-     &quot;rs3020701&quot;  
-     &quot;rs181646587&quot;
-     &quot;rs182902214&quot;
-     &quot;rs184527030&quot;
-     &quot;rs10409990&quot; 
-     &quot;rs185166611&quot;
-     &quot;rs181637538&quot;
-     &quot;rs186213888&quot;
-     &quot;rs184010370&quot;
-     &quot;rs11667161&quot; 
-     &quot;rs188819713&quot;
-     &quot;rs182378235&quot;
-     &quot;rs146361744&quot;
-     &quot;rs190575937&quot;
-     &quot;rs149949827&quot;
-     &quot;rs117671630&quot;
-     &quot;rs149171388&quot;
-     &quot;rs188520640&quot;
-     &quot;rs142722885&quot;
-     &quot;rs146938393&quot;
-
-
-
-
-```julia
-function FixedEffectTerms(effectsizes::AbstractVecOrMat, snps::AbstractVecOrMat)
- # implementation
-    fixed_terms = &quot;&quot;
-for i in 1:length(simulated_effectsizes_chisq) - 1
-expression = &quot; + &quot; * string(simulated_effectsizes_chisq[i]) * &quot;(&quot; * rare_snps_for_simulation[i] * &quot;)&quot;
-    fixed_terms = fixed_terms * expression
-end
-    return String(fixed_terms)
+# @vc is a macro that creates a &#39;VarianceComponent&#39; Type for simulation
+variance_formula = @vc V_A ⊗ 2GRM + V_E ⊗ I_n;</code></pre><pre><code class="language-julia">X</code></pre><pre><code class="language-julia">#revise()
+genetic_model = LMMTrait(formulas, X, variance_formula)
+simulate(genetic_model)</code></pre><h2 id="Random-M-Variance-Components-Simulation-1"><a class="docs-heading-anchor" href="#Random-M-Variance-Components-Simulation-1">Random M Variance Components Simulation</a><a class="docs-heading-anchor-permalink" href="#Random-M-Variance-Components-Simulation-1" title="Permalink"></a></h2><p>Here for m = 10 random Variance Components, we generate m random covariance matrices, a random design matrix and p regression coefficients to illustrate the simulation of a d = 2 dimensional response matrix of traits for a sample of n = 1000 people.</p><p>We then benchmark against the same simulation process using the MatrixNormal() function in the Distributions.jl package.</p><pre><code class="language-none">function generateSPDmatrix(n)
+    A = rand(n)
+    m = 0.5 * (A * A&#39;)
+    PDmat = m + (n * Diagonal(ones(n)))
 end
 
-```
 
+function RVCModel(n::Int64, p::Int64, d::Int64, m::Int64)
+    # n-by-p design matrix
+    X = randn(n, p)
 
+    # p-by-d mean component regression coefficient for each trait
+    B = hcat(ones(p, 1), rand(p))  
 
+    V = ntuple(x -&gt; zeros(n, n), m)
+    for i = 1:m-1
+      copy!(V[i], generateSPDmatrix(n))
+    end
+    copy!(V[end], Diagonal(ones(n))) # last covarianec matrix is identity
 
-    FixedEffectTerms (generic function with 1 method)
+    # a tuple of m d-by-d variance component parameters
+    Σ = ntuple(x -&gt; zeros(d, d), m)
+    for i in 1:m
+      copy!(Σ[i], generateSPDmatrix(d))
+    end
 
+    return(X, B, Σ, V)
+end</code></pre><pre><code class="language-julia">n = 10   # no. observations
+d = 2      # dimension of responses
+m = 10      # no. variance components
+p = 2;      # no. covariates</code></pre><pre><code class="language-julia">X_sim, B_sim, Σ_sim, V_sim = generateRandomVCM(n, p, d, m);
+Random_VCM_Trait = DataFrame(LMM_trait_simulation(X_sim, B_sim, Σ_sim, V_sim), [:SimTrait1, :SimTrait2])</code></pre><p>In our VarianceComponent type, we store the cholesky decomposition of each <span>$\Sigma_i$</span> and <span>$V_i$</span>, computed outside of simulation within the vc_vector of VarianceComponent types. This is important since the more often than not, users have to run the simulation many times for their desired goal.</p><p>From our benchmarking below, we show that when we use the simulation package to simulate traits n_reps times, using the VariaceComponent type is much faster and memory efficient than calling the available julia MatrixNormal distribution m times.</p><h2 id="Compare-simulation-for-m-1-variance-component-1"><a class="docs-heading-anchor" href="#Compare-simulation-for-m-1-variance-component-1">Compare simulation for m = 1 variance component</a><a class="docs-heading-anchor-permalink" href="#Compare-simulation-for-m-1-variance-component-1" title="Permalink"></a></h2><p>For only one variance component we are roughly four 2x more memory efficient and 3.7x faster at simulating this bivariate trait</p><pre><code class="language-julia">LMMtraitobj = LMMTrait(X_sim*B_sim, VarianceComponent(Σ_sim[1], V_sim[1]))
+@benchmark simulate(LMMtraitobj)</code></pre><pre><code class="language-julia">function MN_J(X, B, Σ, V; n_reps = 1)
+    n, p = size(X*B)
+    sim = [zeros(n, p) for i in 1:n_reps]
+    for i in 1:n_reps
+        sim[i] = rand(MatrixNormal(X*B, V, Σ))
+    end
+    return(sim)
+end
 
+@benchmark MN_J($X_sim, $B_sim, $Σ_sim[1], $V_sim[1])</code></pre><h2 id="Compare-simulation-for-m-10-variance-components-1"><a class="docs-heading-anchor" href="#Compare-simulation-for-m-10-variance-components-1">Compare simulation for m = 10 variance components</a><a class="docs-heading-anchor-permalink" href="#Compare-simulation-for-m-10-variance-components-1" title="Permalink"></a></h2><p>still about 2x memory efficient but now 3.2x faster compared to the Distributions package</p><pre><code class="language-julia">vc_vector = [VarianceComponent(Σ_sim[i], V_sim[i]) for i in eachindex(V_sim)]
+LMMtraitobjm = LMMTrait(X_sim*B_sim, vc_vector);
+@benchmark simulate(LMMtraitobjm)</code></pre><pre><code class="language-julia">function MN_Jm(X, B, Σ, V; n_reps = 1)
+    n, p = size(X*B)
+    m = length(V)
+    sim = [zeros(n, p) for i in 1:n_reps]
+    for i in 1:n_reps
+        for j in 1:m
+            dist = MatrixNormal(X*B, V[j], Σ[j])
+            sim[i] += rand(dist)
+        end
+    end
+    return(sim)
+end
 
-Example 3: Single Trait, Rare Variants
+@benchmark vecs = MN_Jm($X_sim, $B_sim, $Σ_sim, $V_sim)</code></pre><h1 id="Example-3:-Power-Calculation-1"><a class="docs-heading-anchor" href="#Example-3:-Power-Calculation-1">Example 3: Power Calculation</a><a class="docs-heading-anchor-permalink" href="#Example-3:-Power-Calculation-1" title="Permalink"></a></h1><div>\[\textbf{Example 3: Custom Models- Power Demonstration}\]</div><p>For the last example, we show how to simulate from customized simulation models that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. This example illustrates the use of the simulations to generates data sets allowing researchers to accurately check the validity of programs and to calculate power for their proposed studies.</p><h2 id="Genotype-Simulation:-1"><a class="docs-heading-anchor" href="#Genotype-Simulation:-1">Genotype Simulation:</a><a class="docs-heading-anchor-permalink" href="#Genotype-Simulation:-1" title="Permalink"></a></h2><p>a) genotype simulation utilities under HWE</p><p>We use the minor allele frequency of the causal variant to simulate the SnpArray.</p><pre><code class="language-julia">maf_causal_snp = [0.2]
+Simulated_SnpArray = snparray_simulation(maf_causal_snp, 379)</code></pre><pre><code class="language-julia">β_new =
+[1.0
+ 2.0
+10.0]</code></pre><pre><code class="language-julia">d1 = Bernoulli(0.51)
+d2 = Normal(45, 8)
 
-We look at just the first of the 1000 simulation results below.
+sex = rand(d1, 379)
+age = zscore(rand(d2, 379))
 
-$$
-Y âŒ N(ÎŒ_{20raresnps}, 4* 2GRM + 2I, n_{reps} = 1000)\]</div><pre><code class="language-julia">mean_formula_rare = FixedEffectTerms(simulated_effectsizes_chisq, rare_snps_for_simulation);
-rare_20_snp_model = LMMTrait([mean_formula_rare], geno_rare20_converted, 4*(2*GRM) + 2*(I_n))
-trait_rare_20_snps = simulate(rare_20_snp_model, 1000)[1]</code></pre><p>Some summary statistics of just the first of the 1000 simulation results.</p><pre><code class="language-julia">describe(trait_rare_20_snps[1], stats = [:mean, :std, :min, :max, :eltype])</code></pre><h2><a class="nav-anchor" id="Saving-Simulation-Results-to-Local-Machine-2" href="#Saving-Simulation-Results-to-Local-Machine-2">Saving Simulation Results to Local Machine</a></h2><p>Here we output the simulated trait values and corresponding genotypes for each of the 212 individuals, labeled by their pedigree ID and person ID for the first iteration of the 1000 simulations. </p><pre><code class="language-julia">Trait3_rare = hcat(Fam_Person_id, trait_rare_20_snps[1], geno_rare20_converted)</code></pre><p>In addition, we output the simulation parameters (generated effect sizes and SNP names) used to simulate this trait.</p><pre><code class="language-julia">Coefficients = DataFrame(Coefficients = simulated_effectsizes_chisq)
-SNPs_rare = DataFrame(SNPs = rare_snps_for_simulation)
-Trait3_rare_sim = hcat(Coefficients, SNPs_rare)</code></pre><pre><code class="language-julia">#cd(&quot;/Users&quot;) #change to home directory
-CSV.write(&quot;Trait3_rare.csv&quot;, Trait3_rare)
-CSV.write(&quot;Trait3_rare_sim.csv&quot;, Trait3_rare_sim);</code></pre><h2><a class="nav-anchor" id="Citations:-1" href="#Citations:-1">Citations:</a></h2><p>[1] Lange K, Papp JC, Sinsheimer JS, Sripracha R, Zhou H, Sobel EM (2013) Mendel: The Swiss army knife of genetic analysis programs. Bioinformatics 29:1568-1570.`</p><p>[2] OPENMENDEL: a cooperative programming project for statistical genetics. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=OPENMENDEL">Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z</a>.</p><footer><hr/></footer></article></body></html>
+X_new = [age sex Simulated_SnpArray]</code></pre><h2 id="Phenotype-Simulation:-1"><a class="docs-heading-anchor" href="#Phenotype-Simulation:-1">Phenotype Simulation:</a><a class="docs-heading-anchor-permalink" href="#Phenotype-Simulation:-1" title="Permalink"></a></h2><p>b) phenotype simulation conditional on simulated genotypes</p><h3 id="Ordered-Multinomial-Trait-1"><a class="docs-heading-anchor" href="#Ordered-Multinomial-Trait-1">Ordered Multinomial Trait</a><a class="docs-heading-anchor-permalink" href="#Ordered-Multinomial-Trait-1" title="Permalink"></a></h3><pre><code class="language-julia">θ = sort(rand(3))
+Multinomial_Model1 = OrdinalTrait(X_new, β_new, θ, LogitLink())</code></pre><pre><code class="language-julia">Multinomial_Trait = simulate(Multinomial_Model1)</code></pre><h3 id="Simulate-Ordered-Multinomial-Logistic-1"><a class="docs-heading-anchor" href="#Simulate-Ordered-Multinomial-Logistic-1">Simulate Ordered Multinomial Logistic</a><a class="docs-heading-anchor-permalink" href="#Simulate-Ordered-Multinomial-Logistic-1" title="Permalink"></a></h3><pre><code class="language-julia">Logistic_Trait = simulate(Multinomial_Model1, Logistic = true, threshold = 2)</code></pre><h3 id="Power-Calculation:-1"><a class="docs-heading-anchor" href="#Power-Calculation:-1">Power Calculation:</a><a class="docs-heading-anchor-permalink" href="#Power-Calculation:-1" title="Permalink"></a></h3><p>We use the following function to generate the p-values for the simulated power example for the logistic vs linear regression model. We include plots of different power/effect size combinations for Ordered Logistic Regression models</p><pre><code class="language-julia">effectsizes =
+[0.0
+0.05
+0.1
+0.15
+0.2
+0.25
+0.3
+0.35
+0.4
+0.45
+0.5]</code></pre><pre><code class="language-julia">P = realistic_ordinal_power(1000, effectsizes, Multinomial_Model1, 1234)</code></pre><pre><code class="language-julia">power_ES = power(P, 0.05)</code></pre><pre><code class="language-julia">plot(effectsizes, power_ES)</code></pre><h2 id="Citations:-1"><a class="docs-heading-anchor" href="#Citations:-1">Citations:</a><a class="docs-heading-anchor-permalink" href="#Citations:-1" title="Permalink"></a></h2><p>[1] Lange K, Papp JC, Sinsheimer JS, Sripracha R, Zhou H, Sobel EM (2013) Mendel: The Swiss army knife of genetic analysis programs. Bioinformatics 29:1568-1570.`</p><p>[2] OPENMENDEL: a cooperative programming project for statistical genetics. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=OPENMENDEL">Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z</a>.</p></article></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 19 February 2020 05:10">Wednesday 19 February 2020</span>. Using Julia version 1.2.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
