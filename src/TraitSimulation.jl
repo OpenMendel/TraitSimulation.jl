@@ -1,10 +1,9 @@
 module TraitSimulation
 using GLM # this already defines some useful distribution and link types
 using DataFrames # so we can test it
-using StatsModels # useful distributions #lots more useful distributions
 using LinearAlgebra
 using Random
-using SpecialFunctions
+# using SpecialFunctions
 using OrdinalMultinomialModels
 import Base: show
 
@@ -23,13 +22,11 @@ include("simulatesnparray.jl")
       y = Vector{eltype(trait.dist)}(undef, nsamplesize(trait))
       # do the simulation
       simulate!(y, trait)
-
       return y
   end
 
   function simulate!(y, trait::GLMTrait)
       dist = trait.dist
-
       # in a for-loop
       for i in eachindex(y)
           # push the work of forming a distribution to a
@@ -56,9 +53,9 @@ include("simulatesnparray.jl")
 
   """
   ```
-  simulate(trait, n_reps)
+  simulate(trait::GLMTrait, n::Integer)
   ```
-  this for simulating a single univariate trait, n_reps times. By default the simulate(trait) function will run a single simulation
+  This simulates a GLM trait n times under the desired generalized linear model, specified using the GLMTrait type.
   """
   function simulate(trait::GLMTrait, n::Integer)
       # pre-allocate output
@@ -76,7 +73,9 @@ include("simulatesnparray.jl")
   ```
   simulate(OrderedMultinomialModel, n_reps; Logistic = false, threshold == empty)
   ```
-  this for simulating a single Ordinal trait, n times. By default we simulate the multinomial ordered outcome, but with the specification of the Logistic and threshold arguments, we can do the transformation to ordinal logistic.
+    This simulates a OrderedMultinomialTrait trait n times under the desired model, specified using the OrderedMultinomialTrait type.
+  This simulates a Ordered Multinomial trait n times, under the specifed ordinal multinomial linear model specified as a GLMTrait object for simulation.
+  By default we simulate the multinomial ordered outcome, but with the specification of the Logistic and threshold arguments, we can do the transformation to ordinal logistic.
   """
   function simulate(trait::OrderedMultinomialTrait; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
      y = Vector{Int64}(undef, nsamplesize(trait)) # preallocate
@@ -115,6 +114,12 @@ include("simulatesnparray.jl")
       return Y
   end
 
+  """
+  ```
+  simulate(trait::VCMTrait, n::Integer)
+  ```
+  This simulates (a) trait(s), n times under the desired variance component model, specified using the VCMTrait type.
+  """
   function simulate(trait::VCMTrait, n::Integer)
       # pre-allocate output
       Y_n = ntuple(x -> zeros(size(trait.mu)), n)
