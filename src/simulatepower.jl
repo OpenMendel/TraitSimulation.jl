@@ -1,17 +1,68 @@
 using OrdinalMultinomialModels, DataFrames
+using VarianceComponentModels, Statistics, Distributions
+
 """
 ```
-realistic_power_simulation(n_sim, γs, traitobject, randomseed)
+vcm_power(n_sim, γs, traitobject, randomseed)
 ```
-This function aims to design a study around the effect of a causal snp on a  GLM trait of interest, controlling for sex and age.
-The user can explore the potential of their study design with TraitSimulation.jl input types.
+This function aims to design a study around the effect of a causal snp on a VCM trait of interest, controlling for other covariates of interest and family structure.
+We use the genetic relationship matrix provided by SnpArrays.jl.
+n_obs: number of observations
+n_sim: number of simulations
+γs: vector of effect sizes of the causal snp (last column of design matrix) to be detected
+traitobject: Trait object of type VCMTrait
+randomseed: The random seed used for the simulations for reproducible results
+"""
+function vcm_power(
+    nobs, nsim::Int, γs::Vector{Float64}, traitobject::VCMTrait, B_original::AbstractVecOrMat, randomseed::Int)
+
+    #power estimate
+    pvalue = Array{Float64}(undef, nsim, length(γs))
+    β_original = B_original[end, :]
+    Random.seed!(randomseed)
+
+    #generate the data
+    X_null = traitobject.X[:, 1:(end - 1)]
+    causal_snp = traitobject.X[:, end][:, :]
+    μ_original = copy(traitobject.mu)
+    μ = traitobject.mu
+    y = zeros(size(X_null, 1))
+    Σ, V = vcobjtuple(traitobject.vc)
+    nulldata = VarianceComponentVariate(y, X_null, (2vcmodel.vc[1].V, vcmodel.vc[2].V))
+    altdata = VarianceComponentVariate(y, vcmodel.X, (2vcmodel.vc[1].V, vcmodel.vc[2].V))
+    for j in eachindex(γs)
+        B_original[end, :] .= γs[j]
+        μ .= traitobject.X * B_original
+        Y = simulate(traitobject, nsim) # simulate the trait
+        for i in 1:nsim
+            println(" . . . ")
+            copyto!(nulldata.Y, Y[i])
+            nullmodel = VarianceComponentModel(nulldata)
+            nulllogl, nullmodel, = fit_mle!(nullmodel, nulldata; algo=:FS)
+
+            altmodel = VarianceComponentModel(altdata)
+            altlogl, altmodel, = fit_mle!(altmodel, altdata; algo=:FS)
+
+            LRT = 2(altlogl - nulllogl)
+            pvalue[i, j] = ccdf(Chisq(1), LRT)
+        end
+    end
+    B_original[end, :] = β_original
+    return pvalue
+end
+
+"""
+```
+power_simulation(n_sim, γs, traitobject, randomseed)
+```
+This function aims to design a study around the effect of a causal snp on a GLM trait of interest, controlling for other covariates of interest.
 n_sim: number of simulations
 γs: vector of effect sizes of the causal snp (last column of design matrix) to be detected
 traitobject: this function is type dispatched for the GLMTrait type in TraitSimulation, and simulates the trait of the fields of the object.
 link: link function from GLM.jl
 randomseed: The random seed used for the simulations for reproducible results
 """
-function realistic_power_simulation(
+function power_simulation(
     nsim::Int, γs::Vector{Float64}, traitobject::GLMTrait, randomseed::Int)
     #power estimate
     pvalue = zeros(nsim, length(γs))
@@ -56,7 +107,6 @@ function ordinal_multinomial_power(
     pvaluepolr = Array{Float64}(undef, nsim, length(γs))
     β_original = traitobject.β[end]
     Random.seed!(randomseed)
-
     #generate the data
     X_null = traitobject.X[:, 1:(end - 1)]
     causal_snp = traitobject.X[:, end][:, :]
@@ -64,7 +114,6 @@ function ordinal_multinomial_power(
         for i in 1:nsim
             β = traitobject.β
             β[end] = γs[j]
-            #println(traitobject.β)
             #simulate the trait
             y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
             #compute the power from the ordinal model
@@ -86,7 +135,7 @@ at the user specified level of significance α.  Specifically, this case is conc
 function power(P, alpha)
     power_ES = zeros(size(P, 2))
     for i in eachindex(power_ES)
-        power_ES[i] = mean(P[:, i] .< alpha)
+        power_ES[i] = Statistics.mean(P[:, i] .< alpha)
     end
     return power_ES
 end
@@ -146,7 +195,6 @@ function realistic_multinomial_powers(
     end
     return pvaluelinear, pvaluelogistic, pvaluepolr
 end
-
 
 """
 ```

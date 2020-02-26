@@ -112,28 +112,33 @@ noutcomecategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
 VCMTrait
 VCMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Variance Component Model Framework.
 """
-struct VCMTrait{muT, T} <: AbstractTraitModel
-  mu::muT
-  vc::Vector{T}
-  function VCMTrait(mu::muT, vc::Vector{T}) where {muT, T}
-    return new{muT, T}(mu, vc)
-  end
+struct VCMTrait{matT, vecT1, T} <: AbstractTraitModel
+	X::matT             # all effects
+    β::vecT1            # regression coefficients
+	mu::matT
+	vc::Vector{T}
+	function VCMTrait(X::matT, β::vecT1, mu::matT, vc::Vector{T}) where {matT<:AbstractMatrix, vecT1, T}
+		return new{matT, vecT1, T}(X, β, mu, vc)
+	end
 end
 
 function VCMTrait(mu::muT, Ω::AbstractMatrix) where muT
 	vc = TotalVarianceComponent(Ω)
-  return VCMTrait(mu, [vc])
+  return VCMTrait(nothing, nothing, mu, [vc])
 end
 
 function VCMTrait(formulas::Vector{String}, df::DataFrame, vc::T) where T
   n_traits = length(formulas)
   n_people = size(df)[1]
   mu = zeros(n_people, n_traits)
+  found_covariates = Symbol[]
   for i in 1:n_traits
     #calculate the mean vector
-    mu[:, i] += mean_formula(formulas[i], df)
+	mu[:, i], found_markers = mean_formula(formulas[i], df)
+	union!(found_covariates, found_markers)
   end
-  return VCMTrait(mu, vc)
+  X = df[:, found_covariates]
+  return VCMTrait(X, nothing, mu, vc)
 end
 
 function VCMTrait(formulas::Vector{String}, df::DataFrame, Σ, V)
@@ -141,11 +146,14 @@ function VCMTrait(formulas::Vector{String}, df::DataFrame, Σ, V)
   n_people = size(df)[1]
   mu = zeros(n_people, n_traits)
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+found_covariates = Symbol[]
   for i in 1:n_traits
     #calculate the mean vector
-    mu[:, i] += mean_formula(formulas[i], df)
+    mu[:, i], found_markers = mean_formula(formulas[i], df)
+	union!(found_covariates, found_markers)
   end
-  return VCMTrait(mu, vc)
+  X = df[:, found_covariates]
+  return VCMTrait(X, nothing, mu, vc)
 end
 
 function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, vc::Vector{T}) where {T1, T}
@@ -156,20 +164,20 @@ function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, vc::Vector{T}) w
     #calculate the mean vector
     mu[:, i] .+= X*β[:, i]
   end
-  return VCMTrait(mu, vc)
+  return VCMTrait(X, β, mu, vc)
 end
 
-function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ, V) where T1
-  n_traits = size(β, 2)
-  n_people = size(X, 1)
-  mu = zeros(n_people, n_traits)
-	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-  for i in 1:n_traits
-    #calculate the mean vector
-    mu[:, i] .+= X*β[:, i]
-  end
-  return VCMTrait(mu, vc)
-end
+# function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where T1
+#   n_traits = size(β, 2)
+#   n_people = size(X, 1)
+#   mu = zeros(n_people, n_traits)
+# 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+#   for i in 1:n_traits
+#     #calculate the mean vector
+#     mu[:, i] .+= X*β[:, i]
+#   end
+#   return VCMTrait(X, β, mu, vc)
+# end
 
 ##  Variance Component Model
 function Base.show(io::IO, x::VCMTrait)
@@ -183,3 +191,4 @@ end
 nsamplesize(trait::VCMTrait) = size(trait.mu, 1)
 ntraits(trait::VCMTrait) = size(trait.mu, 2)
 nvc(trait::VCMTrait) = length(trait.vc)
+neffects(trait::VCMTrait) = size(trait.X, 2)

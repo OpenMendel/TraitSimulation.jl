@@ -13,7 +13,7 @@ include("modelparameterparsers.jl")
 
 include("modelframework.jl")
 
-include("orderedmultinomialpower.jl")
+include("simulatepower.jl")
 
 include("simulatesnparray.jl")
 
@@ -27,10 +27,7 @@ include("simulatesnparray.jl")
 
   function simulate!(y, trait::GLMTrait)
       dist = trait.dist
-      # in a for-loop
       for i in eachindex(y)
-          # push the work of forming a distribution to a
-          # helper function yet-to-be defined
           y[i] = rand(__get_distribution(dist, trait.μ[i]))
       end
       return y
@@ -60,12 +57,10 @@ include("simulatesnparray.jl")
   function simulate(trait::GLMTrait, n::Integer)
       # pre-allocate output
       Y = Matrix{eltype(trait.dist)}(undef, nsamplesize(trait), n)
-
       # do the simulation n times, storing each result in a column
       for k in 1:n
           @views simulate!(Y[:, k], trait)
       end
-
       return Y
   end
 
