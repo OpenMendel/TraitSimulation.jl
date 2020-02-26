@@ -5,7 +5,7 @@
 Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange
 
 
-##Installation
+# Installation
 Double check that you are using Julia version 1.0 or higher by checking the machine information
 
 
@@ -115,7 +115,7 @@ Users can specify to simulate phenotypes from unrelateds or families with user-s
 
 1 . GLM: Y ~ Poisson (mu = ginverse(XB), Sigma = sigmaA * 2GRM + sigmaE * I_n) 
 
-2 . VCM: Y ~ MatrixNormal}(M = XB, Omega = SigmaA ? 2GRM + SigmaE ? I_n)
+2 . VCM: Y ~ MatrixNormal}(M = XB, Omega = SigmaA ⊗ 2GRM + SigmaE ⊗ I_n)
 
 We show in the next example, models with additional variance components can also be specified, as long as they are sensible (positive semi definite).
 
@@ -201,7 +201,7 @@ trait_rare_20_snps = DataFrame(SimTrait = simulate(rare_20_snp_model)[:])
 
 This example extends the variance component model in the previous example to demo how to efficiently account for any number of other random effects, in addition to the additive genetic and environmental variance components. In this example we show alternative ways to specify the simulation parameters for the VCM and benchmark it against the available MatrixNormal distribution in Julia package, Distributions.jl.
 
-Y ~ MatrixNormal(M= XB, Omega = Sum_[k=1^m] Sigma_k  ? V_k)
+Y ~ MatrixNormal(M= XB, Omega = Sum_[k=1^m] Sigma_k  ⊗ V_k)
 
 Say that you have the the classical setting in genetics, two variance components, one for the additive genetic variance and one for the environmental variance.
 
@@ -215,7 +215,7 @@ V_A = [4 1; 1 4]
 V_E = [2.0 0.0; 0.0 2.0];
 
 # @vc is a macro that creates a 'VarianceComponent' Type for simulation
-variance_formula = @vc V_A  ? 2GRM + V_E  ?�� I_n;
+variance_formula = @vc V_A  ⊗ 2GRM + V_E  ⊗ I_n;
 ```
 
 
@@ -257,12 +257,12 @@ We then benchmark against the same simulation process using the MatrixNormal() f
         copy!(V[end], Diagonal(ones(n))) # last covarianec matrix is identity
 
         # a tuple of m d-by-d variance component parameters
-        Σ = ntuple(x -> zeros(d, d), m)
+        Î£ = ntuple(x -> zeros(d, d), m)
         for i in 1:m
-          copy!(Σ[i], generateSPDmatrix(d))
+          copy!(Î£[i], generateSPDmatrix(d))
         end
 
-        return(X, B, Σ, V)
+        return(X, B, Î£, V)
     end
 
 
@@ -276,8 +276,8 @@ p = 2;      # no. covariates
 
 
 ```julia
-X_sim, B_sim, Σ_sim, V_sim = generateRandomVCM(n, p, d, m);
-Random_VCM_Trait = DataFrame(VCM_trait_simulation(X_sim, B_sim, Σ_sim, V_sim), [:SimTrait1, :SimTrait2])
+X_sim, B_sim, Î£_sim, V_sim = generateRandomVCM(n, p, d, m);
+Random_VCM_Trait = DataFrame(VCM_trait_simulation(X_sim, B_sim, Î£_sim, V_sim), [:SimTrait1, :SimTrait2])
 ```
 
 In our VarianceComponent type, we store the cholesky decomposition of each Sigma_i and V_i, computed outside of simulation within the vc_vector of VarianceComponent types. This is important since the more often than not, users have to run the simulation many times for their desired goal.
@@ -290,22 +290,22 @@ For only one variance component we are roughly four 2x more memory efficient and
 
 
 ```julia
-VCMtraitobj = VCMTrait(X_sim*B_sim, VarianceComponent(Σ_sim[1], V_sim[1]))
+VCMtraitobj = VCMTrait(X_sim*B_sim, VarianceComponent(Î£_sim[1], V_sim[1]))
 @benchmark simulate(VCMtraitobj)
 ```
 
 
 ```julia
-function MN_J(X, B, Σ, V; n_reps = 1)
+function MN_J(X, B, Î£, V; n_reps = 1)
     n, p = size(X*B)
     sim = [zeros(n, p) for i in 1:n_reps]
     for i in 1:n_reps
-        sim[i] = rand(MatrixNormal(X*B, V, Σ))
+        sim[i] = rand(MatrixNormal(X*B, V, Î£))
     end
     return(sim)
 end
 
-@benchmark MN_J($X_sim, $B_sim, $Σ_sim[1], $V_sim[1])
+@benchmark MN_J($X_sim, $B_sim, $Î£_sim[1], $V_sim[1])
 ```
 
 ## Compare simulation for m = 10 variance components
@@ -314,27 +314,27 @@ still about 2x memory efficient but now 3.2x faster compared to the Distribution
 
 
 ```julia
-vc_vector = [VarianceComponent(Σ_sim[i], V_sim[i]) for i in eachindex(V_sim)]
+vc_vector = [VarianceComponent(Î£_sim[i], V_sim[i]) for i in eachindex(V_sim)]
 VCMtraitobjm = VCMTrait(X_sim*B_sim, vc_vector);
 @benchmark simulate(VCMtraitobjm)
 ```
 
 
 ```julia
-function MN_Jm(X, B, Σ, V; n_reps = 1)
+function MN_Jm(X, B, Î£, V; n_reps = 1)
     n, p = size(X*B)
     m = length(V)
     sim = [zeros(n, p) for i in 1:n_reps]
     for i in 1:n_reps
         for j in 1:m
-            dist = MatrixNormal(X*B, V[j], Σ[j])
+            dist = MatrixNormal(X*B, V[j], Î£[j])
             sim[i] += rand(dist)
         end
     end
     return(sim)
 end
 
-@benchmark vecs = MN_Jm($X_sim, $B_sim, $Σ_sim, $V_sim)
+@benchmark vecs = MN_Jm($X_sim, $B_sim, $Î£_sim, $V_sim)
 ```
 
 # Example 3: Power Calculation
@@ -356,7 +356,7 @@ Simulated_SnpArray = snparray_simulation(maf_causal_snp, 379)
 
 
 ```julia
-β_new =
+Î²_new =
 [1.0
  2.0
 10.0]
@@ -380,8 +380,8 @@ b) phenotype simulation conditional on simulated genotypes
 
 
 ```julia
-θ = sort(rand(3))
-Multinomial_Model1 = OrdinalTrait(X_new, β_new, θ, LogitLink())
+Î¸ = sort(rand(3))
+Multinomial_Model1 = OrdinalTrait(X_new, Î²_new, Î¸, LogitLink())
 ```
 
 
@@ -436,6 +436,7 @@ plot(effectsizes, power_ES)
 
 [1] Lange K, Papp JC, Sinsheimer JS, Sripracha R, Zhou H, Sobel EM (2013) Mendel: The Swiss army knife of genetic analysis programs. Bioinformatics 29:1568-1570.`
 
-
 [2] OPENMENDEL: a cooperative programming project for statistical genetics.
 [Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z](https://www.ncbi.nlm.nih.gov/pubmed/?term=OPENMENDEL).
+
+[3] German, CA, Sinsheimer, JS, Klimentidis, YC, Zhou, H, Zhou, JJ. Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 2019; 1– 13. https://doi.org/10.1002/gepi.22276
