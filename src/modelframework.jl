@@ -167,17 +167,17 @@ function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, vc::Vector{T}) w
   return VCMTrait(X, β, mu, vc)
 end
 
-# function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where T1
-#   n_traits = size(β, 2)
-#   n_people = size(X, 1)
-#   mu = zeros(n_people, n_traits)
-# 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-#   for i in 1:n_traits
-#     #calculate the mean vector
-#     mu[:, i] .+= X*β[:, i]
-#   end
-#   return VCMTrait(X, β, mu, vc)
-# end
+function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where T1
+  n_traits = size(β, 2)
+  n_people = size(X, 1)
+  mu = zeros(n_people, n_traits)
+	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+  for i in 1:n_traits
+    #calculate the mean vector
+    mu[:, i] .+= X*β[:, i]
+  end
+  return VCMTrait(X, β, mu, vc)
+end
 
 ##  Variance Component Model
 function Base.show(io::IO, x::VCMTrait)
@@ -192,3 +192,38 @@ nsamplesize(trait::VCMTrait) = size(trait.mu, 1)
 ntraits(trait::VCMTrait) = size(trait.mu, 2)
 nvc(trait::VCMTrait) = length(trait.vc)
 neffects(trait::VCMTrait) = size(trait.X, 2)
+
+
+struct GLMMTrait{distT, linkT, matT2, T, matT} <: AbstractTraitModel
+   X::matT             # all effects
+   β::matT2            # regression coefficients
+   μ::matT2            # mean of the glmm with random effects
+   η::matT
+   Z::matT             # place holder for getting glmmm mean
+   vc::Vector{T}
+   dist::Type{distT}   # univariate, exponential family of distributions
+   link::linkT         # link function g(μ) = X*β
+end
+
+function GLMMTrait(X::AbstractMatrix, β::AbstractMatrix, vc::Vector, distribution::D, link::linkT) where {D, linkT, matT2, T, matT}
+	distT = Base.typename(typeof(distribution)).wrapper
+	Z = zeros(size(X, 1), size(β, 2))
+	η = X*β
+	μ = zero(η)
+  return GLMMTrait(X, β, μ, η, Z, vc, distT, link)
+end
+
+
+# better printing; customize how a type is summarized in a REPL
+function Base.show(io::IO, x::GLMMTrait)
+    print(io, "Generalized Linear Mixed Model\n")
+    print(io, "  * response distribution: $(x.dist)\n")
+    print(io, "  * link function: $(typeof(x.link))\n")
+	print(io, "  * number of variance components: $(nvc(x))\n")
+    print(io, "  * sample size: $(nsamplesize(x))")
+end
+# make our new type implement the interface defined above
+nsamplesize(trait::GLMMTrait) = size(trait.μ, 1)
+ntraits(trait::GLMMTrait) = size(trait.μ, 2)
+nvc(trait::GLMMTrait) = length(trait.vc)
+neffects(trait::GLMMTrait) = size(trait.X, 2)

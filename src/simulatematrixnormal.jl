@@ -12,9 +12,10 @@ struct VarianceComponent
 	end
 end
 
+
 struct TotalVarianceComponent
 	Ω::Matrix{Float64}
-	cholΩ::Cholesky{Float64,Array{Float64,2}}
+	cholΩ::Cholesky{Float64, Array{Float64, 2}}
 	function TotalVarianceComponent(Ω)
 		cholΩ = cholesky(Symmetric(Ω))
 		return new(Ω, cholΩ)
@@ -30,7 +31,6 @@ end
 # make our new type implement the interface defined above
 nsamplesize(vc::VarianceComponent) = size(vc.V, 1)
 ntraits(vc::VarianceComponent) = size(vc.Σ, 1)
-
 
 # For a single Variance Component, algorithm that will transform standard normal distribution
 function simulate_matrix_normal!(Z::Matrix, vc::VarianceComponent)
@@ -51,7 +51,7 @@ end
 
 """
 	VCM_trait_simulation(mu::Matrix{Float64}, vc::Vector{TotalVarianceComponent})
-For an evaluated mean matrix and the evaluated covariance matrix (not a VarianceComponent object), simulate from VCM.
+For an evaluated mean matrix and vector of VarianceComponent objects, simulate from VCM.
 """
 function VCM_trait_simulation(Y::Matrix, mu::Matrix{Float64}, vc) # for an evaluated matrix
 	Z = zero(Y)

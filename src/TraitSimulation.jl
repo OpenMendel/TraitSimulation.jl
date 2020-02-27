@@ -125,8 +125,25 @@ include("simulatesnparray.jl")
       return Y_n
   end
 
+  function simulate(trait::GLMMTrait)
+      # pre-allocate output
+      Y = Matrix{eltype(trait.dist)}(undef, nsamplesize(trait), ntraits(trait))
+      # do the simulation
+      simulate!(Y, trait)
+      return Y
+  end
 
-  export mean_formula, VarianceComponent, TotalVarianceComponent
+  function simulate!(Y, trait::GLMMTrait)
+      #  simulate random effects
+      fill!(trait.Z, 0)
+      VCM_trait_simulation(trait.Z, trait.η, trait.vc)
+      # simulate from the glm with the mean μ and vector of ones for coefficients
+      trait.μ .= linkinv.(trait.link, trait.Z)
+      @.  Y = rand(__get_distribution(trait.dist, trait.μ))
+      return Y
+  end
+
+  export mean_formula, VarianceComponent, TotalVarianceComponent, GLMMTrait
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, simulate, @vc, vcobjtuple
   export simulate_effect_size, snparray_simulation, genotype_sim, realistic_multinomial_powers, power_multinomial_models
   export ordinal_multinomial_power, power, realistic_power_simulation

@@ -57,7 +57,7 @@ function mean_formula(user_formula_string::String, df::DataFrame)
     else
         mean_vector = [users_formula_expression for i in 1:size(df, 1)]
     end
-    return mean_vector
+    return mean_vector, found_markers
 end
 
 """
@@ -109,7 +109,7 @@ end
 vcobjectuple(vcobject)
 This function creates a tuple of Variance Components, given a vector of variancecomponent objects to be compatible with VarianceComponentModels.jl
 """
-function  vcobjtuple(vcobject::Vector{VarianceComponent})
+function  vcobjtuple(vcobject::Union{Vector{VarianceComponent},Vector{TotalVarianceComponent}})
 	m = length(vcobject)
 	d = size(vcobject[1].Σ, 1)
 	n = size(vcobject[1].V, 1)
