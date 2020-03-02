@@ -112,13 +112,13 @@ noutcomecategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
 VCMTrait
 VCMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Variance Component Model Framework.
 """
-struct VCMTrait{matT, vecT1, T} <: AbstractTraitModel
-	X::matT             # all effects
-    β::vecT1            # regression coefficients
-	mu::matT
+struct VCMTrait{matT1, matT2, matT3, T} <: AbstractTraitModel
+	X::matT1             # all effects
+    β::matT2            # regression coefficients
+	mu::matT3
 	vc::Vector{T}
-	function VCMTrait(X::matT, β::vecT1, mu::matT, vc::Vector{T}) where {matT<:AbstractMatrix, vecT1, T}
-		return new{matT, vecT1, T}(X, β, mu, vc)
+	function VCMTrait(X::matT1, β::matT2, mu::matT3, vc::Vector{T}) where {matT1, matT2, matT3, T}
+		return new{matT1, matT2, matT3, T}(X, β, mu, vc)
 	end
 end
 
@@ -156,7 +156,7 @@ found_covariates = Symbol[]
   return VCMTrait(X, nothing, mu, vc)
 end
 
-function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, vc::Vector{T}) where {T1, T}
+function VCMTrait(X::T1, β::AbstractArray, vc::Vector{T}) where {T1, T}
   n_traits = size(β, 2)
   n_people = size(X, 1)
   mu = zeros(n_people, n_traits)
