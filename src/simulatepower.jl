@@ -3,7 +3,7 @@ using VarianceComponentModels, Statistics, Distributions
 
 """
 ```
-vcm_power(n_sim, γs, traitobject, randomseed)
+power_simulation(n_sim, γs, traitobject, randomseed)
 ```
 This function aims to design a study around the effect of a causal snp on a VCM trait of interest, controlling for other covariates of interest and family structure.
 We use the genetic relationship matrix provided by SnpArrays.jl.
@@ -13,9 +13,8 @@ n_sim: number of simulations
 traitobject: Trait object of type VCMTrait
 randomseed: The random seed used for the simulations for reproducible results
 """
-function vcm_power(
-    nobs, nsim::Int, γs::Vector{Float64}, traitobject::VCMTrait, B_original::AbstractVecOrMat, randomseed::Int)
-
+function power_simulation(
+    nsim::Int, γs::Vector{Float64}, traitobject::VCMTrait, B_original::AbstractVecOrMat, randomseed::Int)
     #power estimate
     pvalue = Array{Float64}(undef, nsim, length(γs))
     β_original = B_original[end, :]
@@ -27,9 +26,22 @@ function vcm_power(
     μ_original = copy(traitobject.mu)
     μ = traitobject.mu
     y = zeros(size(X_null, 1))
-    Σ, V = vcobjtuple(traitobject.vc)
-    nulldata = VarianceComponentVariate(y, X_null, (2vcmodel.vc[1].V, vcmodel.vc[2].V))
-    altdata = VarianceComponentVariate(y, vcmodel.X, (2vcmodel.vc[1].V, vcmodel.vc[2].V))
+    nulldata = VarianceComponentVariate(y, X_null, (vcmodel.vc[1].V, vcmodel.vc[2].V))
+    altdata = VarianceComponentVariate(y, vcmodel.X, (vcmodel.vc[1].V, vcmodel.vc[2].V))
+
+    vc_null_data_rot = TwoVarCompVariateRotate(nulldata)
+    vc_alt_data_rot = TwoVarCompVariateRotate(altdata)
+
+    null_data = TwoVarCompVariateRotate(vc_null_data_rot.Yrot,
+                vc_null_data_rot.Xrot, vc_null_data_rot.eigval, vc_null_data_rot.eigvec,
+                vc_null_data_rot.logdetV2)
+
+    alt_data = TwoVarCompVariateRotate(vc_alt_data_rot.Yrot,
+                vc_alt_data_rot.Xrot, vc_alt_data_rot.eigval, vc_alt_data_rot.eigvec,
+                vc_alt_data_rot.logdetV2)
+
+    eigvecs = transpose(null_data.eigvec)
+    storage = zeros(length(vc_alt_data_rot.Yrot), 1)
     for j in eachindex(γs)
         B_original[end, :] .= γs[j]
         μ .= traitobject.X * B_original
@@ -37,11 +49,19 @@ function vcm_power(
         for i in 1:nsim
             println(" . . . ")
             copyto!(nulldata.Y, Y[i])
-            nullmodel = VarianceComponentModel(nulldata)
-            nulllogl, nullmodel, = fit_mle!(nullmodel, nulldata; algo=:FS)
+            mul!(storage, eigvecs, Y[i])
+            copyto!(vc_null_data_rot.Yrot, storage)
+            copyto!(null_data.Yrot, storage)
+            null_model = VarianceComponentModel(nulldata)
 
-            altmodel = VarianceComponentModel(altdata)
-            altlogl, altmodel, = fit_mle!(altmodel, altdata; algo=:FS)
+            nulllogl, nullmodel, = mle_fs!(null_model, null_data; solver=:Ipopt, maxiter=1000, verbose=false);
+
+            copyto!(altdata.Y, Y[i])
+            mul!(storage, eigvecs, Y[i])
+            copyto!(vc_alt_data_rot.Yrot, storage)
+            copyto!(alt_data.Yrot, storage)
+            alt_model = VarianceComponentModel(altdata)
+            altlogl, altmodel, = mle_fs!(alt_model, alt_data; solver=:Ipopt, maxiter=1000, verbose=false);
 
             LRT = 2(altlogl - nulllogl)
             pvalue[i, j] = ccdf(Chisq(1), LRT)
@@ -50,6 +70,8 @@ function vcm_power(
     B_original[end, :] = β_original
     return pvalue
 end
+
+
 
 """
 ```
@@ -92,7 +114,7 @@ end
 
 """
 ```
-ordinal_multinomial_power(nsim::Int, γs::Vector{Float64}, traitobject::OrderedMultinomialTrait, randomseed::Int)
+ordinal_power_simulation(nsim::Int, γs::Vector{Float64}, traitobject::OrderedMultinomialTrait, randomseed::Int)
 ```
 This function aims to design a study around the effect of a causal snp on an Ordinal trait of interest, controlling for sex and age.
 The user can explore the potential of their study design with TraitSimulation.jl input types.
@@ -101,12 +123,13 @@ n_sim: number of simulations
 traitobject: this function is type dispatched for the OrdinalTrait type in TraitSimulation, and simulates the trait of the fields of the object.
 randomseed: The random seed used for the simulations for reproducible results
 """
-function ordinal_multinomial_power(
+function ordinal_power_simulation(
     nsim::Int, γs::Vector{Float64}, traitobject::OrderedMultinomialTrait, randomseed::Int)
     #power estimate
     pvaluepolr = Array{Float64}(undef, nsim, length(γs))
     β_original = traitobject.β[end]
     Random.seed!(randomseed)
+
     #generate the data
     X_null = traitobject.X[:, 1:(end - 1)]
     causal_snp = traitobject.X[:, end][:, :]
@@ -114,8 +137,8 @@ function ordinal_multinomial_power(
         for i in 1:nsim
             β = traitobject.β
             β[end] = γs[j]
-            #simulate the trait
-            y = simulate(traitobject)#, Logistic = false, threshold = 0.5)
+            y = simulate(traitobject) # simulate the trait
+            ydata = DataFrame(y = y) # for GLM package also needs to be in a dataframe
             #compute the power from the ordinal model
             ornull = polr(X_null, y, traitobject.link)
             pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
@@ -124,6 +147,7 @@ function ordinal_multinomial_power(
     traitobject.β[end] = β_original
     return pvaluepolr
 end
+
 
 """
 ```
@@ -142,7 +166,7 @@ end
 
 """
 ```
-realistic_multinomial_powers(n, n_sim, maf, θ, γs, meanage, varage, pfemale, link, cutoff, randomseed)
+ordinal_power_simulation(n, n_sim, maf, θ, γs, meanage, varage, pfemale, link, cutoff, randomseed)
 ```
 This function aims to compare the power under the linear regression, logistic regression and ordered multinomial models.
 n: sample size
@@ -153,7 +177,7 @@ link: link function from GLM.jl
 cutoff: Which cuttoff to use for Multinomial Traits that may later be transformed to binary 0, 1 Traits (ex. disease vs healthy). If Trait > cutoff -> Trait == 1 else Trait == 0
 randomseed: The random seed used for the simulations for reproducible results
 """
-function realistic_multinomial_powers(
+function ordinal_power_simulation(
     n::Int, nsim::Int,
     maf::Float64, θ::Vector{Float64}, γs::Float64,
     meanage::Real, varage::Real, pfemale::Real, link, cutoff::Real, randomseed::Int)
