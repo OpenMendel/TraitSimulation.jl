@@ -3,6 +3,7 @@ using GLM # this already defines some useful distribution and link types
 using DataFrames # so we can test it
 using LinearAlgebra
 using Random
+using SnpArrays
 # using SpecialFunctions
 using OrdinalMultinomialModels
 import Base: show

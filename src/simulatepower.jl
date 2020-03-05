@@ -13,6 +13,7 @@ n_sim: number of simulations
 traitobject: Trait object of type VCMTrait
 randomseed: The random seed used for the simulations for reproducible results
 """
+# given the genetic and nongenetic separately
 function power_simulation(
     nsim::Int, γs::Vector{Float64}, traitobject::VCMTrait, B_original::AbstractVecOrMat, randomseed::Int)
     #power estimate
@@ -25,9 +26,9 @@ function power_simulation(
     causal_snp = traitobject.X[:, end][:, :]
     μ_original = copy(traitobject.mu)
     μ = traitobject.mu
-    y = zeros(size(X_null, 1))
-    nulldata = VarianceComponentVariate(y, X_null, (vcmodel.vc[1].V, vcmodel.vc[2].V))
-    altdata = VarianceComponentVariate(y, vcmodel.X, (vcmodel.vc[1].V, vcmodel.vc[2].V))
+    y = zeros(size(μ_original))
+    nulldata = VarianceComponentVariate(y, X_null, (traitobject.vc[1].V, traitobject.vc[2].V))
+    altdata = VarianceComponentVariate(y, traitobject.X, (traitobject.vc[1].V, traitobject.vc[2].V))
 
     vc_null_data_rot = TwoVarCompVariateRotate(nulldata)
     vc_alt_data_rot = TwoVarCompVariateRotate(altdata)
@@ -41,7 +42,7 @@ function power_simulation(
                 vc_alt_data_rot.logdetV2)
 
     eigvecs = transpose(null_data.eigvec)
-    storage = zeros(length(vc_alt_data_rot.Yrot), 1)
+    storage = zeros(size(μ_original))
     for j in eachindex(γs)
         B_original[end, :] .= γs[j]
         μ .= traitobject.X * B_original
@@ -70,7 +71,6 @@ function power_simulation(
     B_original[end, :] = β_original
     return pvalue
 end
-
 
 
 """

@@ -379,8 +379,8 @@ uuid = "1277b4bf-5013-50f5-be3d-901d8477a67a"
 version = "1.0.0"
 
 [[SnpArrays]]
-deps = ["CSV", "CodecBzip2", "CodecXz", "CodecZlib", "CodecZstd", "DataFrames", "DelimitedFiles", "Distributions", "Glob", "LinearAlgebra", "Missings", "Mmap", "Random", "SparseArrays", "Statistics", "StatsBase", "TranscodingStreams"]
-git-tree-sha1 = "76153232271cec9110199bf7bb325e2ec829fc14"
+deps = ["CSV", "CodecBzip2", "CodecXz", "CodecZlib", "CodecZstd", "DataFrames", "DelimitedFiles", "Glob", "LinearAlgebra", "Missings", "Mmap", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "TranscodingStreams"]
+git-tree-sha1 = "66e990bbe71530c3be4a576fe012efe2b295cf4e"
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/SnpArrays.jl"
 uuid = "4e780e97-f5bf-4111-9dc4-b70aaf691b06"
