@@ -37,3 +37,23 @@ X, B, Σ, V = generateRandomVCM(n, p, d, m)
 maf  = 0.2
 nsnps = 10
 @test snparray_simulation([maf], nsnps) isa SnpArrays.SnpArray
+
+using LinearAlgebra
+X, β, Σ, V  = generateRandomVCM(50,2 , 2, 2)
+G = snparray_simulation([0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5], 50)
+Σ = [Σ...]
+V = [V...]
+γ = rand(7, 2)
+varcomp = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗  V[2]
+vcmOBJ =  VCMTrait(X, β, G, γ, Σ, V)
+
+@test vcmOBJ.mu == X*β .+ G*γ
+
+vcmOBJ2 =  VCMTrait(X, β, varcomp)
+@test isnothing(vcmOBJ2.G)
+@test vcmOBJ2.mu ≈ X*β rtol = 0.005
+
+simulations_test  =  simulate(vcmOBJ2, 1000)
+using Statistics
+
+using VarianceComponentModels
