@@ -129,7 +129,7 @@ Here we are separating the computation because A1 is stored in compressed form w
 uncompressed (float64) matrix. This means that they cannot be stored in the same data
 structure.
 """
-function A_mul_B!(C1, C2, A1::SnpArray,
+function A_mul_B!(C1, C2, A1::SnpBitMatrix,
         A2::AbstractMatrix{T}, B1, B2) where {T <: Real}
     SnpArrays.mul!(C1, A1, B1)
     LinearAlgebra.mul!(C2, A2, B2)

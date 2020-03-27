@@ -35,10 +35,11 @@ struct GLMTrait{distT, linkT, vecT1, vecT2, matT} <: AbstractTraitModel
     X::matT             # all effects
     β::vecT1            # regression coefficients
     η::vecT2            # linear predictor η = X*β
-    μ::vecT2            # expected value of response μ = g^-1(η)  where g is the link function
+    μ::vecT2            # expected value of response μ = g^-1(η), g is the link function
     dist::Type{distT}   # univariate, exponential family of distributions
     link::linkT         # link function g(μ) = X*β = η
-    function GLMTrait(X::matT, β::vecT1, η::vecT2, μ::vecT2, distribution::D, link::linkT) where {D,linkT,vecT1,vecT2,matT}
+    function GLMTrait(X::matT, β::vecT1, η::vecT2, μ::vecT2,
+		 distribution::D, link::linkT) where {D,linkT,vecT1,vecT2,matT}
         # extract the base type without type parameters
         distT = Base.typename(typeof(distribution)).wrapper
         # make a new instance
@@ -51,8 +52,8 @@ end
 
 # building from model encoded as mat-vec
 function GLMTrait(X::AbstractMatrix, β::AbstractVector, distribution, link)
-    # define the linear predictor
-    η = X * β
+	# define the linear predictor
+    η = X*β
     # apply the inverse link element-wise
     μ = linkinv.(link, η)
     # create a new instance
@@ -71,6 +72,18 @@ function GLMTrait(x::AbstractVector, distribution, link, ismu::Bool = true)
     return GLMTrait(nothing, nothing, η, μ, distribution, link)
 end
 
+function GLMTrait(X::AbstractMatrix, β::AbstractVector, G::AbstractMatrix,
+	 				γ::AbstractVector, distribution, link)
+  n_traits = size(β[:, :], 2)
+  n_people = size(X, 1)
+  η = zeros(n_people, n_traits)
+  non_gen_covariates = zeros(n_people, n_traits)
+
+  X_full = [X G]
+  β_full = vcat(β,γ)
+  return GLMTrait(X_full, β_full, distribution, link)
+end
+
 # better printing; customize how a type is summarized in a REPL
 function Base.show(io::IO, x::GLMTrait)
     print(io, "Generalized Linear Model\n")
@@ -83,13 +96,15 @@ end
 nsamplesize(trait::GLMTrait) = length(trait.μ)
 neffects(trait::GLMTrait) = size(trait.X, 2)
 
+
 struct OrderedMultinomialTrait{matT, vecT1, vecT2, linkT} <: AbstractTraitModel
     X::matT             # all effects
     β::vecT1            # regression coefficients
     θ::vecT2            # must be increasing
 	link::linkT	        # link function from GLM.jl
 	# create a new instance
-	function OrderedMultinomialTrait(X::matT, β::vecT1, θ::vecT2, link::linkT)  where {matT, vecT1, vecT2, linkT}
+	function OrderedMultinomialTrait(X::matT, β::vecT1,
+		 θ::vecT2, link::linkT)  where {matT, vecT1, vecT2, linkT}
     return new{matT, vecT1, vecT2, linkT}(X, β, θ, link)
   end
 end
@@ -110,7 +125,8 @@ noutcomecategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
 # variance component models: multiple correlated traits
 """
 VCMTrait
-VCMTrait object is one of the two model framework objects. Stores information about the simulation of multiple traits, under the Variance Component Model Framework.
+VCMTrait object is a model framework object that stores information about the simulation model
+ of multiple traits, under the Variance Component Model Framework.
 """
 struct VCMTrait{matT1, matT2, matT3, matT4, matT5, T} <: AbstractTraitModel
 	X::matT1             # all effects
@@ -119,7 +135,8 @@ struct VCMTrait{matT1, matT2, matT3, matT4, matT5, T} <: AbstractTraitModel
 	γ::matT4            # effect sizes for each snp
 	mu::matT5           # evaluated fixed effect
 	vc::Vector{T}
-	function VCMTrait(X::matT1, β::matT2, G::matT3, γ::matT4, mu::matT5, vc::Vector{T}) where {matT1, matT2, matT3, matT4, matT5<:AbstractMatrix, T}
+	function VCMTrait(X::matT1, β::matT2, G::matT3, γ::matT4, mu::matT5,
+	vc::Vector{T}) where {matT1, matT2, matT3, matT4, matT5<:AbstractMatrix, T}
 		return new{matT1, matT2, matT3, matT4, matT5, T}(X, β, G, γ, mu, vc)
 	end
 end
@@ -182,7 +199,7 @@ function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matri
 end
 
 function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, G::matT3, γ::matT4, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where {T1, matT3, matT4}
-  n_traits = size(X, 2)
+  n_traits = size(β, 2)
   n_people = size(X, 1)
   mu = zeros(n_people, n_traits)
   vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
@@ -211,12 +228,16 @@ struct GLMMTrait{distT, linkT, matT2, T, matT} <: AbstractTraitModel
    β::matT2            # regression coefficients
    μ::matT2            # mean of the glmm with random effects
    η::matT
-   Z::matT             # place holder for getting glmmm mean
+   Z::matT             # place holder for getting glmmm mean for simulation
    vc::Vector{T}
    dist::Type{distT}   # univariate, exponential family of distributions
    link::linkT         # link function g(μ) = X*β
 end
 
+"""
+GLMMTrait
+GLMMTrait object is a model framework that stores information about the simulation of multiple traits, under the Generalized Linear Mixed Model Framework.
+"""
 function GLMMTrait(X::AbstractMatrix, β::AbstractMatrix, vc::Vector, distribution::D, link::linkT) where {D, linkT, matT2, T, matT}
 	distT = Base.typename(typeof(distribution)).wrapper
 	Z = zeros(size(X, 1), size(β, 2))

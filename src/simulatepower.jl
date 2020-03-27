@@ -138,7 +138,6 @@ function ordinal_power_simulation(
             β = traitobject.β
             β[end] = γs[j]
             y = simulate(traitobject) # simulate the trait
-            ydata = DataFrame(y = y) # for GLM package also needs to be in a dataframe
             #compute the power from the ordinal model
             ornull = polr(X_null, y, traitobject.link)
             pvaluepolr[i, j] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
