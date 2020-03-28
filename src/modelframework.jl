@@ -136,10 +136,11 @@ struct VCMTrait{matT1, matT2, matT3, matT4, matT5, T} <: AbstractTraitModel
 	mu::matT5           # evaluated fixed effect
 	vc::Vector{T}
 	function VCMTrait(X::matT1, β::matT2, G::matT3, γ::matT4, mu::matT5,
-	vc::Vector{T}) where {matT1, matT2, matT3, matT4, matT5<:AbstractMatrix, T}
+	vc::Vector{T}) where {matT1, matT2, matT3, matT4, matT5<:Matrix{Float64}, T}
 		return new{matT1, matT2, matT3, matT4, matT5, T}(X, β, G, γ, mu, vc)
 	end
 end
+
 
 function VCMTrait(mu::muT, Ω::AbstractMatrix) where muT
 	vc = TotalVarianceComponent(Ω)
@@ -186,7 +187,7 @@ function VCMTrait(X::T1, β::AbstractArray, vc::Vector{T}) where {T1, T}
   return VCMTrait(X, β, nothing, nothing, mu, vc)
 end
 
-function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where T1
+function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{AbstractVecOrMat}, V::Vector{Matrix{Float64}}) where T1
   n_traits = size(β, 2)
   n_people = size(X, 1)
   mu = zeros(n_people, n_traits)
@@ -198,16 +199,15 @@ function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matri
   return VCMTrait(X, β, nothing, nothing, mu, vc)
 end
 
-function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, G::matT3, γ::matT4, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where {T1, matT3, matT4}
-  n_traits = size(β, 2)
-  n_people = size(X, 1)
-  mu = zeros(n_people, n_traits)
-  vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-  non_gen_covariates = zeros(n_people, n_traits)
-  A_mul_B!(mu, non_gen_covariates, G, X, γ, β)
-  return VCMTrait(X, β, G, γ, mu, vc)
+function VCMTrait(X::AbstractArray{T1, 2}, β::AbstractVecOrMat, G::AbstractMatrix, γ::AbstractVecOrMat, Σ, V::Vector{Matrix{Float64}}) where T1
+    n_traits = size(β, 2)
+    n_people = size(X, 1)
+    mu = zeros(n_people, n_traits)[:]
+    vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+    non_gen_covariates = zeros(n_people, n_traits)[:]
+    TraitSimulation.A_mul_B!(mu, non_gen_covariates, G, X, γ, β)[:,:]
+    return VCMTrait(X, β, nothing, γ, mu[:,:], vc)
 end
-
 ##  Variance Component Model
 function Base.show(io::IO, x::VCMTrait)
     print(io, "Variance Component Model\n")

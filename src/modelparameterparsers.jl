@@ -133,12 +133,12 @@ function A_mul_B!(C1, C2, A1::SnpBitMatrix,
         A2::AbstractMatrix{T}, B1, B2) where {T <: Real}
     SnpArrays.mul!(C1, A1, B1)
     LinearAlgebra.mul!(C2, A2, B2)
-	@. C1 = C1 + C2
+	C1 += C2
 end
 
 function A_mul_B!(C1, C2, A1::AbstractMatrix{T},
         A2::AbstractMatrix{T}, B1, B2) where {T <: Real}
     LinearAlgebra.mul!(C1, A1, B1)
     LinearAlgebra.mul!(C2, A2, B2)
-	@. C1 = C1 + C2
+	C1 += C2
 end
