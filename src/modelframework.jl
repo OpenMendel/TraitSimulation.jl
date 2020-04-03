@@ -202,10 +202,10 @@ end
 function VCMTrait(X::AbstractArray{T1, 2}, β::AbstractVecOrMat, G::AbstractMatrix, γ::AbstractVecOrMat, Σ, V::Vector{Matrix{Float64}}) where T1
     n_traits = size(β, 2)
     n_people = size(X, 1)
-    mu = zeros(n_people, n_traits)[:]
+    mu = zeros(n_people, n_traits)
     vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-    non_gen_covariates = zeros(n_people, n_traits)[:]
-    TraitSimulation.A_mul_B!(mu, non_gen_covariates, G, X, γ, β)[:,:]
+    non_gen_covariates = zeros(n_people, n_traits)
+    TraitSimulation.A_mul_B!(mu, non_gen_covariates, G, X, γ, β)
     return VCMTrait(X, β, nothing, γ, mu[:,:], vc)
 end
 ##  Variance Component Model
