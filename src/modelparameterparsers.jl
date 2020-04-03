@@ -130,7 +130,7 @@ uncompressed (float64) matrix. This means that they cannot be stored in the same
 structure.
 """
 function A_mul_B!(C1::AbstractMatrix{T}, C2::AbstractMatrix{T}, A1::SnpBitMatrix,
-        A2::AbstractMatrix{T}, B1::AbstractMatrix{T}, B2::AbstractMatrix{T}) where {T <: Real}
+        A2::AbstractVecOrMat{T}, B1::AbstractVecOrMat{T}, B2::AbstractVecOrMat{T}) where {T <: Real}
 		for i in 1:size(C1, 2)
 			SnpArrays.mul!(C1[:, i], A1, B1[:, i])
 		end

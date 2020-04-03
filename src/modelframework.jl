@@ -208,6 +208,17 @@ function VCMTrait(X::AbstractArray{T1, 2}, β::AbstractVecOrMat, G::AbstractMatr
     TraitSimulation.A_mul_B!(mu, non_gen_covariates, G, X, γ, β)
     return VCMTrait(X, β, nothing, γ, mu[:,:], vc)
 end
+
+function VCMTrait(X::AbstractArray{T1, 2}, β::AbstractVecOrMat, G::AbstractMatrix, γ::AbstractVecOrMat, vc::Vector{T}) where {T1, T}
+    n_traits = size(β, 2)
+    n_people = size(X, 1)
+    mu = zeros(n_people, n_traits)
+    non_gen_covariates = zeros(n_people, n_traits)
+    TraitSimulation.A_mul_B!(mu, non_gen_covariates, G, X, γ, β)
+    return VCMTrait(X, β, nothing, γ, mu[:,:], vc)
+end
+
+
 ##  Variance Component Model
 function Base.show(io::IO, x::VCMTrait)
     print(io, "Variance Component Model\n")
@@ -218,7 +229,7 @@ end
 
 # make our new type implement the interface defined above
 nsamplesize(trait::VCMTrait) = size(trait.mu, 1)
-ntraits(trait::VCMTrait) = size(trait.mu, 2)
+ntraits(trait::VCMTrait) = size(trait.vc[1].Σ, 1)
 nvc(trait::VCMTrait) = length(trait.vc)
 neffects(trait::VCMTrait) = size(trait.X, 2)
 
@@ -257,6 +268,6 @@ function Base.show(io::IO, x::GLMMTrait)
 end
 # make our new type implement the interface defined above
 nsamplesize(trait::GLMMTrait) = size(trait.μ, 1)
-ntraits(trait::GLMMTrait) = size(trait.μ, 2)
+ntraits(trait::GLMMTrait) = size(trait.vc[1].Σ, 1)
 nvc(trait::GLMMTrait) = length(trait.vc)
 neffects(trait::GLMMTrait) = size(trait.X, 2)
