@@ -1,4 +1,4 @@
-using OrdinalMultinomialModels, DataFrames
+using OrdinalMultinomialModels, DataFrames, MDDatasets, Random
 using VarianceComponentModels, Statistics, Distributions
 
 """
@@ -48,7 +48,6 @@ function power_simulation(
         μ .= traitobject.X * B_original
         Y = simulate(traitobject, nsim) # simulate the trait
         for i in 1:nsim
-            println(" . . . ")
             copyto!(nulldata.Y, Y[i])
             mul!(storage, eigvecs, Y[i])
             copyto!(vc_null_data_rot.Yrot, storage)
@@ -145,6 +144,44 @@ function ordinal_power_simulation(
     end
     traitobject.β[end] = β_original
     return pvaluepolr
+end
+
+
+
+function single_ordinal_power(es, traitobject, randomseed, nsim)
+    #generate the data
+    Random.seed!(randomseed)
+    pval = Array{Float64}(undef, nsim)
+    X_null = traitobject.X[:, 1:(end - 1)]
+    causal_snp = traitobject.X[:, end][:, :]
+    for i in 1:nsim
+            β = traitobject.β
+            β[end] = es
+            y = simulate(traitobject) # simulate the trait
+            #compute the power from the ordinal model
+            ornull = polr(X_null, y, traitobject.link)
+            pval[i] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
+    end
+    pval
+end
+
+
+function ordinal_power(gamma::Vector{Float64}, nsim::Int64, alpha::Float64, randomseed::Int64, ordinalmodel::OrderedMultinomialTrait; power = 0.8)
+    # get pvalues from testing the significance of causal snp nsim times
+    pvalues = [single_ordinal_power3(ES, ordinalmodel, randomseed, nsim) for ES in gamma]
+    
+    # for each row, it represents that effect size, we find the power
+    power_vector = [mean(pvalues[i] .< alpha) for i in 1:length(pvalues)]
+    
+    #now we want to find where they intersect the desired power value
+    v1 = DataF1(exp.(gamma), power_vector)
+    ze = zeros(length(gamma))
+    vcat(fill!(ze, power)...)
+    v2 = DataF1(exp.(gamma), ze)
+
+    xings = ycross(v1, v2)
+    min_det_ES = xings.x
+    return pvalues, v1, min_det_ES
 end
 
 
