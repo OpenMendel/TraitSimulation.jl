@@ -3,7 +3,8 @@ using VarianceComponentModels, Statistics, Distributions
 
 """
 ```
-power_simulation(n_sim, γs, traitobject, randomseed)
+
+_simulation(n_sim, γs, traitobject, randomseed)
 ```
 This function aims to design a study around the effect of a causal snp on a VCM trait of interest, controlling for other covariates of interest and family structure.
 We use the genetic relationship matrix provided by SnpArrays.jl.
@@ -168,7 +169,7 @@ end
 
 function ordinal_power(gamma::Vector{Float64}, nsim::Int64, alpha::Float64, randomseed::Int64, ordinalmodel::OrderedMultinomialTrait; power = 0.8)
     # get pvalues from testing the significance of causal snp nsim times
-    pvalues = [single_ordinal_power3(ES, ordinalmodel, randomseed, nsim) for ES in gamma]
+    pvalues = [single_ordinal_power(ES, ordinalmodel, randomseed, nsim) for ES in gamma]
     
     # for each row, it represents that effect size, we find the power
     power_vector = [mean(pvalues[i] .< alpha) for i in 1:length(pvalues)]
