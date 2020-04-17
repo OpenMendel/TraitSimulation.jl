@@ -4,7 +4,6 @@ using DataFrames # so we can test it
 using LinearAlgebra
 using Random
 using SnpArrays
-# using SpecialFunctions
 using OrdinalMultinomialModels
 import Base: show
 
@@ -48,29 +47,30 @@ include("simulatesnparray.jl")
 
   # specific to NegativeBinomial
   function __get_distribution(dist::Type{NegativeBinomial}, μ)
-      return dist(1, 1 / (1 + μ)) # r = 1
+      p = inv(1 + μ)
+      return dist(1, p) # r = 1
   end
 
   # clamp the trait values
     # specific to Poisson and NegativeBinomial
-    function clamp_eta(X, β, distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb, ub)
-    	systematic_component = map(y -> y >= ub ? ub : y, X*β)
-    	return systematic_component
-      end
+    function clamp_eta!(η, distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb, ub)
+        map(y -> y >= ub ? ub : y, η)
+    end
 
-      # specific to Bernoulli and Binomial
-      function clamp_eta(X, β, distT::Union{Type{Bernoulli}, Type{Binomial}}; lb , ub)
-    	  systematic_component = X*β
-    	  return clamp!(systematic_component, lb, ub)
-      end
+    # specific to Bernoulli and Binomial
+    function clamp_eta!(η, distT::Union{Type{Bernoulli}, Type{Binomial}}; lb , ub)
+        clamp!(η, lb, ub)
+    end
 
-      function clamp_glm(trait::GLMTrait; lb = -20, ub = 20)
-    	  trait.η .= clamp_eta(trait.X, trait.β, distT; lb = lb, ub = ub)
-    	  for i in eachindex(trait.μ)
-    		  trait.μ[i] = GLM.linkinv(trait.link, trait.η[i])
-    	  end
+    function clamp_glm(trait::GLMTrait; lb = -20, ub = 20)
+        distT = trait.dist
+        mul!(trait.η, trait.X, trait.β)
+     	trait.η .= clamp_eta!(trait.η, distT; lb = lb , ub = ub)
+        for i in eachindex(trait.μ)
+            trait.μ[i] = GLM.linkinv(trait.link, trait.η[i])
+        end
         return trait
-      end
+    end
   """
   ```
   simulate(trait::GLMTrait, n::Integer)
@@ -106,7 +106,7 @@ include("simulatesnparray.jl")
       y .= rpolr(trait.X, trait.β, trait.θ, trait.link)
       if Logistic
           threshold == nothing && error("I need the cutoff for case/control")
-          y .= Int64.(y .> threshold) #makes J/2 the default cutoff for case/control
+          y .= Int64.(y .> threshold) # need threshold/ cutoff for case/control
       end
       return y
   end
@@ -170,7 +170,7 @@ include("simulatesnparray.jl")
   ```
   simulate(trait::VCMTrait, n::Integer)
   ```
-  This simulates (a) trait(s), n times under the desired variance component model, specified using the VCMTrait type.
+  This simulates trait(s), n times under the desired generalized linear mixed model, specified using the GLMMTrait type.
   """
   function simulate(trait::GLMMTrait, n::Integer)
       # pre-allocate output
@@ -185,5 +185,5 @@ include("simulatesnparray.jl")
   export mean_formula, VarianceComponent, TotalVarianceComponent, GLMMTrait
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, simulate, @vc, vcobjtuple
   export simulate_effect_size, snparray_simulation, genotype_sim
-  export power_simulation, power, ordinal_power_simulation, clamp_glm
+  export power_simulation, power, ordinal_power_simulation, clamp_glm, ordinal_power, simulate!
 end #module
