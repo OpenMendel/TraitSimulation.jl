@@ -1,10 +1,9 @@
-using OrdinalMultinomialModels, DataFrames, MDDatasets, Random
+using OrdinalMultinomialModels, DataFrames, Random
 using VarianceComponentModels, Statistics, Distributions
-
 """
 ```
 
-_simulation(n_sim, γs, traitobject, randomseed)
+power_simulation(n_sim, γs, traitobject, randomseed)
 ```
 This function aims to design a study around the effect of a causal snp on a VCM trait of interest, controlling for other covariates of interest and family structure.
 We use the genetic relationship matrix provided by SnpArrays.jl.
@@ -12,66 +11,70 @@ n_obs: number of observations
 n_sim: number of simulations
 γs: vector of effect sizes of the causal snp (last column of design matrix) to be detected
 traitobject: Trait object of type VCMTrait
-randomseed: The random seed used for the simulations for reproducible results
 """
-# given the genetic and nongenetic separately
-function power_simulation(
-    nsim::Int, γs::Vector{Float64}, traitobject::VCMTrait, B_original::AbstractVecOrMat, randomseed::Int)
-    #power estimate
-    pvalue = Array{Float64}(undef, nsim, length(γs))
-    β_original = B_original[end, :]
-    Random.seed!(randomseed)
-
-    #generate the data
-    X_null = traitobject.X[:, 1:(end - 1)]
-    causal_snp = traitobject.X[:, end][:, :]
-    μ_original = copy(traitobject.mu)
+function power_simulation(nsim, γs, traitobject::VCMTrait, B_original; algorithm = :MM)
+    pvalue = zeros(nsim, length(γs))
+    y_alternative = zeros(size(traitobject.mu))
     μ = traitobject.mu
-    y = zeros(size(μ_original))
-    nulldata = VarianceComponentVariate(y, X_null, (traitobject.vc[1].V, traitobject.vc[2].V))
-    altdata = VarianceComponentVariate(y, traitobject.X, (traitobject.vc[1].V, traitobject.vc[2].V))
+    tmp_mat = similar(y_alternative)
+    tmp_mat2 = similar(y_alternative)
+    
+    # fit null model once to store nessary information for alternative model 
+    nulldata    = VarianceComponentVariate(y_alternative, traitobject.X[:,(end-1)], (2traitobject.vc[1].V, traitobject.vc[2].V))
+    nulldatarot = TwoVarCompVariateRotateS(nulldata)
+    nullmodel   = VarianceComponentModel(nulldata)
 
-    vc_null_data_rot = TwoVarCompVariateRotate(nulldata)
-    vc_alt_data_rot = TwoVarCompVariateRotate(altdata)
-
-    null_data = TwoVarCompVariateRotate(vc_null_data_rot.Yrot,
-                vc_null_data_rot.Xrot, vc_null_data_rot.eigval, vc_null_data_rot.eigvec,
-                vc_null_data_rot.logdetV2)
-
-    alt_data = TwoVarCompVariateRotate(vc_alt_data_rot.Yrot,
-                vc_alt_data_rot.Xrot, vc_alt_data_rot.eigval, vc_alt_data_rot.eigvec,
-                vc_alt_data_rot.logdetV2)
-
-    eigvecs = transpose(null_data.eigvec)
-    storage = zeros(size(μ_original))
-    for j in eachindex(γs)
-        B_original[end, :] .= γs[j]
-        μ .= traitobject.X * B_original
-        Y = simulate(traitobject, nsim) # simulate the trait
+    altdatarot = TwoVarCompVariateRotate(nulldatarot.Yrot, tmp_mat2, nulldatarot.eigval, nulldatarot.eigvec, nulldatarot.logdetV2)
+    
+    mul!(tmp_mat2, transpose(nulldatarot.eigvec), traitobject.X)
+    copyto!(altdatarot.Xrot, tmp_mat2) # last column ramains zero
+    altmodel = VarianceComponentModel(altdatarot)
+    
+    for j in 1:length(γs)
+        for k in 1:size(B_original, 2)
+            B_original[end, k] = γs[j]
+        end
+        mul!(μ, traitobject.X, B_original)
         for i in 1:nsim
-            copyto!(nulldata.Y, Y[i])
-            mul!(storage, eigvecs, Y[i])
-            copyto!(vc_null_data_rot.Yrot, storage)
-            copyto!(null_data.Yrot, storage)
-            null_model = VarianceComponentModel(nulldata)
+            TraitSimulation.simulate!(y_alternative, traitobject) # simulate the trait
 
-            nulllogl, nullmodel, = mle_fs!(null_model, null_data; solver=:Ipopt, maxiter=1000, verbose=false);
+            # null
+            LinearAlgebra.mul!(tmp_mat, transpose(nulldatarot.eigvec), y_alternative)
+            copyto!(nulldatarot.Yrot, tmp_mat)
 
-            copyto!(altdata.Y, Y[i])
-            mul!(storage, eigvecs, Y[i])
-            copyto!(vc_alt_data_rot.Yrot, storage)
-            copyto!(alt_data.Yrot, storage)
-            alt_model = VarianceComponentModel(altdata)
-            altlogl, altmodel, = mle_fs!(alt_model, alt_data; solver=:Ipopt, maxiter=1000, verbose=false);
 
-            LRT = 2(altlogl - nulllogl)
-            pvalue[i, j] = ccdf(Chisq(1), LRT)
+            # alt
+            LinearAlgebra.mul!(tmp_mat, transpose(altdatarot.eigvec), y_alternative)
+            copyto!(altdatarot.Yrot, tmp_mat)
+
+
+          # fit null model for the ith simulated trait  
+            logl_null, _, _, _, _, _ = mle_mm!(nullmodel, nulldatarot; verbose = false)
+
+
+            # initialize mean effects to null model fit
+            fill!(altmodel.B, zero(eltype(y_alternative)))
+            copyto!(altmodel.B, nullmodel.B)
+            copyto!(altmodel.Σ[1], nullmodel.Σ[1])
+            copyto!(altmodel.Σ[2], nullmodel.Σ[2]) # ask eric and hua tomorrow about this 
+
+
+            # fit alternative model for ith simulation 
+            if algorithm == :MM
+                logl_alt, _, _, _, _, _ = mle_mm!(altmodel, altdatarot; verbose = false)
+            elseif algorithm == :FS
+                logl_alt, = mle_fs!(altmodel, altdatarot; verbose = false)
+            end
+
+        #     # LRT statistics and its pvalue
+            lrt = - 2(logl_null - logl_alt)
+            pvalue[i, j] = ccdf(Chisq(1), lrt)
         end
     end
-    B_original[end, :] = β_original
     return pvalue
 end
-
+    
+    
 
 """
 ```
@@ -149,41 +152,41 @@ end
 
 
 
-function single_ordinal_power(es, traitobject, randomseed, nsim)
-    #generate the data
-    Random.seed!(randomseed)
-    pval = Array{Float64}(undef, nsim)
-    X_null = traitobject.X[:, 1:(end - 1)]
-    causal_snp = traitobject.X[:, end][:, :]
-    for i in 1:nsim
-            β = traitobject.β
-            β[end] = es
-            y = simulate(traitobject) # simulate the trait
-            #compute the power from the ordinal model
-            ornull = polr(X_null, y, traitobject.link)
-            pval[i] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
-    end
-    pval
-end
+# function single_ordinal_power(es, traitobject, randomseed, nsim)
+#     #generate the data
+#     Random.seed!(randomseed)
+#     pval = Array{Float64}(undef, nsim)
+#     X_null = traitobject.X[:, 1:(end - 1)]
+#     causal_snp = traitobject.X[:, end][:, :]
+#     for i in 1:nsim
+#             β = traitobject.β
+#             β[end] = es
+#             y = simulate(traitobject) # simulate the trait
+#             #compute the power from the ordinal model
+#             ornull = polr(X_null, y, traitobject.link)
+#             pval[i] = polrtest(OrdinalMultinomialScoreTest(ornull, causal_snp))
+#     end
+#     pval
+# end
 
 
-function ordinal_power(gamma::Vector{Float64}, nsim::Int64, alpha::Float64, randomseed::Int64, ordinalmodel::OrderedMultinomialTrait; power = 0.8)
-    # get pvalues from testing the significance of causal snp nsim times
-    pvalues = [single_ordinal_power(ES, ordinalmodel, randomseed, nsim) for ES in gamma]
+# function ordinal_power(gamma::Vector{Float64}, nsim::Int64, alpha::Float64, randomseed::Int64, ordinalmodel::OrderedMultinomialTrait; power = 0.8)
+#     # get pvalues from testing the significance of causal snp nsim times
+#     pvalues = [single_ordinal_power(ES, ordinalmodel, randomseed, nsim) for ES in gamma]
     
-    # for each row, it represents that effect size, we find the power
-    power_vector = [mean(pvalues[i] .< alpha) for i in 1:length(pvalues)]
+#     # for each row, it represents that effect size, we find the power
+#     power_vector = [Statistics.mean(pvalues[i] .< alpha) for i in 1:length(pvalues)]
     
-    #now we want to find where they intersect the desired power value
-    v1 = DataF1(exp.(gamma), power_vector)
-    ze = zeros(length(gamma))
-    vcat(fill!(ze, power)...)
-    v2 = DataF1(exp.(gamma), ze)
+#     #now we want to find where they intersect the desired power value
+#     v1 = DataF1(exp.(gamma), power_vector)
+#     ze = zeros(length(gamma))
+#     vcat(fill!(ze, power)...)
+#     v2 = DataF1(exp.(gamma), ze)
 
-    xings = ycross(v1, v2)
-    min_det_ES = xings.x
-    return pvalues, v1, min_det_ES
-end
+#     xings = ycross(v1, v2)
+#     min_det_ES = xings.x
+#     return pvalues, v1, min_det_ES
+# end
 
 
 """

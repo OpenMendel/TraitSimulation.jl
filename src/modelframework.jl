@@ -53,7 +53,8 @@ end
 # building from model encoded as mat-vec
 function GLMTrait(X::AbstractMatrix, β::AbstractVector, distribution, link)
 	# define the linear predictor
-    η = X*β
+    η = zeros(size(X, 1), size(β, 2))
+    mul!(η, X, β)
     # apply the inverse link element-wise
     μ = linkinv.(link, η)
     # create a new instance
@@ -158,8 +159,9 @@ function VCMTrait(formulas::Vector{String}, df::DataFrame, vc::T) where T
 	union!(found_covariates, found_markers)
   end
   X = df[:, found_covariates]
-  return VCMTrait(X, nothing, nothing, nothing, mu, vc)
+  return VCMTrait(Matrix(X), nothing, nothing, nothing, mu, vc)
 end
+    
 # User provides mean formula for all fixed effects, dataframe of the genetic and nongenetic covariates and the variance component covariance matrices
 function VCMTrait(formulas::Vector{String}, df::DataFrame, Σ, V)
   n_traits = length(formulas)
@@ -173,29 +175,24 @@ found_covariates = Symbol[]
 	union!(found_covariates, found_markers)
   end
   X = df[:, found_covariates]
-  return VCMTrait(X, nothing, nothing, mu, vc)
+  return VCMTrait(Matrix(X), nothing, nothing, mu, vc)
 end
 
 function VCMTrait(X::T1, β::AbstractArray, vc::Vector{T}) where {T1, T}
   n_traits = size(β, 2)
   n_people = size(X, 1)
   mu = zeros(n_people, n_traits)
-  for i in 1:n_traits
     #calculate the mean vector
-    mu[:, i] .+= X*β[:, i]
-  end
+    mul!(mu, X, β)
   return VCMTrait(X, β, nothing, nothing, mu, vc)
 end
 
-function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{AbstractVecOrMat}, V::Vector{Matrix{Float64}}) where T1
+function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where T1
   n_traits = size(β, 2)
   n_people = size(X, 1)
   mu = zeros(n_people, n_traits)
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-  for i in 1:n_traits
-    #calculate the mean vector
-    mu[:, i] .+= X*β[:, i]
-  end
+  mul!(mu, X, β)
   return VCMTrait(X, β, nothing, nothing, mu, vc)
 end
 
@@ -241,7 +238,8 @@ GLMMTrait object is a model framework that stores information about the simulati
 function GLMMTrait(X::AbstractMatrix, β::AbstractMatrix, vc::Vector, distribution::D, link::linkT) where {D, linkT, matT2, T, matT}
 	distT = Base.typename(typeof(distribution)).wrapper
 	Z = zeros(size(X, 1), size(β, 2))
-	η = X*β
+    η = similar(Z)
+	mul!(η, X, β)
 	μ = zero(η)
   return GLMMTrait(X, β, μ, η, Z, vc, distT, link)
 end

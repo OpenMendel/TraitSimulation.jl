@@ -4,7 +4,6 @@ using DataFrames # so we can test it
 using LinearAlgebra
 using Random
 using SnpArrays
-# using SpecialFunctions
 using OrdinalMultinomialModels
 import Base: show
 
@@ -186,5 +185,5 @@ include("simulatesnparray.jl")
   export mean_formula, VarianceComponent, TotalVarianceComponent, GLMMTrait
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, simulate, @vc, vcobjtuple
   export simulate_effect_size, snparray_simulation, genotype_sim
-  export power_simulation, power, ordinal_power_simulation, clamp_glm, ordinal_power
+  export power_simulation, power, ordinal_power_simulation, clamp_glm, ordinal_power, simulate!
 end #module

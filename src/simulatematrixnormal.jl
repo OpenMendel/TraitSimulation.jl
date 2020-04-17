@@ -5,8 +5,8 @@ this VarianceComponent type stores A, B , CholA and CholB so we don't have to co
 struct VarianceComponent
 	Σ::Matrix{Float64} # n_traits by n_traits
 	V::Matrix{Float64} # n_people by n_people
-	CholΣ::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of A
-	CholV::Cholesky{Float64,Array{Float64,2}} # cholesky decomposition of B
+	CholΣ::Cholesky{Float64, Array{Float64,2}} # cholesky decomposition of A
+	CholV::Cholesky{Float64, Array{Float64,2}} # cholesky decomposition of B
 	function VarianceComponent(Σ, V) #inner constructor given A, B
 		return new(Σ, V, cholesky(Symmetric(Σ)), cholesky(Symmetric(V))) # stores these values (this is helpful so we don't have it inside the loop)
 	end
@@ -22,8 +22,8 @@ struct TotalVarianceComponent
 	end
 end
 
-function Base.show(io::IO, x::VarianceComponent)
-    print(io, "Variance Components\n")
+function Base.show(io::IO, x::Union{VarianceComponent, Vector{VarianceComponent}})
+    print(io, "Variance Component\n")
     print(io, "  * number of traits: $(ntraits(x))\n")
     print(io, "  * sample size: $(nsamplesize(x))")
 end
@@ -50,7 +50,7 @@ function simulate_matrix_normal!(Z::Matrix, vc::TotalVarianceComponent)
 end
 
 """
-	VCM_trait_simulation(mu::Matrix{Float64}, vc::Vector{TotalVarianceComponent})
+	VCM_trait_simulation(mu::Matrix{Float64}, vc::Vector{VarianceComponent})
 For an evaluated mean matrix and vector of VarianceComponent objects, simulate from VCM.
 """
 function VCM_trait_simulation(Y::Matrix, mu::Matrix{Float64}, vc) # for an evaluated matrix
