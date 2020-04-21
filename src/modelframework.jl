@@ -123,100 +123,96 @@ nsamplesize(trait::OrderedMultinomialTrait) = size(trait.X, 1)
 neffects(trait::OrderedMultinomialTrait) = size(trait.X, 2)
 noutcomecategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
 
-# variance component models: multiple correlated traits
+
+
 """
 VCMTrait
 VCMTrait object is a model framework object that stores information about the simulation model
  of multiple traits, under the Variance Component Model Framework.
 """
-struct VCMTrait{matT1, matT2, matT3, matT4, matT5, T} <: AbstractTraitModel
-	X::matT1             # all effects
-    β::matT2            # regression coefficients
-	G::matT3            # genotypes
-	γ::matT4            # effect sizes for each snp
-	mu::matT5           # evaluated fixed effect
-	vc::Vector{T}
-	function VCMTrait(X::matT1, β::matT2, G::matT3, γ::matT4, mu::matT5,
-	vc::Vector{T}) where {matT1, matT2, matT3, matT4, matT5<:Matrix{Float64}, T}
-		return new{matT1, matT2, matT3, matT4, matT5, T}(X, β, G, γ, mu, vc)
+struct VCMTrait{T <: Real}
+	X::Matrix{T}             # all effects
+	β::Matrix{T}             # regression coefficients
+	G::AbstractMatrix        # genotypes CHANGE TO SNPARRAY
+	γ::Matrix{T}             # effect sizes for each snp
+	vc::Vector{VarianceComponent}
+	μ::Matrix{T}            # evaluated fixed effect
+	Z::Matrix{T}
+	function VCMTrait(X, β, G, γ, vc, μ)
+		T = eltype(μ)
+		Z  = Matrix{T}(undef, size(μ))
+		new{T}(X, β, G, γ, vc, μ, Z)
 	end
 end
 
 
-function VCMTrait(mu::muT, Ω::AbstractMatrix) where muT
-	vc = TotalVarianceComponent(Ω)
-  return VCMTrait(nothing, nothing, nothing, nothing, mu, [vc])
+function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
+	 vc::Vector{VarianceComponent}) where T <: Real
+	n, p, m, d = size(X, 1), size(X, 2), length(vc), size(β, 2)
+	# working arrays
+	genovec = zeros(Float64, size(G))
+	Base.copyto!(genovec, @view(G[:, :]), model = ADDITIVE_MODEL, impute = true)
+	μ = Matrix{T}(undef, n, d)
+	μ_null = Matrix{T}(undef, n, d)
+	LinearAlgebra.mul!(μ_null, X, β)
+    LinearAlgebra.mul!(μ, genovec, γ)
+ 	μ += μ_null
+	# constructor
+	VCMTrait(X, β, genovec, γ, vc, μ)
 end
 
-function VCMTrait(formulas::Vector{String}, df::DataFrame, vc::T) where T
-  n_traits = length(formulas)
-  n_people = size(df)[1]
-  mu = zeros(n_people, n_traits)
+function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray,
+	 γ::Matrix{T}, Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: Real
+	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+	return VCMTrait(X, β, vc)
+end
+
+function VCMTrait(X::Matrix{T}, β::Matrix{T},
+	 vc::Vector{VarianceComponent}) where T <: Real
+	n, d = size(X, 1), size(β, 2)
+	μ = Matrix{T}(undef, n, d)
+	mul!(μ, X, β)
+	genovec = zeros(Float64, n, 1)
+	copyto!(genovec, X[:, end])
+	γ = Matrix{T}(undef, 1, d)
+	copyto!(γ, β[end, :])
+	return VCMTrait(X, β, genovec, γ, vc, μ)
+end
+
+function VCMTrait(X::Matrix{T}, β::Matrix{T},
+	 Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: Real
+	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
+	return VCMTrait(X, β, vc)
+end
+
+
+function VCMTrait(formulas::Vector{String}, df::DataFrame,
+	 vc::Vector{VarianceComponent})
+  d = length(formulas)
+  n = size(df)[1]
+  μ = zeros(n, d)
   found_covariates = Symbol[]
-  for i in 1:n_traits
+  for i in 1:d
     #calculate the mean vector
-	mu[:, i], found_markers = mean_formula(formulas[i], df)
+	μ[:, i], found_markers = mean_formula(formulas[i], df)
 	union!(found_covariates, found_markers)
   end
-  X = df[:, found_covariates]
-  return VCMTrait(Matrix(X), nothing, nothing, nothing, mu, vc)
+  X = Matrix(df[:, found_covariates])
+  p = length(found_covariates)
+  β = Matrix{Float64}(undef, p, d)
+  G = Matrix{Float64}(undef, n, 1)
+  γ = Matrix{Float64}(undef, 1, p)
+  return VCMTrait(X, β, G, γ, vc, μ)
 end
-    
-# User provides mean formula for all fixed effects, dataframe of the genetic and nongenetic covariates and the variance component covariance matrices
-function VCMTrait(formulas::Vector{String}, df::DataFrame, Σ, V)
-  n_traits = length(formulas)
-  n_people = size(df)[1]
-  mu = zeros(n_people, n_traits)
+
+function VCMTrait(formulas::Vector{String}, df::DataFrame,
+	 Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: Real
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-found_covariates = Symbol[]
-  for i in 1:n_traits
-    #calculate the mean vector
-    mu[:, i], found_markers = mean_formula(formulas[i], df)
-	union!(found_covariates, found_markers)
-  end
-  X = df[:, found_covariates]
-  return VCMTrait(Matrix(X), nothing, nothing, mu, vc)
-end
-
-function VCMTrait(X::T1, β::AbstractArray, vc::Vector{T}) where {T1, T}
-  n_traits = size(β, 2)
-  n_people = size(X, 1)
-  mu = zeros(n_people, n_traits)
-    #calculate the mean vector
-    mul!(mu, X, β)
-  return VCMTrait(X, β, nothing, nothing, mu, vc)
-end
-
-function VCMTrait(X::AbstractArray{T1, 2}, β::Matrix{Float64}, Σ::Vector{Matrix{Float64}}, V::Vector{Matrix{Float64}}) where T1
-  n_traits = size(β, 2)
-  n_people = size(X, 1)
-  mu = zeros(n_people, n_traits)
-	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-  mul!(mu, X, β)
-  return VCMTrait(X, β, nothing, nothing, mu, vc)
-end
-
-function VCMTrait(X::AbstractArray{T1, 2}, β::AbstractVecOrMat, G::AbstractMatrix, γ::AbstractVecOrMat, Σ, V::Vector{Matrix{Float64}}) where T1
-    n_traits = size(β, 2)
-    n_people = size(X, 1)
-    mu = zeros(n_people, n_traits)
-    vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-    non_gen_covariates = zeros(n_people, n_traits)
-    TraitSimulation.A_mul_B!(mu, non_gen_covariates, G, X, γ, β)
-    return VCMTrait(X, β, nothing, γ, mu[:,:], vc)
-end
-
-function VCMTrait(X::AbstractArray{T1, 2}, β::AbstractVecOrMat, G::AbstractMatrix, γ::AbstractVecOrMat, vc::Vector{T}) where {T1, T}
-    n_traits = size(β, 2)
-    n_people = size(X, 1)
-    mu = zeros(n_people, n_traits)
-    non_gen_covariates = zeros(n_people, n_traits)
-    TraitSimulation.A_mul_B!(mu, non_gen_covariates, G, X, γ, β)
-    return VCMTrait(X, β, nothing, γ, mu[:,:], vc)
+	VCMTrait(formulas, df, vc)
 end
 
 
-##  Variance Component Model
+#  Variance Component Model
 function Base.show(io::IO, x::VCMTrait)
     print(io, "Variance Component Model\n")
     print(io, "  * number of traits: $(ntraits(x))\n")
@@ -224,8 +220,8 @@ function Base.show(io::IO, x::VCMTrait)
     print(io, "  * sample size: $(nsamplesize(x))")
 end
 
-# make our new type implement the interface defined above
-nsamplesize(trait::VCMTrait) = size(trait.mu, 1)
+#make our new type implement the interface defined above
+nsamplesize(trait::VCMTrait) = size(trait.μ, 1)
 ntraits(trait::VCMTrait) = size(trait.vc[1].Σ, 1)
 nvc(trait::VCMTrait) = length(trait.vc)
 neffects(trait::VCMTrait) = size(trait.X, 2)

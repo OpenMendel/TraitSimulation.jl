@@ -122,13 +122,13 @@ include("simulatesnparray.jl")
   end
 
   function simulate(trait::VCMTrait)
-     Y = zeros(size(trait.mu)) # preallocate
+     Y = zeros(size(trait.μ)) # preallocate
      simulate!(Y, trait) # do the simulation
      return Y
   end
 
   function simulate!(Y, trait::VCMTrait)
-      VCM_trait_simulation(Y, trait.mu, trait.vc)
+      TraitSimulation.VCM_trait_simulation(Y, trait.Z, trait.μ, trait.vc)
       return Y
   end
 

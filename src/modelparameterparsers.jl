@@ -109,7 +109,7 @@ end
 vcobjectuple(vcobject)
 This function creates a tuple of Variance Components, given a vector of variancecomponent objects to be compatible with VarianceComponentModels.jl
 """
-function  vcobjtuple(vcobject::Union{Vector{VarianceComponent},Vector{TotalVarianceComponent}})
+function  vcobjtuple(vcobject::Vector{VarianceComponent})
 	m = length(vcobject)
 	d = size(vcobject[1].Σ, 1)
 	n = size(vcobject[1].V, 1)

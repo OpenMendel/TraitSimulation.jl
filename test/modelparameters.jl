@@ -1,7 +1,36 @@
-using Random, SnpArrays
+using Random, SnpArrays, DataFrames, GLM
 using LinearAlgebra
 Random.seed!(1234)
 include("benchmarking.jl")
+
+# function generateSPDmatrix(n)
+# 	A = rand(n)
+# 	m = 0.5 * (A * A')
+# 	PDmat = m + (n * Diagonal(ones(n)))
+# end
+#
+#
+# function generateRandomVCM(n::Int64, p::Int64, d::Int64, m::Int64)
+# 	# n-by-p design matrix
+# 	X = randn(n, p)
+#
+# 	# p-by-d mean component regression coefficient for each trait
+# 	B = hcat(ones(p, 1), rand(p))
+#
+# 	V = ntuple(x -> zeros(n, n), m)
+# 	for i = 1:m-1
+# 	  copy!(V[i], generateSPDmatrix(n))
+# 	end
+# 	copy!(V[end], Diagonal(ones(n))) # last covarianec matrix is identity
+#
+# 	# a tuple of m d-by-d variance component parameters
+# 	Σ = ntuple(x -> zeros(d, d), m)
+# 	for i in 1:m
+# 	  copy!(Σ[i], generateSPDmatrix(d))
+# 	end
+# 	return(X, B, Σ, V)
+# end
+
 import TraitSimulation: snparray_simulation
 n = 10
 p = 2
@@ -28,16 +57,19 @@ for i in eachindex(evaluated_output[1])
   return(@test GLMTrait(Matrix(df), beta, dist, link).μ[i] == evaluated_output[1][i])
 end
 
-# traitversion1 = VCMTrait(X, B, Σ, V)
-# variancecomponent = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
-
 X, B, Σ, V = generateRandomVCM(n, p, d, m)
-@test VCMTrait(X, B, [Σ...], [V...]).vc[1].Σ - (@vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])[1].Σ == zeros(2, 2)
+test_vcm1 = VCMTrait(X, B, @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])
+
+# what if you specify as a vector of variance components, not using the VarianceComponent type
+test_vcm1_equivalent = VCMTrait(X, B, [Σ...], [V...])
+@test test_vcm1_equivalent.vc[1].V == V[1]
+@test typeof(test_vcm1.vc[1]) == VarianceComponent
+
 n, p, d, m = 10, 2 , 2, 2
 #testing for types
-maf  = 0.2
+minor_alle_frequency  = 0.2
 nsnps = p
-@test snparray_simulation([maf], nsnps) isa SnpArrays.SnpArray
+@test snparray_simulation([minor_alle_frequency], nsnps) isa SnpArrays.SnpArray
 
 effectsizes = rand(n)
 our_names = ["sarah"; "janet"; "hua"; "eric"; "ken"; "jenny"; "ben"; "chris"; "juhyun"; "xinkai"]
@@ -47,25 +79,30 @@ rename!(data_frame_2, Symbol.(our_names))
 
 @test unique(mean_formula(whats_my_mean_formula, data_frame_2)[1])[1] == sum(effectsizes)
 
-variance_formula2  = @vc [maf][:,:] ⊗ V[1] + [maf][:,:] ⊗ V[1]
+variance_formula2  = @vc [minor_alle_frequency][:,:] ⊗ V[1] + [minor_alle_frequency][:,:] ⊗ V[1]
 trait2 = VCMTrait([whats_my_mean_formula], data_frame_2, variance_formula2)
 
-sigma_t, v_t = vcobjtuple(variance_formula2)
-mean_formula(whats_my_mean_formula, data_frame_2)[1]
-
 X2, β2, Σ2, V2  = generateRandomVCM(n, p, d, m)
-G = snparray_simulation([0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5], n)
-genovec = zeros(Float64, size(G))
-Base.copyto!(genovec, @view(G[:,:]), model=ADDITIVE_MODEL, impute=true)
-Σ2 = [Σ2...]
-V2 = [V2...]
-γ = rand(7, 2)
-varcomp = @vc Σ2[1] ⊗ V2[1] + Σ2[2] ⊗  V2[2]
-vcmOBJ =  VCMTrait(X2, β2, genovec, γ, varcomp)
 
+# simulate the SnpArray
+G = snparray_simulation([0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5], n)
+γ = rand(7, 2)
+# specify the variance compoents of the model
+varcomp = @vc Σ2[1] ⊗ V2[1] + Σ2[2] ⊗ V2[2]
+vcmOBJ =  VCMTrait(X2, β2, G, γ, varcomp)
+
+# check data was copied correctly
 @test vcmOBJ.X == X2
+
+# check that the overall mean is the sum of both nongenetic and genetic effects
+@test vcmOBJ.μ == X2*β2 + vcmOBJ.G*γ
 #X*β .+ genovec*γ
 
 vcmOBJ2 =  VCMTrait(X2, β2, varcomp)
-@test vcmOBJ2.G == nothing
-@test vcmOBJ2.mu ≈ X2*β2 rtol = 0.005
+vcmOBJ2_equivalent = VCMTrait(X2, β2, [Σ2...], [V2...])
+@test vcmOBJ2.vc[1].V == vcmOBJ2_equivalent.vc[1].V
+@test vcmOBJ2.G != nothing
+@test vcmOBJ2.μ == X2*β2
+
+# check if the preallocated memory that will loop over for the matrix normal  (to sum the variance components) before we sum the mean matrix
+@test size(vcmOBJ2.Z) == size(vcmOBJ2.μ)
