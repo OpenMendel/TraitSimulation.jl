@@ -2,8 +2,6 @@ using VarianceComponentModels, Distributions
 using Random, Plots, DataFrames, LinearAlgebra
 using SnpArrays, TraitSimulation, GLM, StatsBase, OrdinalMultinomialModels
 
-# include("simulatepower.jl")
-
 """
 ```
 
@@ -89,10 +87,9 @@ nullmodel = VarianceComponentModel(nulldatarot)
 pvals = zeros(nsim, length(γs))
 eigen_vecs = transpose(nulldatarot.eigvec)
 copyto!(nulldatarot.Yrot, eigen_vecs * y);
-altdatarot = TwoVarCompVariateRotate(nulldatarot.Yrot, tmp_mat2, nulldatarot.eigval, nulldatarot.eigvec, nulldatarot.logdetV2)
 tmp_mat2 = zeros(size(genetic_model_test.X))
 tmp_mat = zeros(size(genetic_model_test.μ))
-
+altdatarot = TwoVarCompVariateRotate(nulldatarot.Yrot, tmp_mat2, nulldatarot.eigval, nulldatarot.eigvec, nulldatarot.logdetV2)
 mul!(tmp_mat2, eigen_vecs, genetic_model_test.X)
 copyto!(altdatarot.Xrot, tmp_mat2)
 altmodel = VarianceComponentModel(altdatarot)

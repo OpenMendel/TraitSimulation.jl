@@ -18,3 +18,7 @@ end
 @testset "simulationmodels" begin
 	include("simulationmodels.jl")
 end
+
+@testset "simulatepower" begin
+	include("simulatepower.jl")
+end
