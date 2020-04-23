@@ -163,9 +163,9 @@ include("simulatesnparray.jl")
       return Y_n
   end
 
-  export mean_formula, VarianceComponent, TotalVarianceComponent, GLMMTrait
-  export GLMTrait, OrderedMultinomialTrait, VCMTrait, simulate, @vc, vcobjtuple
+  export mean_formula, VarianceComponent, @vc, vcobjtuple
+  export GLMTrait, OrderedMultinomialTrait, VCMTrait, GLMMTrait
   export simulate_effect_size, snparray_simulation, genotype_sim
   export nsamplesize, neffects, nvc, ntraits
-  export power_simulation, power, ordinal_power_simulation, clamp_glm, ordinal_power, simulate!
+  export power_simulation, power, simulate!, simulate
 end #module

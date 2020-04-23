@@ -36,7 +36,10 @@ function generateRandomVCM(n::Int64, p::Int64, d::Int64, m::Int64)
 end
 
 X, B, Σ, V = generateRandomVCM(n, p, d, m)
-test_vcm1 = VCMTrait(X, B, @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])
+# specify the variance compoents of the model
+varcomp = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
+
+test_vcm1 = VCMTrait(X, B, varcomp)
 
 y_vcm = simulate(test_vcm1)
 
@@ -46,57 +49,45 @@ number_independent_simulations = 5
 
 @test test_vcm1 isa TraitSimulation.AbstractTraitModel
 
-n, p, d, m = 10, 2, 2, 2
 #testing for types
 minor_alle_frequency  = 0.2
 nsnps = p
 @test snparray_simulation([minor_alle_frequency], nsnps) isa SnpArrays.SnpArray
 
-effectsizes = rand(n)
-our_names = ["sarah"; "janet"; "hua"; "eric"; "ken"; "jenny"; "ben"; "chris"; "juhyun"; "xinkai"]
-whats_my_mean_formula = TraitSimulation.FixedEffectTerms(effectsizes, our_names)
-data_frame_2 = DataFrame(ones(length(our_names), length(our_names)))
-rename!(data_frame_2, Symbol.(our_names))
-
-@test unique(mean_formula(whats_my_mean_formula, data_frame_2)[1])[1] == sum(effectsizes)
-
 variance_formula2  = @vc [minor_alle_frequency][:,:] ⊗ V[1] + [minor_alle_frequency][:,:] ⊗ V[1]
-trait2 = VCMTrait([whats_my_mean_formula], data_frame_2, variance_formula2)
+trait2 = VCMTrait(["x2 + 3x1", "2 +2x1"], DataFrame(X), variance_formula2)
 sigma, v = vcobjtuple(variance_formula2)
-trait2_equivalent = VCMTrait([whats_my_mean_formula], data_frame_2, [sigma...], [v...])
+trait2_equivalent = VCMTrait(["x2 + 3x1", "2 +2x1"], DataFrame(X), [sigma...], [v...])
 
 @test trait2_equivalent.vc[1].V == trait2.vc[1].V
-
-X2, β2, Σ2, V2  = generateRandomVCM(n, p, d, m)
 
 # simulate the SnpArray
 G = snparray_simulation([0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5], n)
 γ = rand(7, 2)
-# specify the variance compoents of the model
-varcomp = @vc Σ2[1] ⊗ V2[1] + Σ2[2] ⊗ V2[2]
-vcmOBJ =  VCMTrait(X2, β2, G, γ, varcomp)
-vcmOBJ_equivalent =  VCMTrait(X2, β2, G, γ, [Σ2...], [V2...])
 
-@test vcmOBJ.vc[1].V == V2[1]
-@test vcmOBJ_equivalent.vc[1].V == V2[1]
+vcmOBJ =  VCMTrait(X, B, G, γ, varcomp)
+vcmOBJ_equivalent =  VCMTrait(X, B, G, γ, [Σ...], [V...])
+
+@test vcmOBJ.vc[1].V == V[1]
+@test vcmOBJ_equivalent.vc[1].V == V[1]
 # check data was copied correctly
-@test vcmOBJ.X == X2
+@test vcmOBJ.X == X
 
 # check that the overall mean is the sum of both nongenetic and genetic effects
-@test vcmOBJ.μ == X2*β2 + vcmOBJ.G*γ
+@test vcmOBJ.μ == X*B + vcmOBJ.G*γ
 #X*β .+ genovec*γ
 
-vcmOBJ2 =  VCMTrait(X2, β2, varcomp)
+vcmOBJ2 =  VCMTrait(X, B, varcomp)
 
 @test eltype(simulate(vcmOBJ2)) == Float64
 
 @test length(simulate(vcmOBJ2, number_independent_simulations))  == number_independent_simulations
 
 
-vcmOBJ2_equivalent = VCMTrait(X2, β2, [Σ2...], [V2...])
+vcmOBJ2_equivalent = VCMTrait(X, B, [Σ...], [V...])
 @test vcmOBJ2.vc[1].V == vcmOBJ2_equivalent.vc[1].V
 @test vcmOBJ2.G != nothing
-@test vcmOBJ2.μ == X2*β2
+@test vcmOBJ2.μ == X*B
 
 # check if the preallocated memory that will loop over for the matrix normal  (to sum the variance components) before we sum the mean matrix
 @test size(vcmOBJ2.Z) == size(vcmOBJ2.μ)

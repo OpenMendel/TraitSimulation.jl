@@ -44,6 +44,10 @@ link = IdentityLink()
 # test for correct mean formula
 formulas = ["x + 5y", "2 + log(y)"]
 
+# what happens when there is no variables and just a scalar
+formulas2 = ["25", "738"]
+@test unique(mean_formula(formulas2[1], df)[1]) == [25]
+
 evaluated_output = [repeat([5.0], n), repeat([2.0], n)]
 
 for i in eachindex(formulas)
@@ -59,6 +63,20 @@ test_vcm1_equivalent = VCMTrait(X, B, [Σ...], [V...])
 varcomp = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
 test_vcm1 = VCMTrait(X, B, varcomp)
 
+# check if the structure is correct
 @test eltype(varcomp) == VarianceComponent
 
+# check if returns the appropriate decomposition of the VarianceComponent type
 @test vcobjtuple(varcomp)[1][1] == Σ[1]
+
+# test provided simulate coefficients function
+x = rand(n)
+@test eltype(TraitSimulation.simulate_effect_size(x)) == Float64
+
+effectsizes = rand(n)
+our_names = ["sarah"; "janet"; "hua"; "eric"; "ken"; "jenny"; "ben"; "chris"; "juhyun"; "xinkai"]
+whats_my_mean_formula = TraitSimulation.FixedEffectTerms(effectsizes, our_names)
+data_frame_2 = DataFrame(ones(length(our_names), length(our_names)))
+rename!(data_frame_2, Symbol.(our_names))
+
+@test unique(mean_formula(whats_my_mean_formula, data_frame_2)[1])[1] == sum(effectsizes)

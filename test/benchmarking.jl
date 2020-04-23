@@ -1,14 +1,13 @@
 # using Distributions, BenchmarkTools
 #
 function generateSPDmatrix(n)
-	    A = rand(n)
-	    m = 0.5 * (A * A')
-	    PDmat = m + (n * Diagonal(ones(n)))
-	end
+	A = rand(n)
+	m = 0.5 * (A * A')
+	PDmat = m + (n * Diagonal(ones(n)))
+end
 
 
 function generateRandomVCM(n::Int64, p::Int64, d::Int64, m::Int64)
-
 	# n-by-p design matrix
 	X = randn(n, p)
 
@@ -26,7 +25,6 @@ function generateRandomVCM(n::Int64, p::Int64, d::Int64, m::Int64)
 	for i in 1:m
 	  copy!(Σ[i], generateSPDmatrix(d))
 	end
-
 	return(X, B, Σ, V)
 end
 

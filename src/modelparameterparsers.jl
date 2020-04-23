@@ -43,21 +43,19 @@ Construction of the evaluated mean vector, given formula string and named datafr
 """
 function mean_formula(user_formula_string::String, df::DataFrame)
     global input_data_from_user = df #this is so we can call whatever name the user has for the dataframe
-
     users_formula_expression = Meta.parse(user_formula_string)
     if(users_formula_expression isa Expr)
-        found_markers = find_variables(users_formula_expression) #store the vector of symbols of the found variables
+        found_markers = TraitSimulation.find_variables(users_formula_expression) #store the vector of symbols of the found variables
         #X = Matrix(df[:, found_markers)
         dotted_args = map(Base.Broadcast.__dot__, users_formula_expression.args) # adds dots to the arguments in the expression
         dotted_expression = Expr(:., dotted_args[1], Expr(:tuple, dotted_args[2:end]...)) #reformats the exprssion arguments by changing the variable names to tuples of the variable names to keep the dot structure of julia
-
-        julia_interpretable_expression = search_variables!(dotted_expression, found_markers...) #gives me the julia interpretable exprsesion with the dataframe provided
-
+        julia_interpretable_expression = TraitSimulation.search_variables!(dotted_expression, found_markers...) #gives me the julia interpretable exprsesion with the dataframe provided
         mean_vector = eval(Meta.parse(string(julia_interpretable_expression))) #evaluates the julia interpretable expression on the dataframe provided
     else
         mean_vector = [users_formula_expression for i in 1:size(df, 1)]
+		found_markers = TraitSimulation.find_variables(users_formula_expression)
     end
-    return mean_vector, found_markers
+    mean_vector, found_markers
 end
 
 """
@@ -72,7 +70,6 @@ function FixedEffectTerms(effectsizes::AbstractVecOrMat, snps::AbstractVecOrMat)
         expression = " + " * string(effectsizes[i]) * "(" * snps[i] * ")"
         fixed_terms = fixed_terms * expression
     end
-
     return String(fixed_terms)
 end
 

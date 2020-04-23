@@ -42,12 +42,11 @@ end
 
 
 # Effect Size Simulation Conditional on MAF
-
 function simulate_effect_size(maf)
-Simulated_ES = ones(length(maf))
-# Generating Effect Sizes where the lower the minor allele frequency the larger the effect size
-for i in eachindex(maf)
-    Simulated_ES[i] = rand([-1, 1]) .* (0.1 / sqrt.(maf[i] .* (1 - maf[i])))
-end
-return Simulated_ES
+    Simulated_ES = ones(length(maf))
+    # Generating Effect Sizes where the lower the minor allele frequency the larger the effect size
+    for i in eachindex(maf)
+        Simulated_ES[i] = rand([-1, 1]) .* (0.01 / sqrt.(maf[i] .* (1 - maf[i])))
+    end
+    return Simulated_ES
 end
