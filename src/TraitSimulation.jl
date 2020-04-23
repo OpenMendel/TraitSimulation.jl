@@ -13,10 +13,7 @@ include("modelparameterparsers.jl")
 
 include("modelframework.jl")
 
-include("simulatepower.jl")
-
 include("simulatesnparray.jl")
-
 
   function simulate(trait::GLMTrait)
       # pre-allocate output
@@ -166,6 +163,6 @@ include("simulatesnparray.jl")
   export mean_formula, VarianceComponent, @vc, vcobjtuple
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, GLMMTrait
   export simulate_effect_size, snparray_simulation, genotype_sim
-  export nsamplesize, neffects, nvc, ntraits
-  export power_simulation, power, simulate!, simulate
+  export nsamplesize, neffects, noutcomecategories, nvc, ntraits
+  export simulate!, simulate
 end #module

@@ -58,6 +58,8 @@ Ordinal_Model_Test = OrderedMultinomialTrait(X, beta, θ, link)
 @test eltype(simulate(Ordinal_Model_Test)) == Int64
 @test size(simulate(Ordinal_Model_Test, number_independent_simulations))  == (n, number_independent_simulations)
 
+@test noutcomecategories(Ordinal_Model_Test) == 4
+
 # make sure GLM simulation works
 dist = Poisson()
 link = IdentityLink()
@@ -94,10 +96,33 @@ glmtraitobject5 = GLMTrait(X, beta, dist, link)
 @test size(simulate(glmtraitobject5, number_independent_simulations))  == (n, number_independent_simulations)
 
 # make sure GLMM works
-glmm_test = GLMMTrait(X, B, varcomp, dist, link)
-@test glmm_test isa TraitSimulation.AbstractTraitModel
+glmtraitobject6 = GLMMTrait(X, B, varcomp, dist, link)
+@test glmtraitobject6 isa TraitSimulation.AbstractTraitModel
 
-y_glmm = simulate(glmm_test)
+@test nsamplesize(glmtraitobject6) == n
+@test neffects(glmtraitobject6) == p
+@test nvc(glmtraitobject6) == m
+@test ntraits(glmtraitobject6) == d
+
+
+y_glmm = simulate(glmtraitobject6)
 @test size(y_glmm) == (size(X,  1),  size(B, 2))
 
-@test length(simulate(glmm_test, number_independent_simulations)) == number_independent_simulations
+@test length(simulate(glmtraitobject6, number_independent_simulations)) == number_independent_simulations
+
+
+# simulate the SnpArray
+G = snparray_simulation([0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5], n)
+γ = rand(7)
+
+glmtraitobject7 =  GLMTrait(X, beta, G, γ, dist, link)
+
+@test glmtraitobject7.dist  == Gamma
+@test eltype(simulate(glmtraitobject7)) == eltype(dist)
+
+@test size(simulate(glmtraitobject7, number_independent_simulations), 2) == number_independent_simulations
+
+@test GLMTrait(X, beta, G, γ, dist, link) != empty
+
+@test nsamplesize(glmtraitobject7) == n
+@test neffects(glmtraitobject7) == p

@@ -74,20 +74,23 @@ end
 
 # clamp the trait values
   # specific to Poisson and NegativeBinomial
-  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat, distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb = -20, ub = 20) where T <: Real
+  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat,
+	   distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb = -20, ub = 20) where T <: Real
 	  mul!(η, X, β)
 	  η .= map(y -> y >= ub ? ub : y, η)
   end
 
   # specific to Bernoulli and Binomial
-  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat, distT::Union{Type{Bernoulli}, Type{Binomial}}; lb = -20, ub = 20) where T <: Real
+  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat,
+	   distT::Union{Type{Bernoulli}, Type{Binomial}}; lb = -20, ub = 20) where T <: Real
 	  mul!(η, X, β)
 	  clamp!(η, lb, ub)
 	  η
   end
 
   # all others
-  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat, distT::Type{D}; lb = -20, ub = 20) where {D, T <: Real}
+  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat,
+	   distT::Type{D}; lb = -20, ub = 20) where {D, T <: Real}
 	  mul!(η, X, β)
 	  η
   end

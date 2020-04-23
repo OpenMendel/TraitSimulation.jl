@@ -41,6 +41,11 @@ varcomp = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
 
 test_vcm1 = VCMTrait(X, B, varcomp)
 
+@test nsamplesize(test_vcm1) == n
+@test nvc(test_vcm1) == m
+@test ntraits(test_vcm1) == d
+@test neffects(test_vcm1) == p
+
 y_vcm = simulate(test_vcm1)
 
 @test size(y_vcm) == size(X*B)
@@ -77,7 +82,7 @@ vcmOBJ_equivalent =  VCMTrait(X, B, G, γ, [Σ...], [V...])
 @test vcmOBJ.μ == X*B + vcmOBJ.G*γ
 #X*β .+ genovec*γ
 
-vcmOBJ2 =  VCMTrait(X, B, varcomp)
+vcmOBJ2 = VCMTrait(X, B, varcomp)
 
 @test eltype(simulate(vcmOBJ2)) == Float64
 

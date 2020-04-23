@@ -61,6 +61,10 @@ test_vcm1_equivalent = VCMTrait(X, B, [Σ...], [V...])
 @test typeof(test_vcm1.vc[1]) == VarianceComponent
 
 varcomp = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
+
+varcomp_onevc = @vc Σ[1] ⊗ V[1]
+@test eltype(varcomp_onevc) == VarianceComponent
+
 test_vcm1 = VCMTrait(X, B, varcomp)
 
 # check if the structure is correct
