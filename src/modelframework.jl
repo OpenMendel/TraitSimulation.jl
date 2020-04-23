@@ -29,61 +29,69 @@ simulate(trait::AbstractTraitModel, n::Integer) = __default_behavior(trait)
 "Simulate a trait and store the result in y."
 simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
 
-
-# Now let's define our first concrete type.
-struct GLMTrait{distT, linkT, vecT1, vecT2, matT} <: AbstractTraitModel
-    X::matT             # all effects
-    β::vecT1            # regression coefficients
-    η::vecT2            # linear predictor η = X*β
-    μ::vecT2            # expected value of response μ = g^-1(η), g is the link function
-    dist::Type{distT}   # univariate, exponential family of distributions
-    link::linkT         # link function g(μ) = X*β = η
-    function GLMTrait(X::matT, β::vecT1, η::vecT2, μ::vecT2,
-		 distribution::D, link::linkT) where {D,linkT,vecT1,vecT2,matT}
-        # extract the base type without type parameters
-        distT = Base.typename(typeof(distribution)).wrapper
-        # make a new instance
-        new{distT, linkT, vecT1, vecT2, matT}(X, β, η, μ, distT, link)
-    end
+struct GLMTrait{distT, linkT, vecT1, vecT2, vecT3, matT, matT2} <: AbstractTraitModel
+	X::matT             # all effects
+	β::vecT1            # regression coefficients
+	G::matT2        # genotypes CHANGE TO SNPARRAY
+	γ::vecT1             # effect sizes for each snp
+	η::vecT2            # linear predictor η = X*β
+	μ::vecT3            # expected value of response μ = g^-1(η), g is the link function
+	dist::Type{distT}   # univariate, exponential family of distributions
+	link::linkT         # link function g(μ) = X*β = η
+	function GLMTrait(X::matT, β::vecT1, G::matT2, γ::vecT1, η::vecT2, distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, vecT1, vecT2, matT, matT2}
+	# extract the base type without type parameters
+	distT = Base.typename(typeof(distribution)).wrapper
+	n = size(X, 1)
+	μ = zeros(n)
+	for i in eachindex(η)
+	μ[i] = GLM.linkinv(link, η[i])
+	end
+	# make a new instance
+	new{distT, linkT, vecT1, typeof(η), typeof(μ), matT, matT2}(X, β, G, γ, η, μ, distT, link)
+	end
 end
 
-# define outer constructors that act as intermediates between the internal
-# constructor and any external interfaces we deem convenient
-
-# building from model encoded as mat-vec
-function GLMTrait(X::AbstractMatrix, β::AbstractVector, distribution, link)
-	# define the linear predictor
-    η = zeros(size(X, 1), size(β, 2))
-    mul!(η, X, β)
-    # apply the inverse link element-wise
-    μ = linkinv.(link, η)
-    # create a new instance
-    GLMTrait(X, β, η, μ, distribution, link)
+function GLMTrait(X::Matrix{T}, β::Vector{T}, G::SnpArray, γ::Vector{T},
+	 distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T <: Real}
+	 distT = Base.typename(typeof(distribution)).wrapper
+ 	 n = size(X, 1)
+	 η = Vector{T}(undef, n)
+ 	 clamp_eta!(η, X, β, distT; lb = lb , ub = ub)
+	 genovec = zeros(Float64, size(G))
+ 	 Base.copyto!(genovec, @view(G[:, :]), model = ADDITIVE_MODEL, impute = true)
+  return GLMTrait(X, β, genovec, γ, η, distribution, link)
 end
 
-# building from linear predictor only
-function GLMTrait(x::AbstractVector, distribution, link, ismu::Bool = true)
-    if ismu
-        μ = x
-        η = linkfun.(link, μ)
-    else
-        η = x
-        μ = linkinv.(link, η)
-    end
-    return GLMTrait(nothing, nothing, η, μ, distribution, link)
+function GLMTrait(X::Matrix{T}, β::Vector{T}, distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T <: Real}
+	distT = Base.typename(typeof(distribution)).wrapper
+	n = size(X, 1)
+	η = zeros(n)
+	clamp_eta!(η, X, β, distT; lb = lb , ub = ub)
+	genovec = zeros(Float64, n)
+	copyto!(genovec, X[:, end])
+    GLMTrait(X, β, genovec, [β[end]], η, distribution, link)
 end
 
-function GLMTrait(X::AbstractMatrix, β::AbstractVector, G::AbstractMatrix,
-	 				γ::AbstractVector, distribution, link)
-  n_traits = size(β[:, :], 2)
-  n_people = size(X, 1)
-  η = zeros(n_people, n_traits)
-  non_gen_covariates = zeros(n_people, n_traits)
+# clamp the trait values
+  # specific to Poisson and NegativeBinomial
+  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat, distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb = -20, ub = 20) where T <: Real
+	  mul!(η, X, β)
+	  η .= map(y -> y >= ub ? ub : y, η)
+  end
 
-  X_full = [X G]
-  β_full = vcat(β,γ)
-  return GLMTrait(X_full, β_full, distribution, link)
-end
+  # specific to Bernoulli and Binomial
+  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat, distT::Union{Type{Bernoulli}, Type{Binomial}}; lb = -20, ub = 20) where T <: Real
+	  mul!(η, X, β)
+	  clamp!(η, lb, ub)
+	  η
+  end
+
+  # all others
+  function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat, distT::Type{D}; lb = -20, ub = 20) where {D, T <: Real}
+	  mul!(η, X, β)
+	  η
+  end
+
 
 # better printing; customize how a type is summarized in a REPL
 function Base.show(io::IO, x::GLMTrait)
@@ -91,6 +99,7 @@ function Base.show(io::IO, x::GLMTrait)
     print(io, "  * response distribution: $(x.dist)\n")
     print(io, "  * link function: $(typeof(x.link))\n")
     print(io, "  * sample size: $(nsamplesize(x))")
+	print(io, "  * fixed effects: $(neffects(x))")
 end
 
 # make our new type implement the interface defined above
@@ -124,13 +133,12 @@ neffects(trait::OrderedMultinomialTrait) = size(trait.X, 2)
 noutcomecategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
 
 
-
 """
 VCMTrait
 VCMTrait object is a model framework object that stores information about the simulation model
  of multiple traits, under the Variance Component Model Framework.
 """
-struct VCMTrait{T <: Real}
+struct VCMTrait{T <: Real} <: AbstractTraitModel
 	X::Matrix{T}             # all effects
 	β::Matrix{T}             # regression coefficients
 	G::AbstractMatrix        # genotypes CHANGE TO SNPARRAY
@@ -145,7 +153,6 @@ struct VCMTrait{T <: Real}
 	end
 end
 
-
 function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
 	 vc::Vector{VarianceComponent}) where T <: Real
 	n, p, m, d = size(X, 1), size(X, 2), length(vc), size(β, 2)
@@ -156,7 +163,7 @@ function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
 	μ_null = Matrix{T}(undef, n, d)
 	LinearAlgebra.mul!(μ_null, X, β)
     LinearAlgebra.mul!(μ, genovec, γ)
- 	μ += μ_null
+ 	μ .+= μ_null
 	# constructor
 	VCMTrait(X, β, genovec, γ, vc, μ)
 end
@@ -226,30 +233,35 @@ ntraits(trait::VCMTrait) = size(trait.vc[1].Σ, 1)
 nvc(trait::VCMTrait) = length(trait.vc)
 neffects(trait::VCMTrait) = size(trait.X, 2)
 
-
-struct GLMMTrait{distT, linkT, matT2, T, matT} <: AbstractTraitModel
-   X::matT             # all effects
-   β::matT2            # regression coefficients
-   μ::matT2            # mean of the glmm with random effects
-   η::matT
-   Z::matT             # place holder for getting glmmm mean for simulation
-   vc::Vector{T}
-   dist::Type{distT}   # univariate, exponential family of distributions
-   link::linkT         # link function g(μ) = X*β
-end
-
 """
 GLMMTrait
 GLMMTrait object is a model framework that stores information about the simulation of multiple traits, under the Generalized Linear Mixed Model Framework.
 """
-function GLMMTrait(X::AbstractMatrix, β::AbstractMatrix, vc::Vector, distribution::D, link::linkT) where {D, linkT, matT2, T, matT}
-	distT = Base.typename(typeof(distribution)).wrapper
-	Z = zeros(size(X, 1), size(β, 2))
-    η = similar(Z)
-	mul!(η, X, β)
-	μ = zero(η)
-  return GLMMTrait(X, β, μ, η, Z, vc, distT, link)
+struct GLMMTrait{distT, linkT, T <: Real} <: AbstractTraitModel
+   X::Matrix{T}             # all effects
+   β::Matrix{T}            # regression coefficients
+   μ::Matrix{T}            # mean of the glmm with random effects
+   η::Matrix{T}
+   Z::Matrix{T}             # place holder for aggregating random effects
+   Y_vcm::Matrix{T}        # place holder for getting glmmm mean for simulation
+   vc::Vector{VarianceComponent}
+   dist::Type{distT}   # univariate, exponential family of distributions
+   link::linkT         # link function g(μ) = X*β
+   function GLMMTrait(X::Matrix{T}, β::Matrix{T}, vc::Vector{VarianceComponent},
+   	 distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T<: Real}
+   	distT = Base.typename(typeof(distribution)).wrapper
+   	Z = zeros(size(X, 1), size(β, 2))
+   	Y_vcm = zeros(size(X, 1), size(β, 2))
+    η = zeros(size(X, 1), size(β, 2))
+   	clamp_eta!(η, X, β, distT; lb = lb , ub = ub)
+   	μ = zero(η)
+   	for i in eachindex(η)
+   		μ[i] = GLM.linkinv(link, η[i])
+   	end
+     return new{distT, linkT, T}(X, β, μ, η, Z, Y_vcm, vc, distT, link)
+   end
 end
+
 
 
 # better printing; customize how a type is summarized in a REPL

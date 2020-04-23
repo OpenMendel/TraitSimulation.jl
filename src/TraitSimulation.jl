@@ -51,26 +51,6 @@ include("simulatesnparray.jl")
       return dist(1, p) # r = 1
   end
 
-  # clamp the trait values
-    # specific to Poisson and NegativeBinomial
-    function clamp_eta!(η, distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb, ub)
-        map(y -> y >= ub ? ub : y, η)
-    end
-
-    # specific to Bernoulli and Binomial
-    function clamp_eta!(η, distT::Union{Type{Bernoulli}, Type{Binomial}}; lb , ub)
-        clamp!(η, lb, ub)
-    end
-
-    function clamp_glm(trait::GLMTrait; lb = -20, ub = 20)
-        distT = trait.dist
-        mul!(trait.η, trait.X, trait.β)
-     	trait.η .= clamp_eta!(trait.η, distT; lb = lb , ub = ub)
-        for i in eachindex(trait.μ)
-            trait.μ[i] = GLM.linkinv(trait.link, trait.η[i])
-        end
-        return trait
-    end
   """
   ```
   simulate(trait::GLMTrait, n::Integer)
@@ -128,7 +108,7 @@ include("simulatesnparray.jl")
   end
 
   function simulate!(Y, trait::VCMTrait)
-      TraitSimulation.VCM_trait_simulation(Y, trait.Z, trait.μ, trait.vc)
+      TraitSimulation.VCM_trait_simulation!(Y, trait.Z, trait.μ, trait.vc)
       return Y
   end
 
@@ -140,7 +120,7 @@ include("simulatesnparray.jl")
   """
   function simulate(trait::VCMTrait, n::Integer)
       # pre-allocate output
-      Y_n = ntuple(x -> zeros(size(trait.mu)), n)
+      Y_n = ntuple(x -> zeros(size(trait.μ)), n)
       # do the simulation n times, storing each result in a column
       for k in 1:n
           @views simulate!(Y_n[k], trait)
@@ -150,7 +130,7 @@ include("simulatesnparray.jl")
 
   function simulate(trait::GLMMTrait)
       # pre-allocate output
-      Y = Matrix{eltype(trait.dist)}(undef, nsamplesize(trait), ntraits(trait))
+      Y = Matrix{eltype(trait.dist)}(undef, size(trait.μ))
       # do the simulation
       simulate!(Y, trait)
       return Y
@@ -158,12 +138,13 @@ include("simulatesnparray.jl")
 
   function simulate!(Y, trait::GLMMTrait)
       #  simulate random effects
-      fill!(trait.Z, 0)
-      VCM_trait_simulation(trait.Z, trait.η, trait.vc)
+      fill!(trait.Z, 0.0)
+      fill!(trait.Y_vcm, 0.0)
+      TraitSimulation.VCM_trait_simulation!(trait.Y_vcm, trait.Z, trait.η, trait.vc)
       # simulate from the glm with the mean μ and vector of ones for coefficients
-      trait.μ .= linkinv.(trait.link, trait.Z)
-      @.  Y = rand(__get_distribution(trait.dist, trait.μ))
-      return Y
+      trait.μ .= GLM.linkinv.(trait.link, trait.Y_vcm)
+      copyto!(Y, rand.(__get_distribution.(trait.dist, trait.μ)))
+      Y
   end
 
   """
@@ -185,5 +166,6 @@ include("simulatesnparray.jl")
   export mean_formula, VarianceComponent, TotalVarianceComponent, GLMMTrait
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, simulate, @vc, vcobjtuple
   export simulate_effect_size, snparray_simulation, genotype_sim
+  export nsamplesize, neffects, nvc, ntraits
   export power_simulation, power, ordinal_power_simulation, clamp_glm, ordinal_power, simulate!
 end #module

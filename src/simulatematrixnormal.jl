@@ -5,10 +5,10 @@ this VarianceComponent type stores A, B , CholA and CholB so we don't have to co
 struct VarianceComponent
 	Σ::Matrix{Float64} # n_traits by n_traits
 	V::Matrix{Float64} # n_people by n_people
-	CholΣ::Cholesky{Float64, Array{Float64,2}} # cholesky decomposition of A
-	CholV::Cholesky{Float64, Array{Float64,2}} # cholesky decomposition of B
+	CholΣ::Array{Float64,2} # cholesky decomposition of A
+	CholV::Array{Float64,2} # cholesky decomposition of B
 	function VarianceComponent(Σ, V) #inner constructor given A, B
-		return new(Σ, V, cholesky(Symmetric(Σ)), cholesky(Symmetric(V))) # stores these values (this is helpful so we don't have it inside the loop)
+		return new(Σ, V, cholesky(Σ).factors, cholesky(V).factors) # stores these values (this is helpful so we don't have it inside the loop)
 	end
 end
 
@@ -25,23 +25,32 @@ ntraits(vc::VarianceComponent) = size(vc.Σ, 1)
 
 # For a single Variance Component, algorithm that will transform standard normal distribution
 function simulate_matrix_normal!(Z::Matrix, vc::VarianceComponent)
-	cholΣ = vc.CholΣ.factors # grab (not calculate) the stored Cholesky decomposition of n_traits by n_traits variance component matrix
-	cholV = vc.CholV.factors # grab (not calculate) the stored Cholesky decomposition of n_people by n_people variance component matrix
 	randn!(Z)
-	BLAS.trmm!('L', 'U', 'T', 'N', 1.0, cholV, Z)
+	BLAS.trmm!('L', 'U', 'T', 'N', 1.0, vc.CholV, Z)
 	#lmul!(cholV.L, Z) # Z => (CholV.L)Z
-	BLAS.trmm!('R', 'U', 'N', 'N', 1.0, cholΣ, Z)
+	BLAS.trmm!('R', 'U', 'N', 'N', 1.0, vc.CholΣ, Z)
 	#rmul!(Z, cholΣ.U) # Z => (CholV.L)Z(CholΣ.U) so each Y_i = Z ~ MN(0, A_i = (CholV.L)(CholV.L)^T, B_i = (CholΣ.U)^T(CholΣ.U)), i in 1:m
 	return Z #adds onto Z the effects of each variance component
 end
+
+# function simulate_mnl!(Z::Matrix, cholVf, cholΣf)
+# 	# cholΣ = vc.CholΣ.factors # grab (not calculate) the stored Cholesky decomposition of n_traits by n_traits variance component matrix
+# 	# cholV = vc.CholV.factors # grab (not calculate) the stored Cholesky decomposition of n_people by n_people variance component matrix
+# 	randn!(Z)
+# 	BLAS.trmm!('L', 'U', 'T', 'N', 1.0, cholVf, Z)
+# 	#lmul!(cholV.L, Z) # Z => (CholV.L)Z
+# 	BLAS.trmm!('R', 'U', 'N', 'N', 1.0, cholΣf, Z)
+# 	#rmul!(Z, cholΣ.U) # Z => (CholV.L)Z(CholΣ.U) so each Y_i = Z ~ MN(0, A_i = (CholV.L)(CholV.L)^T, B_i = (CholΣ.U)^T(CholΣ.U)), i in 1:m
+# 	return Z #adds onto Z the effects of each variance component
+# end
 
 """
 	VCM_trait_simulation(mu::Matrix{Float64}, vc::Vector{VarianceComponent})
 For an evaluated mean matrix and vector of VarianceComponent objects, simulate from VCM.
 """
-function VCM_trait_simulation(Y::Matrix, Z::Matrix, mu::Matrix{Float64}, vc::Vector{VarianceComponent}) # for an evaluated matrix
+function VCM_trait_simulation!(Y::Matrix, Z::Matrix, mu::Matrix{Float64}, vc::Vector{VarianceComponent}) # for an evaluated matrix
 	for i in eachindex(vc)
-		simulate_matrix_normal!(Z, vc[i]) # this step aggregates the variance components by
+		TraitSimulation.simulate_matrix_normal!(Z, vc[i]) # this step aggregates the variance components by
 		axpy!(1.0, Z, Y) # summing the independent matrix normals to Y, rewriting over Z for each variance component
 	end
 	axpy!(1.0, mu, Y) # add the mean back to shift the matrix normal
