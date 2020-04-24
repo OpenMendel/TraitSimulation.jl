@@ -99,7 +99,7 @@ y_alternative = zeros(size(genetic_model_test.μ))
 pvalues = power_simulation_VCM(nsim, γs, genetic_model_test, y_alternative, tmp_mat, tmp_mat2, nulldatarot, eigen_vecs, pvals) #
 
 @test eltype(pvalues) == Float64
-@test issorted(pvalues[1, :])
+@test pvalues[1] < pvalues[end]
 
 """
 ```
