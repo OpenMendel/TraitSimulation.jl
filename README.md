@@ -1,4 +1,12 @@
 # TraitSimulation.jl
+Authors: Sarah Ji, Hua Zhou, Janet Sinsheimer, Kenneth Lange, Eric Sobel
+
+A convenient tool for simulating phenotypes for unrelateds or families under a variety of supported models.
+
+** (1) GLM Traits: Generalized Linear Models
+** (2) VCM Traits: Variance Component Models
+** (3) Improved Multinomial Case/Control Traits: Ordered Multinomial Models:
+** (4) GLMM Traits: Generalized Linear Mixed Models 
 
 *Trait Simulation in Julia.*
 
@@ -8,7 +16,6 @@ This package requires Julia v0.7 or later, which can be obtained from https://ju
 The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 
 `(v1.2) pkg> add https://github.com/OpenMendel/TraitSimulation.jl`
-
 
 
 #Citation
