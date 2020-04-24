@@ -3,10 +3,13 @@ Authors: Sarah Ji, Hua Zhou, Janet Sinsheimer, Kenneth Lange, Eric Sobel
 
 A convenient tool for simulating phenotypes for unrelateds or families under a variety of supported models.
 
-** (1) GLM Traits: Generalized Linear Models
-** (2) VCM Traits: Variance Component Models
-** (3) Improved Multinomial Case/Control Traits: Ordered Multinomial Models:
-** (4) GLMM Traits: Generalized Linear Mixed Models 
+**(1) GLM Traits: Generalized Linear Models 
+
+**(2) VCM Traits: Variance Component Models
+
+**(3) Improved Multinomial Case/Control Traits: Ordered Multinomial Models:
+
+**(4) GLMM Traits: Generalized Linear Mixed Models 
 
 *Trait Simulation in Julia.*
 
