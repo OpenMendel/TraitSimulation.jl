@@ -22,7 +22,7 @@ Use the backspace key to return to the Julia REPL.
 
 | **Documentation**                                                                           | **Build Status**                                                              | **Code Coverage**                                                                            |
 |---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| [![Stable][docs-stable-img]][docs-stable-url] [![Latest][docs-latest-img]][docs-latest-url] | [![Travis][travis-img]][travis-url] [![Appveyor][appveyor-img]][appveyor-url] | [![Coverage Status][coveralls-img]][coveralls-url] [![codecov.io][codecov-img]][codecov-url] |
+| [![Stable][docs-stable-img]][docs-stable-url] [![Latest][docs-latest-img]][docs-latest-url] | [![Travis][travis-img]][travis-url]| [![Coverage Status][coveralls-img]][coveralls-url] [![codecov.io][codecov-img]][codecov-url] |
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
 [docs-latest-url]: https://openmendel.github.io/TraitSimulation.jl/dev/
@@ -33,9 +33,6 @@ Use the backspace key to return to the Julia REPL.
 [travis-img]: https://travis-ci.org/OpenMendel/TraitSimulation.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/OpenMendel/TraitSimulation.jl
 
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/xnug0ey8xpx8we48?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/OpenMendel/TraitSimulation-jl
-
 [issues-url]: https://github.com/OpenMendel/TraitSimulation.jl/issues
 
 [coveralls-img]: https://coveralls.io/repos/github/OpenMendel/TraitSimulation.jl/badge.svg?branch=master
@@ -43,3 +40,5 @@ Use the backspace key to return to the Julia REPL.
 
 [codecov-img]: https://codecov.io/gh/OpenMendel/TraitSimulation.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/OpenMendel/TraitSimulation.jl
+
+
