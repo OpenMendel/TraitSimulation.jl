@@ -98,9 +98,9 @@ y_alternative = zeros(size(genetic_model_test.μ))
 pvalues = power_simulation_VCM(nsim, γs, genetic_model_test, y_alternative, tmp_mat, tmp_mat2, nulldatarot, eigen_vecs, pvals) #
 
 @test eltype(pvalues) == Float64
+deviation_1sim = abs.(sort(pvalues[1, :], rev = true) .- pvalues[1, :])
 
-@test norm(sort(pvalues[1, :], rev = true) .- pvalues[1, :]) < 0.5
-
+@test maximum(deviation_1sim) < 0.5
 
 """
 ```
