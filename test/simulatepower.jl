@@ -1,6 +1,7 @@
 using VarianceComponentModels, Distributions
 using Random, Plots, DataFrames, LinearAlgebra
 using SnpArrays, TraitSimulation, GLM, StatsBase, OrdinalMultinomialModels
+Random.seed!(1234)
 
 """
 ```
@@ -73,7 +74,7 @@ genetic_model_test = VCMTrait(X_new, β_new[:, :], totalvc)
 y = simulate(genetic_model_test)
 @test eltype(y) == Float64
 
-γs = collect(0.0:0.025:0.4)
+γs = collect(0.0:0.025:0.1)
 
 nsim = 1
 randomseed = 1234
@@ -98,9 +99,7 @@ y_alternative = zeros(size(genetic_model_test.μ))
 pvalues = power_simulation_VCM(nsim, γs, genetic_model_test, y_alternative, tmp_mat, tmp_mat2, nulldatarot, eigen_vecs, pvals) #
 
 @test eltype(pvalues) == Float64
-deviation_1sim = abs.(sort(pvalues[1, :], rev = true) .- pvalues[1, :])
-
-@test maximum(deviation_1sim) < 0.5
+@test issorted(pvalues[1, :])
 
 """
 ```
