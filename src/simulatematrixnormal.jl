@@ -1,3 +1,4 @@
+using VarianceComponentModels, Distributions
 """
 VarianceComponent
 this VarianceComponent type stores A, B , CholA and CholB so we don't have to compute the cholesky decomposition inside the loop.
@@ -37,7 +38,7 @@ end
 	VCM_trait_simulation(mu::Matrix{Float64}, vc::Vector{VarianceComponent})
 For an evaluated mean matrix and vector of VarianceComponent objects, simulate from VCM.
 """
-function VCM_trait_simulation!(Y::Matrix, Z::Matrix, mu::Matrix{Float64}, vc::Vector{VarianceComponent}) # for an evaluated matrix
+function VCM_trait_simulation(Y::Matrix, Z::Matrix, mu::Matrix{Float64}, vc::Vector{VarianceComponent}) # for an evaluated matrix
 	for i in eachindex(vc)
 		TraitSimulation.simulate_matrix_normal!(Z, vc[i]) # this step aggregates the variance components by
 		axpy!(1.0, Z, Y) # summing the independent matrix normals to Y, rewriting over Z for each variance component

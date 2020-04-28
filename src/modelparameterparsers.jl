@@ -118,26 +118,3 @@ function  vcobjtuple(vcobject::Vector{VarianceComponent})
 	end
 	return(Σ, V)
 end
-
-# """
-# This is a wrapper linear algebra function that computes the fixed effects. [C1 ; C2] = [A1 ; A2] * [B1 ; B2]
-# where A1 is a snpmatrix and A2 is a dense Matrix{Float}. Used for cleaner code.
-# Here we are separating the computation because A1 is stored in compressed form while A2 is
-# uncompressed (float64) matrix. This means that they cannot be stored in the same data
-# structure.
-# """
-# function A_mul_B!(C1::AbstractMatrix{T}, C2::AbstractMatrix{T}, A1::SnpBitMatrix,
-#         A2::AbstractVecOrMat{T}, B1::AbstractVecOrMat{T}, B2::AbstractVecOrMat{T}) where {T <: Real}
-# 		for i in 1:size(C1, 2)
-# 			SnpArrays.mul!(C1[:, i], A1, B1[:, i])
-# 		end
-#     LinearAlgebra.mul!(C2, A2, B2)
-# 	C1 += C2
-# end
-#
-# function A_mul_B!(C1::AbstractMatrix{T}, C2::AbstractMatrix{T}, A1::AbstractMatrix{T},
-#         A2::AbstractMatrix{T}, B1, B2) where {T <: Real}
-#     LinearAlgebra.mul!(C1, A1, B1)
-#     LinearAlgebra.mul!(C2, A2, B2)
-# 	C1 += C2
-# end

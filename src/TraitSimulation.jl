@@ -5,15 +5,17 @@ using LinearAlgebra
 using Random
 using SnpArrays
 using OrdinalMultinomialModels
+using VarianceComponentModels
+using Distributions
 import Base: show
 
 include("simulatematrixnormal.jl")
 
-include("modelparameterparsers.jl")
-
 include("modelframework.jl")
 
 include("simulatesnparray.jl")
+
+include("modelparameterparsers.jl")
 
   function simulate(trait::GLMTrait)
       # pre-allocate output
@@ -105,7 +107,8 @@ include("simulatesnparray.jl")
   end
 
   function simulate!(Y, trait::VCMTrait)
-      TraitSimulation.VCM_trait_simulation!(Y, trait.Z, trait.μ, trait.vc)
+      fill!(Y, 0.0)
+      TraitSimulation.VCM_trait_simulation(Y, trait.Z, trait.μ, trait.vc)
       return Y
   end
 
@@ -137,7 +140,7 @@ include("simulatesnparray.jl")
       #  simulate random effects
       fill!(trait.Z, 0.0)
       fill!(trait.Y_vcm, 0.0)
-      TraitSimulation.VCM_trait_simulation!(trait.Y_vcm, trait.Z, trait.η, trait.vc)
+      TraitSimulation.VCM_trait_simulation(trait.Y_vcm, trait.Z, trait.η, trait.vc)
       # simulate from the glm with the mean μ and vector of ones for coefficients
       trait.μ .= GLM.linkinv.(trait.link, trait.Y_vcm)
       copyto!(Y, rand.(__get_distribution.(trait.dist, trait.μ)))

@@ -1,6 +1,6 @@
 using Random, SnpArrays, DataFrames, GLM
-using LinearAlgebra
-using BenchmarkTools
+using LinearAlgebra, Test, TraitSimulation
+using BenchmarkTools, Statistics
 Random.seed!(1234)
 
 function generateSPDmatrix(n)
@@ -84,3 +84,41 @@ data_frame_2 = DataFrame(ones(length(our_names), length(our_names)))
 rename!(data_frame_2, Symbol.(our_names))
 
 @test unique(mean_formula(whats_my_mean_formula, data_frame_2)[1])[1] == sum(effectsizes)
+
+@test_throws ErrorException TraitSimulation.__default_behavior(test_vcm1)
+
+test_vcm1_new = VCMTrait(X, B, @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2])
+test_vcm1_equiv_new = VCMTrait(X, B, [Σ...], [V...])
+
+##
+nsim = 10
+using Statistics
+Y_new = simulate(test_vcm1_new, nsim)
+Y_vecd = zeros(n*d, nsim)
+
+for i in 1:nsim
+	Y_vecd[:, i]  = vec(Y_new[i])
+end
+
+simulated_mean = Statistics.mean(Y_vecd, dims = 2)
+
+Z_new =  Y_vecd .- simulated_mean
+
+emp_cov = (Z_new * Z_new') * inv(nsim)
+
+
+true_mu = vec(test_vcm1_new.μ)
+
+true_Ω = zeros(n*d, n*d)
+for i = 1:m
+  global true_Ω += kron(Σ[i], V[i])
+end
+
+vs = diag(true_Ω)
+
+    for i = 1:20
+        @test isapprox(simulated_mean[i], true_mu[i], atol=sqrt(vs[i] / nsim) * 8.0)
+    end
+    for i = 1:20, j = 1:20
+        @test isapprox(emp_cov[i,j], true_Ω[i,j], atol=sqrt(vs[i] * vs[j]) * 10.0 / sqrt(nsim))
+    end

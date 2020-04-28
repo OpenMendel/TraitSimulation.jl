@@ -1,4 +1,5 @@
 using Random, SnpArrays, DataFrames, GLM
+using Suppressor
 using LinearAlgebra
 using BenchmarkTools
 beta = [1.0, 5.0]
@@ -126,3 +127,11 @@ glmtraitobject7 =  GLMTrait(X, beta, G, γ, dist, link)
 
 @test nsamplesize(glmtraitobject7) == n
 @test neffects(glmtraitobject7) == p
+
+model_info_ordinal = @capture_out show(Ordinal_Model_Test)
+model_info_glmm = @capture_out show(glmtraitobject6)
+model_info_glm = @capture_out show(glmtraitobject7)
+
+@test model_info_ordinal != nothing
+@test model_info_glmm != nothing
+@test model_info_glm != nothing
