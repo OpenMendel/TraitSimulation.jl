@@ -17,6 +17,17 @@ include("simulatesnparray.jl")
 
 include("modelparameterparsers.jl")
 
+include("simulatepower.jl")
+
+"Simulate the trait under the given model."
+simulate(trait::AbstractTraitModel) = __default_behavior(trait)
+
+"Simulate a trait `n` times independently."
+simulate(trait::AbstractTraitModel, n::Integer) = __default_behavior(trait)
+
+"Simulate a trait and store the result in y."
+simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
+
   function simulate(trait::GLMTrait)
       # pre-allocate output
       y = Vector{eltype(trait.dist)}(undef, nsamplesize(trait))
@@ -112,12 +123,6 @@ include("modelparameterparsers.jl")
       return Y
   end
 
-  """
-  ```
-  simulate(trait::VCMTrait, n::Integer)
-  ```
-  This simulates (a) trait(s), n times under the desired variance component model, specified using the VCMTrait type.
-  """
   function simulate(trait::VCMTrait, n::Integer)
       # pre-allocate output
       Y_n = ntuple(x -> zeros(size(trait.μ)), n)
@@ -149,9 +154,9 @@ include("modelparameterparsers.jl")
 
   """
   ```
-  simulate(trait::VCMTrait, n::Integer)
+  simulate(trait::GLMMTrait, n::Integer)
   ```
-  This simulates trait(s), n times under the desired generalized linear mixed model, specified using the GLMMTrait type.
+  This simulates a trait n times under the desired generalized linear mixed model, specified using the GLMMTrait type.
   """
   function simulate(trait::GLMMTrait, n::Integer)
       # pre-allocate output
@@ -168,4 +173,5 @@ include("modelparameterparsers.jl")
   export simulate_effect_size, snparray_simulation, genotype_sim
   export nsamplesize, neffects, noutcomecategories, nvc, ntraits
   export simulate!, simulate
+  export null_and_alternative_vcm_and_rotate, power_simulation, power
 end #module

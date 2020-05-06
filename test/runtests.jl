@@ -6,6 +6,7 @@ using Test
 using DataFrames
 using VarianceComponentModels
 using SnpArrays
+using Suppressor
 
 @testset "modelparameters" begin
 	include("modelparameters.jl")
@@ -20,5 +21,6 @@ end
 end
 
 @testset "simulatepower" begin
-	include("simulatepower.jl")
+	include("vcm_power.jl")
+	include("univariate_power.jl")
 end

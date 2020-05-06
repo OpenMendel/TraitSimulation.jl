@@ -38,8 +38,14 @@ end
 X, B, Σ, V = generateRandomVCM(n, p, d, m)
 # specify the variance compoents of the model
 varcomp = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
-
 test_vcm1 = VCMTrait(X, B, varcomp)
+
+model_info_vcm = @capture_out show(test_vcm1)
+vc_info = @capture_out show(varcomp)
+
+@test model_info_vcm != nothing
+@test vc_info != nothing
+
 
 @test nsamplesize(test_vcm1) == n
 @test nvc(test_vcm1) == m
@@ -77,10 +83,6 @@ vcmOBJ_equivalent =  VCMTrait(X, B, G, γ, [Σ...], [V...])
 @test vcmOBJ_equivalent.vc[1].V == V[1]
 # check data was copied correctly
 @test vcmOBJ.X == X
-
-# check that the overall mean is the sum of both nongenetic and genetic effects
-@test vcmOBJ.μ == X*B + vcmOBJ.G*γ
-#X*β .+ genovec*γ
 
 vcmOBJ2 = VCMTrait(X, B, varcomp)
 

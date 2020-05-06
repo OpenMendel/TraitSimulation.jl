@@ -39,16 +39,20 @@ end
 
 X, B, Σ, V = generateRandomVCM(n, p, d, m)
 
-glmtraitobject = GLMTrait(Matrix(df), beta, dist, link)
+glmtraitobject = GLMTrait(X, beta, dist, link)
 y_normal  = simulate(glmtraitobject)
-@test size(y_normal) == size(Matrix(df)*beta)
+@test size(y_normal) == size(X*beta)
+
+@test_throws ErrorException("function not supported by $(typeof(glmtraitobject))") nvc(glmtraitobject)
+
+@test_throws ErrorException("function not supported by $(typeof(glmtraitobject))") ntraits(glmtraitobject)
+
+@test_throws ErrorException("function not supported by $(typeof(glmtraitobject))") noutcomecategories(glmtraitobject)
 
 number_independent_simulations  = 5
 @test size(simulate(glmtraitobject, number_independent_simulations)) == (n, number_independent_simulations)
 
 @test glmtraitobject isa TraitSimulation.AbstractTraitModel
-
-@test GLMTrait(Matrix(df), beta, dist, link).η == evaluated_output[1]
 
 # make sure that ordered multinomial models works
 link = LogitLink()
@@ -99,6 +103,7 @@ glmtraitobject5 = GLMTrait(X, beta, dist, link)
 # make sure GLMM works
 glmtraitobject6 = GLMMTrait(X, B, varcomp, dist, link)
 @test glmtraitobject6 isa TraitSimulation.AbstractTraitModel
+
 
 @test nsamplesize(glmtraitobject6) == n
 @test neffects(glmtraitobject6) == p

@@ -27,9 +27,7 @@ ntraits(vc::VarianceComponent) = size(vc.Σ, 1)
 function simulate_matrix_normal!(Z::Matrix, vc::VarianceComponent)
 	randn!(Z)
 	BLAS.trmm!('L', 'U', 'T', 'N', 1.0, vc.CholV, Z)
-	#lmul!(cholV.L, Z) # Z => (CholV.L)Z
 	BLAS.trmm!('R', 'U', 'N', 'N', 1.0, vc.CholΣ, Z)
-	#rmul!(Z, cholΣ.U) # Z => (CholV.L)Z(CholΣ.U) so each Y_i = Z ~ MN(0, A_i = (CholV.L)(CholV.L)^T, B_i = (CholΣ.U)^T(CholΣ.U)), i in 1:m
 	return Z #adds onto Z the effects of each variance component
 end
 

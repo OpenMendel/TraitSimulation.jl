@@ -6,28 +6,22 @@ import Distributions: UnivariateDistribution
 # all instances of AbstractTrait
 abstract type AbstractTraitModel end
 
-# for example, you might want to be able to check
-# the number of samples or linear predictors
-
 __default_behavior(trait) = error("function not supported by $(typeof(trait))")
 
-"Check the number of observations."
-nsamplesize(trait::AbstractTraitModel) = __default_behavior(trait)
-
-"Check the number of linear predictors."
-neffects(trait::AbstractTraitModel) = __default_behavior(trait)
+"Check the number of traits."
+ntraits(trait::AbstractTraitModel) = __default_behavior(trait)
 
 "Check the number of variance components."
 nvc(trait::AbstractTraitModel) = __default_behavior(trait)
 
-"Simulate the trait under the given model."
-simulate(trait::AbstractTraitModel) = __default_behavior(trait)
+"Check the number of outcome categories."
+noutcomecategories(trait::AbstractTraitModel) = __default_behavior(trait)
 
-"Simulate a trait `n` times independently."
-simulate(trait::AbstractTraitModel, n::Integer) = __default_behavior(trait)
+"Check the number of fixed covariates in linear model."
+neffects(trait::AbstractTraitModel) = size(trait.X, 2)
 
-"Simulate a trait and store the result in y."
-simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
+"Check the number of people in the sample."
+nsamplesize(trait::AbstractTraitModel) = size(trait.X, 1)
 
 struct GLMTrait{distT, linkT, vecT1, vecT2, vecT3, matT, matT2} <: AbstractTraitModel
 	X::matT             # all effects
@@ -105,11 +99,6 @@ function Base.show(io::IO, x::GLMTrait)
 	print(io, "  * fixed effects: $(neffects(x))")
 end
 
-# make our new type implement the interface defined above
-nsamplesize(trait::GLMTrait) = length(trait.μ)
-neffects(trait::GLMTrait) = size(trait.X, 2)
-
-
 struct OrderedMultinomialTrait{matT, vecT1, vecT2, linkT} <: AbstractTraitModel
     X::matT             # all effects
     β::vecT1            # regression coefficients
@@ -130,11 +119,7 @@ function Base.show(io::IO, x::OrderedMultinomialTrait)
     print(io, "  * sample size: $(nsamplesize(x))")
 end
 
-# make our new type implement the interface defined above
-nsamplesize(trait::OrderedMultinomialTrait) = size(trait.X, 1)
-neffects(trait::OrderedMultinomialTrait) = size(trait.X, 2)
 noutcomecategories(trait::OrderedMultinomialTrait) = length(trait.θ) + 1
-
 
 """
 VCMTrait
@@ -144,7 +129,7 @@ VCMTrait object is a model framework object that stores information about the si
 struct VCMTrait{T <: Real} <: AbstractTraitModel
 	X::Matrix{T}             # all effects
 	β::Matrix{T}             # regression coefficients
-	G::AbstractMatrix        # genotypes CHANGE TO SNPARRAY
+	G::AbstractVecOrMat        # genotypes CHANGE TO SNPARRAY
 	γ::Matrix{T}             # effect sizes for each snp
 	vc::Vector{VarianceComponent}
 	μ::Matrix{T}            # evaluated fixed effect
@@ -159,14 +144,14 @@ end
 function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
 	 vc::Vector{VarianceComponent}) where T <: Real
 	n, p, m, d = size(X, 1), size(X, 2), length(vc), size(β, 2)
-	# working arrays
-	genovec = zeros(Float64, size(G))
-	Base.copyto!(genovec, @view(G[:, :]), model = ADDITIVE_MODEL, impute = true)
-	μ = Matrix{T}(undef, n, d)
-	μ_null = Matrix{T}(undef, n, d)
+	genovec = SnpBitMatrix{Float64}(G, model=ADDITIVE_MODEL, center=true, scale=true);
+	μ = Matrix{Float64}(undef, n, 2)
+	μ_null = zeros(n, d)
 	LinearAlgebra.mul!(μ_null, X, β)
-    LinearAlgebra.mul!(μ, genovec, γ)
- 	μ .+= μ_null
+	for j in 1:size(μ, 2)
+		mul!(μ[:, j], genovec, γ[:, j]);
+	end
+	BLAS.axpby!(1.0, μ_null, 1.0, μ)
 	# constructor
 	VCMTrait(X, β, genovec, γ, vc, μ)
 end
@@ -231,10 +216,8 @@ function Base.show(io::IO, x::VCMTrait)
 end
 
 #make our new type implement the interface defined above
-nsamplesize(trait::VCMTrait) = size(trait.μ, 1)
 ntraits(trait::VCMTrait) = size(trait.vc[1].Σ, 1)
 nvc(trait::VCMTrait) = length(trait.vc)
-neffects(trait::VCMTrait) = size(trait.X, 2)
 
 """
 GLMMTrait
@@ -276,7 +259,5 @@ function Base.show(io::IO, x::GLMMTrait)
     print(io, "  * sample size: $(nsamplesize(x))")
 end
 # make our new type implement the interface defined above
-nsamplesize(trait::GLMMTrait) = size(trait.μ, 1)
 ntraits(trait::GLMMTrait) = size(trait.vc[1].Σ, 1)
 nvc(trait::GLMMTrait) = length(trait.vc)
-neffects(trait::GLMMTrait) = size(trait.X, 2)
