@@ -72,7 +72,7 @@ simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
       Y = Matrix{eltype(trait.dist)}(undef, nsamplesize(trait), n)
       # do the simulation n times, storing each result in a column
       for k in 1:n
-          @views simulate!(Y[:, k], trait)
+          simulate!(Y[:, k], trait)
       end
       return Y
   end
@@ -123,14 +123,24 @@ simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
       return Y
   end
 
-  function simulate(trait::VCMTrait, n::Integer)
+  function simulate_old(trait::VCMTrait, n::Integer)
       # pre-allocate output
-      Y_n = ntuple(x -> zeros(size(trait.μ)), n)
+      Y_n = [zeros(size(trait.μ)) for _ in 1:n] # replicates
       # do the simulation n times, storing each result in a column
       for k in 1:n
-          @views simulate!(Y_n[k], trait)
+          simulate!(Y_n[k], trait)
       end
       return Y_n
+  end
+
+  function simulate(trait::VCMTrait, n::Integer)
+      # pre-allocate output
+      Y_n = [zeros(size(traitobject.μ)) for _ in 1:n] # holds n replicates
+      # do the simulation n times, storing each result in a column
+     Threads.@threads for k in 1:n
+          simulate!(Y_n[k], trait)
+      end
+      return simulated_traits
   end
 
   function simulate(trait::GLMMTrait)
@@ -160,9 +170,9 @@ simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
   """
   function simulate(trait::GLMMTrait, n::Integer)
       # pre-allocate output
-      Y_n = ntuple(x -> zeros(size(trait.μ)), n)
+      Y_n = [zeros(size(traitobject.μ)) for _ in 1:n]
       # do the simulation n times, storing each result
-      for k in 1:n
+      @inbounds for k in 1:n
           @views simulate!(Y_n[k], trait)
       end
       return Y_n
@@ -173,5 +183,5 @@ simulate!(y, trait::AbstractTraitModel) = __default_behavior(trait)
   export simulate_effect_size, snparray_simulation, genotype_sim
   export nsamplesize, neffects, noutcomecategories, nvc, ntraits
   export simulate!, simulate
-  export null_and_alternative_vcm_and_rotate, power_simulation, power
+  export null_and_alternative_vcm_and_rotate, power_simulation, power, VCM_trait_simulation
 end #module
