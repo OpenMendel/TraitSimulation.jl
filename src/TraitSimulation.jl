@@ -168,6 +168,7 @@ This simulates a GLM trait once under the desired generalized linear model, spec
   """
   function simulate!(Y, Z, trait::VCMTrait)
       fill!(Y, 0.0)
+      LinearAlgebra.BLAS.set_num_threads(1)
       TraitSimulation.VCM_trait_simulation(Y, Z, trait.μ, trait.vc)
       return Y
   end

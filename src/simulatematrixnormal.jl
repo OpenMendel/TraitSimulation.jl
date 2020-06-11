@@ -37,7 +37,6 @@ end
 For an evaluated mean matrix and vector of VarianceComponent objects, simulate from VCM.
 """
 function VCM_trait_simulation(Y::Matrix, Z::Matrix, mu::Matrix{Float64}, vc::Vector{VarianceComponent}) # for an evaluated matrix
-LinearAlgebra.BLAS.set_num_threads(1)
 	for i in eachindex(vc)
 		TraitSimulation.simulate_matrix_normal!(Z, vc[i]) # this step aggregates the variance components by
 		axpy!(1.0, Z, Y) # summing the independent matrix normals to Y, rewriting over Z for each variance component
