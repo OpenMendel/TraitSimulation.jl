@@ -9,7 +9,9 @@ struct VarianceComponent
 	CholΣ::Array{Float64,2} # cholesky decomposition of A
 	CholV::Array{Float64,2} # cholesky decomposition of B
 	function VarianceComponent(Σ, V) #inner constructor given A, B
-		return new(Σ, V, cholesky(Symmetric(Σ)).factors, cholesky(Symmetric(V)).factors) # stores these values (this is helpful so we don't have it inside the loop)
+		CholΣ = cholesky(Symmetric(Σ)).factors
+		CholV = cholesky(Symmetric(V)).factors
+		return new(Σ, V, CholΣ, CholV) # stores these values (this is helpful so we don't have it inside the loop)
 	end
 end
 
@@ -30,7 +32,6 @@ function simulate_matrix_normal!(Z::Matrix, vc::VarianceComponent)
 	BLAS.trmm!('R', 'U', 'N', 'N', 1.0, vc.CholΣ, Z)
 	return Z #adds onto Z the effects of each variance component
 end
-
 
 """
 	VCM_trait_simulation(mu::Matrix{Float64}, vc::Vector{VarianceComponent})

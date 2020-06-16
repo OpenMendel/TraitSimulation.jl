@@ -8,6 +8,7 @@ using OrdinalMultinomialModels
 using VarianceComponentModels
 using Distributions
 import Base: show
+using LinearAlgebra: BlasReal, copytri!
 
 include("simulatematrixnormal.jl")
 
@@ -81,12 +82,12 @@ This simulates a GLM trait once under the desired generalized linear model, spec
   """
   function simulate(trait::GLMTrait, n::Integer)
       # pre-allocate output
-      Y = Matrix{eltype(trait.dist)}(undef, nsamplesize(trait), n)
+      Y_n = [zeros(size(trait.μ)) for _ in 1:n] # replicates
       # do the simulation n times, storing each result in a column
       for k in 1:n
-          simulate!(Y[:, k], trait)
+          simulate!(Y_n[k], trait)
       end
-      return Y
+      return Y_n
   end
 
   """
@@ -128,12 +129,12 @@ This simulates a GLM trait once under the desired generalized linear model, spec
   """
   function simulate(trait::OrderedMultinomialTrait, n::Integer; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
       # pre-allocate output
-      Y = Matrix{Int64}(undef, nsamplesize(trait), n)
+      Y_n = [zeros(nsamplesize(trait)) for _ in 1:n] # replicates
       # do the simulation n times, storing each result in a column
       for k in 1:n
-          simulate!(Y[:, k], trait; Logistic = Logistic, threshold = threshold)
+          simulate!(Y_n[k], trait; Logistic = Logistic, threshold = threshold)
       end
-      return Y
+      return Y_n
   end
 
   """
@@ -168,7 +169,7 @@ This simulates a GLM trait once under the desired generalized linear model, spec
   """
   function simulate!(Y, Z, trait::VCMTrait)
       fill!(Y, 0.0)
-      LinearAlgebra.BLAS.set_num_threads(1)
+      #LinearAlgebra.BLAS.set_num_threads(1) # make simulations more consistent
       TraitSimulation.VCM_trait_simulation(Y, Z, trait.μ, trait.vc)
       return Y
   end

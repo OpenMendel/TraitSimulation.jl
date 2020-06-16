@@ -46,7 +46,7 @@ struct GLMTrait{distT, linkT, vecT1, vecT2, vecT3, matT, matT2} <: AbstractTrait
 end
 
 function GLMTrait(X::Matrix{T}, β::Vector{T}, G::SnpArray, γ::Vector{T},
-	 distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T <: Real}
+	 distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T <: BlasReal}
 	 distT = Base.typename(typeof(distribution)).wrapper
  	 n = size(X, 1)
 	 η = Vector{T}(undef, n)
@@ -56,7 +56,7 @@ function GLMTrait(X::Matrix{T}, β::Vector{T}, G::SnpArray, γ::Vector{T},
   return GLMTrait(X, β, genovec, γ, η, distribution, link)
 end
 
-function GLMTrait(X::Matrix{T}, β::Vector{T}, distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T <: Real}
+function GLMTrait(X::Matrix{T}, β::Vector{T}, distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T <: BlasReal}
 	distT = Base.typename(typeof(distribution)).wrapper
 	n = size(X, 1)
 	η = zeros(n)
@@ -69,14 +69,14 @@ end
 # clamp the trait values
   # specific to Poisson and NegativeBinomial
   function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat,
-	   distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb = -20, ub = 20) where T <: Real
+	   distT::Union{Type{Poisson}, Type{NegativeBinomial}}; lb = -20, ub = 20) where T <: BlasReal
 	  mul!(η, X, β)
 	  η .= map(y -> y >= ub ? ub : y, η)
   end
 
   # specific to Bernoulli and Binomial
   function clamp_eta!(η::AbstractVecOrMat, X::Matrix{T}, β::AbstractVecOrMat,
-	   distT::Union{Type{Bernoulli}, Type{Binomial}}; lb = -20, ub = 20) where T <: Real
+	   distT::Union{Type{Bernoulli}, Type{Binomial}}; lb = -20, ub = 20) where T <: BlasReal
 	  mul!(η, X, β)
 	  clamp!(η, lb, ub)
 	  η
@@ -142,10 +142,10 @@ struct VCMTrait{T <: Real} <: AbstractTraitModel
 end
 
 function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
-	 vc::Vector{VarianceComponent}) where T <: Real
+	 vc::Vector{VarianceComponent}) where T <: BlasReal
 	n, p, m, d = size(X, 1), size(X, 2), length(vc), size(β, 2)
-	genovec = SnpBitMatrix{Float64}(G, model=ADDITIVE_MODEL, center=true, scale=true);
-	μ = Matrix{Float64}(undef, n, 2)
+	genovec = SnpBitMatrix{Float32}(G, model=ADDITIVE_MODEL, center=true, scale=true);
+	μ = Matrix{T}(undef, n, 2)
 	μ_null = zeros(n, d)
 	LinearAlgebra.mul!(μ_null, X, β)
 	for j in 1:size(μ, 2)
@@ -157,17 +157,17 @@ function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
 end
 
 function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray,
-	 γ::Matrix{T}, Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: Real
+	 γ::Matrix{T}, Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: BlasReal
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
 	return VCMTrait(X, β, vc)
 end
 
 function VCMTrait(X::Matrix{T}, β::Matrix{T},
-	 vc::Vector{VarianceComponent}) where T <: Real
+	 vc::Vector{VarianceComponent}) where T <: BlasReal
 	n, d = size(X, 1), size(β, 2)
 	μ = Matrix{T}(undef, n, d)
 	mul!(μ, X, β)
-	genovec = zeros(Float64, n, 1)
+	genovec = zeros(Float32, n, 1)
 	copyto!(genovec, X[:, end])
 	γ = Matrix{T}(undef, 1, d)
 	copyto!(γ, β[end, :])
@@ -175,7 +175,7 @@ function VCMTrait(X::Matrix{T}, β::Matrix{T},
 end
 
 function VCMTrait(X::Matrix{T}, β::Matrix{T},
-	 Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: Real
+	 Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: BlasReal
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
 	return VCMTrait(X, β, vc)
 end
@@ -194,14 +194,14 @@ function VCMTrait(formulas::Vector{String}, df::DataFrame,
   end
   X = Matrix(df[:, found_covariates])
   p = length(found_covariates)
-  β = Matrix{Float64}(undef, p, d)
-  G = Matrix{Float64}(undef, n, 1)
-  γ = Matrix{Float64}(undef, 1, p)
+  β = Matrix{Float32}(undef, p, d)
+  G = Matrix{Float32}(undef, n, 1)
+  γ = Matrix{Float32}(undef, 1, p)
   return VCMTrait(X, β, G, γ, vc, μ)
 end
 
 function VCMTrait(formulas::Vector{String}, df::DataFrame,
-	 Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: Real
+	 Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: BlasReal
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
 	VCMTrait(formulas, df, vc)
 end
@@ -223,7 +223,7 @@ nvc(trait::VCMTrait) = length(trait.vc)
 GLMMTrait
 GLMMTrait object is a model framework that stores information about the simulation of multiple traits, under the Generalized Linear Mixed Model Framework.
 """
-struct GLMMTrait{distT, linkT, T <: Real} <: AbstractTraitModel
+struct GLMMTrait{distT, linkT, T <: BlasReal} <: AbstractTraitModel
    X::Matrix{T}             # all effects
    β::Matrix{T}            # regression coefficients
    μ::Matrix{T}            # mean of the glmm with random effects
@@ -234,7 +234,7 @@ struct GLMMTrait{distT, linkT, T <: Real} <: AbstractTraitModel
    dist::Type{distT}   # univariate, exponential family of distributions
    link::linkT         # link function g(μ) = X*β
    function GLMMTrait(X::Matrix{T}, β::Matrix{T}, vc::Vector{VarianceComponent},
-   	 distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T<: Real}
+   	 distribution::D, link::linkT; lb = -20, ub = 20) where {D, linkT, T<: BlasReal}
    	distT = Base.typename(typeof(distribution)).wrapper
    	Z = zeros(size(X, 1), size(β, 2))
    	Y_vcm = zeros(size(X, 1), size(β, 2))

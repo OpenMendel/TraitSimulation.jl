@@ -38,7 +38,8 @@ function generateRandomVCM(n::Int64, p::Int64, d::Int64, m::Int64)
 end
 
 X, B, Σ, V = generateRandomVCM(n, p, d, m)
-
+dist = Normal()
+link = IdentityLink()
 glmtraitobject = GLMTrait(X, beta, dist, link)
 y_normal  = simulate(glmtraitobject)
 @test size(y_normal) == size(X*beta)
@@ -50,7 +51,7 @@ y_normal  = simulate(glmtraitobject)
 @test_throws ErrorException("function not supported by $(typeof(glmtraitobject))") noutcomecategories(glmtraitobject)
 
 number_independent_simulations  = 5
-@test size(simulate(glmtraitobject, number_independent_simulations)) == (n, number_independent_simulations)
+@test length(simulate(glmtraitobject, number_independent_simulations)) == number_independent_simulations
 
 @test glmtraitobject isa TraitSimulation.AbstractTraitModel
 
@@ -61,7 +62,7 @@ Ordinal_Model_Test = OrderedMultinomialTrait(X, beta, θ, link)
 
 @test Ordinal_Model_Test isa TraitSimulation.AbstractTraitModel
 @test eltype(simulate(Ordinal_Model_Test)) == Int64
-@test size(simulate(Ordinal_Model_Test, number_independent_simulations))  == (n, number_independent_simulations)
+@test length(simulate(Ordinal_Model_Test, number_independent_simulations))  == number_independent_simulations
 
 @test noutcomecategories(Ordinal_Model_Test) == 4
 
@@ -82,7 +83,7 @@ glmtraitobject3 = GLMTrait(X, beta, dist, link)
 
 @test eltype(simulate(glmtraitobject3)) == Bool
 
-@test size(simulate(glmtraitobject3, number_independent_simulations))  == (n, number_independent_simulations)
+@test length(simulate(glmtraitobject3, number_independent_simulations))  == number_independent_simulations
 
 dist = NegativeBinomial()
 link = LogLink()
@@ -90,7 +91,7 @@ glmtraitobject4 = GLMTrait(X, beta, dist, link)
 
 @test eltype(simulate(glmtraitobject4)) == Int64
 
-@test size(simulate(glmtraitobject4, number_independent_simulations))  == (n, number_independent_simulations)
+@test length(simulate(glmtraitobject4, number_independent_simulations)) == number_independent_simulations
 
 dist = Gamma()
 link = LogLink()
@@ -98,8 +99,9 @@ glmtraitobject5 = GLMTrait(X, beta, dist, link)
 
 @test eltype(simulate(glmtraitobject5)) == Float64
 
-@test size(simulate(glmtraitobject5, number_independent_simulations))  == (n, number_independent_simulations)
+@test length(simulate(glmtraitobject5, number_independent_simulations)) == number_independent_simulations
 
+varcomp = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
 # make sure GLMM works
 glmtraitobject6 = GLMMTrait(X, B, varcomp, dist, link)
 @test glmtraitobject6 isa TraitSimulation.AbstractTraitModel
@@ -126,7 +128,7 @@ glmtraitobject7 =  GLMTrait(X, beta, G, γ, dist, link)
 @test glmtraitobject7.dist  == Gamma
 @test eltype(simulate(glmtraitobject7)) == eltype(dist)
 
-@test size(simulate(glmtraitobject7, number_independent_simulations), 2) == number_independent_simulations
+@test length(simulate(glmtraitobject7, number_independent_simulations)) == number_independent_simulations
 
 @test GLMTrait(X, beta, G, γ, dist, link) != empty
 
