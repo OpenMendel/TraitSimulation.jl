@@ -144,7 +144,7 @@ end
 function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
 	 vc::Vector{VarianceComponent}) where T <: BlasReal
 	n, p, m, d = size(X, 1), size(X, 2), length(vc), size(β, 2)
-	genovec = SnpBitMatrix{Float32}(G, model=ADDITIVE_MODEL, center=true, scale=true);
+	genovec = SnpBitMatrix{Float64}(G, model=ADDITIVE_MODEL, center=true, scale=true);
 	μ = Matrix{T}(undef, n, 2)
 	μ_null = zeros(n, d)
 	LinearAlgebra.mul!(μ_null, X, β)

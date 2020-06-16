@@ -1,56 +1,45 @@
 
-# TraitSimulation.jl Tutorial
+# TraitSimulation.jl 
 
-
-Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange
-
-
-# Installation
-Double check that you are using Julia version 1.0 or higher by checking the machine information
-
-
-```julia
-versioninfo()
-```
-Add any missing packages needed for this tutorial:
-
-You can also use the package manager to add the `TraitSimulation.jl` package by running the following link:
-
-```{julia}
-pkg> add "https://github.com/sarah-ji/TraitSimulation.jl"
-```
-
-
-# Trait Simulation Tutorial
-
-Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange
-
-In this notebook we show how to use the `TraitSimulation.jl` package we illustrate how TraitSimulation.jl can easily simulate traits from genotype data, all within the OpenMendel universe. Operating within this universe brings potential advantages over the available software(s) when needed for downstream analysis or study design.
-
-Using just a few calls on the command line to the appropriate packages within the OpenMendel, we demonstrate in three easy examples the utilities of the TraitSimulation.jl package.
-
+Authors: Sarah Ji, Kenneth Lange, Janet Sinsheimer, Jin Zhou, Hua Zhou, Eric Sobel
 
 ## Background
 
 There is a lack of software available to geneticists who wish to calculate power and sample sizes in designing a study on genetics data. Typically, the study power depends on assumptions about the underlying disease model.  Many power calculating software tools operate as a black box and do not allow for customization.  To develop custom tests, researchers can develop their own simulation procedures to carry out power calculations.  One limitation with many existing methods for simulating traits conditional on genotypes is that these methods are limited to normally distributed traits and to fixed effects.
 
-This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. This package gives users the ability to easily simulate phenotypic traits under GLMs or VCMs conditional on PLINK formatted genotype data [3]. In addition, we include customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. We demonstrate these simulation utilities on the example dataset described below.
+This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. This package gives users the ability to easily simulate phenotypic traits under GLMs, VCMs and GLMM's conditional on PLINK formatted genotype data [3]. In addition, we include customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. We introduce each of the simulation models, and demonstrate how to run the simulation utilities on the example dataset described below.
 
 
 ## Demonstration
 
 ##### Example Data
 
-We use the OpenMendel package [SnpArrays.jl](https://openmendel.github.io/SnpArrays.jl/latest/) to both read in and write out PLINK formatted files. Available in the data directory under the [Example_Data](https://openmendel.github.io/SnpArrays.jl/latest/#Example-data-1) section of this package, we use the file `"EUR_SUBSET"` for the demonstration how to simulate phenotypic traits on PLINK formatted data.
+We use the OpenMendel package [SnpArrays.jl](https://openmendel.github.io/SnpArrays.jl/latest/) to both read in and write out PLINK formatted files. Available in the data directory under the [Example_Data](https://openmendel.github.io/SnpArrays.jl/latest/#Example-data-1) section of this package, we use the file `"EUR_SUBSET"` for the demonstration how to simulate phenotypic traits on PLINK formatted data. 
 For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient.
 
 In each example the user can specify the simulation model parameters, along with the number of repitions for each simulation model as desired. By default, the simulation will return the result of a single simulation.
 
-These are the packages required for this demonstration.
+### Double check that you are using Julia version 1.0 or higher by checking the machine information
+
 
 ```julia
-using Revise, Plots
-using DataFrames, LinearAlgebra, Random, SnpArrays, Distributions, TraitSimulation, BenchmarkTools, StatsBase, GLM, OrdinalMultinomialModels
+versioninfo()
+```
+
+    Julia Version 1.4.0
+    Commit b8e9a9ecc6 (2020-03-21 16:36 UTC)
+    Platform Info:
+      OS: macOS (x86_64-apple-darwin18.6.0)
+      CPU: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+      WORD_SIZE: 64
+      LIBM: libopenlibm
+      LLVM: libLLVM-8.0.1 (ORCJIT, skylake)
+
+
+
+```julia
+using Random, Plots, DataFrames, LinearAlgebra 
+using SnpArrays, TraitSimulation, GLM, StatsBase, OrdinalMultinomialModels
 Random.seed!(1234);
 ```
 
@@ -61,7 +50,7 @@ First use `SnpArrays.jl` to read in the genotype data. We use PLINK formatted da
 SnpArrays is a very useful utility and can do a lot more than just read in the data. More information about all the functionality of SnpArrays can be found at:
 https://openmendel.github.io/SnpArrays.jl/latest/
 
-As missing genotypes are often due to problems making the calls, the called genotypes at a marker with too much missing genotypes are potentially unreliable. By default, SnpArrays filters to keep only the genotypes with success rates greater than 0.98 and the minimum minor allele frequency to be 0.01. If the user wishes to change the stringency, she should change the number given in filter according to https://openmendel.github.io/SnpArrays.jl/latest/#Fitering-1.
+As missing genotypes are often due to problems making the calls, the called genotypes at a marker with too much missing genotypes are potentially unreliable. By default, SnpArrays filters to keep only the genotypes with success rates greater than 0.98 and the minimum minor allele frequency to be 0.01. If the user wishes to change the stringency, change the number given in filter according to [SnpArrays](https://openmendel.github.io/SnpArrays.jl/latest/#Fitering-1).
 
 
 ```julia
@@ -73,79 +62,191 @@ EUR = SnpArray(SnpArrays.datadir(filename * ".bed"));
 ```julia
 rowmask, colmask =  SnpArrays.filter(EUR)
 minor_allele_frequency = maf(EUR);
-# rows are people; columns are SNPs
 people, snps = size(EUR)
 ```
+
+
+
+
+    (379, 54051)
+
+
 
 
 ```julia
 EUR_data = SnpData(SnpArrays.datadir(filename));
 ```
 
-Here we will use the rarest snp in our dataset, rs150018646, as the causal snp in our model for demonstration. Additionally, we will control for sex, with females as the baseline group, `sex = 0.0`. We want to find the index of this causal locus in the snp_definition (.bim) file and then subset that locus from the genetic marker data above.
-
-For users who wish to identify by name, which locus to include, first subset the names of all the loci into a vector called `snpid`  and then call the following command to store our design matrix for the model that includes sex and locus of choice.
-
-`snpid  = bimfile[!, :snpid]`
-
-`causal_snp_index = findall(x -> x == "rs150018646", snpid)`
-
-To comform to common convention we also transform sex variable from M/F to 1/0.
+Here we will use identify by name, which locus to include, first subset the names of all the loci into a vector called `snpid`  and then call the following command to store our design matrix for the model that includes sex and locus of choice.
 
 
 ```julia
-bimfile = EUR_data.snp_info
-causal_snp_index = findmin(minor_allele_frequency)[2]
-locus = convert(Vector{Float64}, @view(EUR[:, causal_snp_index]))
+bimfile = EUR_data.snp_info # store the snp_info with the snp names
 
-famfile = EUR_data.person_info
-sex = map(x -> strip(x) == "F" ? 0.0 : 1.0, famfile[!, :sex]) # note julia's ternary operator '?'
-X = DataFrame(intercept = ones(length(sex)), sex = sex, locus = locus)
+snpid  = bimfile[!, :snpid] # store the snp names in the snpid vector
+
+causal_snp_index = findall(x -> x == "rs150018646", snpid) # find the index of the snp of interest by snpid
 ```
 
-# Example 1: Standard Models
 
-In this example we first demonstrate how to use the GLM.jl package to simulate a trait from unrelated individuals. We then show how to use our TraitSimulation.jl package to simulate a trait from families.  
 
-The notebook is organized as follows:
 
-For the first example, we show how to simulate traits from standard models users in the genetics community will recognize.
+    1-element Array{Int64,1}:
+     82
 
-Users can specify to simulate phenotypes from unrelateds or families with user-specified Generalized Linear Models (GLMs) or Variance Component Models (VCMs), respectively. 
 
-1 . GLM: Y ~ Poisson (mu = ginverse(XB), Sigma = sigmaA * 2GRM + sigmaE * I_n) 
 
-2 . VCM: Y ~ MatrixNormal}(M = XB, Omega = SigmaA ⊗ 2GRM + SigmaE ⊗ I_n)
+Additionally, we will control for sex, with females as the baseline group, `sex = 0.0`. We want to find the index of this causal locus in the snp_definition (.bim) file and then subset that locus from the genetic marker data above. Make note of julia's ternary operator '?' which allows us to make this conversion efficiently!
 
-We show in the next example, models with additional variance components can also be specified, as long as they are sensible (positive semi definite).
+Using SnpArrays.jl we can then use the `convert` and `@view` commands to get the appropriate conversion from SnpArray to a computable vector of Float64. 
+
+
+```julia
+locus = convert(Vector{Float64}, @view(EUR[:, causal_snp_index[1]]))
+famfile = EUR_data.person_info
+sex = map(x -> strip(x) == "F" ? 0.0 : 1.0, famfile[!, :sex])
+intercept = ones(length(sex))
+X_covar = [intercept sex]
+X = [intercept sex locus]
+```
+
+
+
+
+    379×3 Array{Float64,2}:
+     1.0  1.0  2.0
+     1.0  1.0  1.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     ⋮         
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  1.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+     1.0  1.0  2.0
+
+
+
+
+# Example 1: GLM Trait
+
+In this example we first demonstrate how to use the GLM.jl package to simulate a trait from unrelated individuals.  We specify the fixed effects and the phenotype distribution, and output the simulation results.
+
+$Y \sim Poisson(\mu = g^{-1}(XB))$
+
+A more thorough application of this GLM TraitSimulation applied to an Iterative Hard Thresholding problem under MendelIHT can be found here:
+
+```@contents
+Pages = [
+    "examples/testing_MendelIHT_glm.md"
+]
+Depth = 2
+```
 
 ## GLM Traits from Unrelated Individuals
 
-    Y ~ Poisson(mu = ginverse(XB))
-
-
-Here we specify the fixed effects and the phenotype distribution, and output for ten simulations per person.
+$ Y_{n \times 1} \sim Poisson(\mu_{n \times 1} = X\beta)$
 
 
 ```julia
-beta = [1; 0.2; 0.5]
-mu = Matrix(X) * beta
-dist = Poisson
-GVCModel = GLMTrait(mu, dist);
-Simulated_GLM_Traits = DataFrame(PoissonTrait = simulate(GLMmodel))
+β = [1; 0.2; 0.5]
+dist = Poisson()
+link = LogLink()
+GLMmodel = GLMTrait(X, β, dist, link)
 ```
+
+    Generalized Linear Model
+      * response distribution: Poisson
+      * link function: LogLink
+      * sample size: 379  * fixed effects: 3
+
+
+
+
+```julia
+Simulated_GLM_Traits = simulate(GLMmodel)
+```
+
+    379-element Array{Int64,1}:
+      4
+      8
+      7
+     10
+     10
+     11
+      7
+      9
+      8
+      9
+      6
+      9
+     10
+      ⋮
+      7
+     11
+      5
+     11
+      9
+      7
+      5
+      8
+      4
+     12
+     16
+     10
+
+
+
+# Example 2: VCM Trait
+In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects. We simulate data under a variance component model so that we can model residual dependency among individuals. 
+
+We note models with additional variance components can also be specified, as long as they are sensible (positive semi definite).
+
+## VCMTrait UK Biobank Demo:
+For the univariate and bivariate Variance Component Model, we include in the Real Data Examples section our step-by-step procedure of simultaneously simulating and fitting to get the genetic power. 
+
+$Y \sim N(\mu, 4* 2GRM + 2*I_n)$
+
+$Y \sim N(\mathbf{\mu}, \sigma_a \otimes 2GRM + \sigma_e \otimes I_n)$
+
+where we can calculate the estimated empirical kinship matrix $2*\hat{\Phi}_{GRM}$ using [SnpArrays.jl](https://openmendel.github.io/SnpArrays.jl/latest/#Genetic-relationship-matrix-1).
+Due to privacy of the data, we include only the html file for viewing. 
+
+```@contents
+Pages = [
+    "examples/ukbiobank_vcm_power.md"
+]
+Depth = 2
+```
+
+We include some other variance component model examples for family data as follows:
+
 
 ## Rare Variant VCM Related Individuals
 
-In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects. We simulate data under a variance component model so that we can model residual dependency among individuals.
+In this example we show how to generate data so that the related individuals have correlated trait values even after we account for the effect of a snp, a combination of snps or other fixed effects. We simulate data under a linear mixed model so that we can model residual dependency among individuals. 
 
+$Y \sim \text{Normal}(\mathbf{\mu}_{n \times 1} = X\beta, \Sigma_{n \times n} = \sigma_A \times 2\hat{\Phi}_{GRM} + \sigma_E \times I_n)$
 
-Y ~ N(mu, 4* 2GRM + 2I_n)
+This example is meant to simulate data in a scenario in which a number of rare mutations in a single gene can change a trait value. We model the residual variation among relatives with the additive genetic variance component and we include 20 simulated rare variants in the mean portion of the model, defined as loci with minor allele frequencies greater than 0.002 but less than 0.02.
 
-
-This example is meant to simulate data in a scenario in which a number of rare mutations in a single gene can change a trait value. We model the residual variation among relatives with the additive genetic variance component and we include 20 rare variants in the mean portion of the model, defined as loci with minor allele frequencies greater than 0.002 but less than 0.02.
-
-Specifically we are generating a single normal trait controlling for family structure with residual heritability of 67\%\, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
+Specifically we are generating a single normal trait controlling for family structure with residual heritabiity of 67%, and effect sizes for the variants generated as a function of the minor allele frequencies. The rarer the variant the greater its effect size.
 
 In practice rare variants have smaller minor allele frequencies, but we are limited in this tutorial by the relatively small size of the data set. Note also that our modeling these effects as part of the mean is not meant to imply that the best way to detect them would be a standard association analysis. Instead we recommend a burden or SKAT test.
 
@@ -154,289 +255,342 @@ In practice rare variants have smaller minor allele frequencies, but we are limi
 GRM = grm(EUR, minmaf = 0.05);
 ```
 
-## Filtering
+### `Genotype Simulation:`
 
-We first subset only the rare SNP's, then we simulate traits on the 20 of the rare SNP's. For this demo, we subset the fist k = 20 rare snps. Change the parameters and the number of SNPs for simulation to model different regions of the genome. The number 20 is arbitrary and you can use more or less than 20 if you desire by changing the final number.
+Say our study population has a sample size of `n` people and we are interested in studying the effect of the causal snp with a predetermined minor allele frequency. We use the minor allele frequency of the causal variant to simulate the SnpArray under Hardy Weinberg Equillibrium (HWE), using the `snparray_simulation` function as follows:
+    
+    
+| Genotype | Plink/SnpArray |  
+|:---:|:---:|  
+| A1,A1 | 0x00 |  
+| missing | 0x01 |
+| A1,A2 | 0x02 |  
+| A2,A2 | 0x03 |  
+    
+
+Given a vector of minor allele frequencies, specify `maf = [0.2, 0.25, 0.3]`, for each specified allele it will simulate a SnpArray under HWE and ouput them together. This function samples from the genotype vector under HWE and returns the compressed binary format under SnpArrays.
 
 
 ```julia
-# filter out rare SNPS, get a subset of uncommon SNPs with 0.002 < MAF .< 0.02
-minor_allele_frequency = maf(EUR)
-rare_index = (0.002 .< minor_allele_frequency .< 0.02)
-filtsnpdata = SnpArrays.filter(EUR_data, rowmask, rare_index, des = "rare_filtered_28data");
+maf_rare = rand([0.002, 0.004, 0.008, 0.01, 0.012, 0.015, 0.02], 20)
+rare_snps = snparray_simulation(maf_rare, 379)
 ```
 
 
-```julia
-rare_snps = SnpArray("rare_filtered_28data.bed");
-```
-
-### Simulation
-
-For demonstration purposes, we simulate effect sizes from the Chi-squared(df = 1) distribution, where we use the minor allele frequency (maf) as x and find f(x) where f is the pdf for the Chi-squared (df = 1) density, so that the rarest SNP's have the biggest effect sizes. The effect sizes are rounded to the second digit, throughout this example. Notice there is a random +1 or -1, so that there are effects that both increase and decrease the simulated trait value.
-
-```julia
-
-# Generating Effect Sizes from Chisquared(df = 1) density
-
-n = length(rare_snps)
-chisq_coeff = zeros(n)
-
-for i in 1:n
-    chisq_coeff[i] = rand([-1, 1]) .* (0.1 / sqrt.(maf_rare_snps[i] .* (1 - maf_rare_snps[i])))
-end
-```
 
 
-```julia
-effsizes = simulate_effect_size(minor_allele_frequency[rare_index][1:20])
-X_rare = rare_snps[:, 1:20]
-mu = Matrix(X_rare) * effsizes
-mu_n = reshape(mu, 379, 1)
-rare_20_snp_model = VCMTrait(mu_n, 4*(2*GRM) + 2*(I))
-trait_rare_20_snps = DataFrame(SimTrait = simulate(rare_20_snp_model)[:])
-```
+    379×20 SnpArray:
+     0x00  0x00  0x00  0x00  0x00  0x00  …  0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00  …  0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00  …  0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+        ⋮                             ⋮  ⋱           ⋮                    
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00  …  0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x02  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x02  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00  …  0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x02  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x00  0x00  0x00  0x00  0x00  0x00
+     0x00  0x00  0x00  0x00  0x00  0x00     0x02  0x00  0x00  0x00  0x00  0x00
 
-# Example 2: Multiple Traits, Multiple Variance Components? Easy.
 
-This example extends the variance component model in the previous example to demo how to efficiently account for any number of other random effects, in addition to the additive genetic and environmental variance components. In this example we show alternative ways to specify the simulation parameters for the VCM and benchmark it against the available MatrixNormal distribution in Julia package, Distributions.jl.
-
-Y ~ MatrixNormal(M= XB, Omega = Sum_[k=1^m] Sigma_k  ⊗ V_k)
-
-Say that you have the the classical setting in genetics, two variance components, one for the additive genetic variance and one for the environmental variance.
-
-Users can specify their covariance structures as follows. We note that this form can also accompany more than 2 variance components.
 
 
 ```julia
-formulas = ["1 + 2.0*sex + 0.5*locus", "20 + 2.0*sex + 1.0*locus"]
+β_covar = [1.0; 0.6]
 I_n = Matrix{Float64}(I, size(GRM))
-V_A = [4 1; 1 4]
-V_E = [2.0 0.0; 0.0 2.0];
-
-# @vc is a macro that creates a 'VarianceComponent' Type for simulation
-variance_formula = @vc V_A  ⊗ 2GRM + V_E  ⊗ I_n;
+vc = @vc [0.01][:,:] ⊗ (GRM + I_n) + [0.9][:, :] ⊗ I_n
+sigma, v = vcobjtuple(vc)
+rare_20_snp_model = VCMTrait(X_covar, β_covar[:, :], rare_snps, maf_rare[:, :], [sigma...], [v...])
 ```
 
 
-```julia
-X
-```
 
 
-```julia
-#revise()
-genetic_model = VCMTrait(formulas, X, variance_formula)
-simulate(genetic_model)
-```
+    Variance Component Model
+      * number of traits: 1
+      * number of variance components: 2
+      * sample size: 379
 
-## Random M Variance Components Simulation
-
-Here for m = 10 random Variance Components, we generate m random covariance matrices, a random design matrix and p regression coefficients to illustrate the simulation of a d = 2 dimensional response matrix of traits for a sample of n = 1000 people.
-
-We then benchmark against the same simulation process using the MatrixNormal() function in the Distributions.jl package.
-
-    function generateSPDmatrix(n)
-        A = rand(n)
-        m = 0.5 * (A * A')
-        PDmat = m + (n * Diagonal(ones(n)))
-    end
-
-
-    function RVCModel(n::Int64, p::Int64, d::Int64, m::Int64)
-        # n-by-p design matrix
-        X = randn(n, p)
-
-        # p-by-d mean component regression coefficient for each trait
-        B = hcat(ones(p, 1), rand(p))  
-
-        V = ntuple(x -> zeros(n, n), m)
-        for i = 1:m-1
-          copy!(V[i], generateSPDmatrix(n))
-        end
-        copy!(V[end], Diagonal(ones(n))) # last covarianec matrix is identity
-
-        # a tuple of m d-by-d variance component parameters
-        Î£ = ntuple(x -> zeros(d, d), m)
-        for i in 1:m
-          copy!(Î£[i], generateSPDmatrix(d))
-        end
-
-        return(X, B, Î£, V)
-    end
 
 
 
 ```julia
-n = 10   # no. observations
-d = 2      # dimension of responses
-m = 10      # no. variance components
-p = 2;      # no. covariates
+Rare_SNP_Trait = simulate(rare_20_snp_model)
 ```
 
 
-```julia
-X_sim, B_sim, Î£_sim, V_sim = generateRandomVCM(n, p, d, m);
-Random_VCM_Trait = DataFrame(VCM_trait_simulation(X_sim, B_sim, Î£_sim, V_sim), [:SimTrait1, :SimTrait2])
-```
-
-In our VarianceComponent type, we store the cholesky decomposition of each Sigma_i and V_i, computed outside of simulation within the vc_vector of VarianceComponent types. This is important since the more often than not, users have to run the simulation many times for their desired goal.
-
-From our benchmarking below, we show that when we use the simulation package to simulate traits n_reps times, using the VariaceComponent type is much faster and memory efficient than calling the available julia MatrixNormal distribution m times.
-
-## Compare simulation for m = 1 variance component
-
-For only one variance component we are roughly four 2x more memory efficient and 3.7x faster at simulating this bivariate trait
 
 
-```julia
-VCMtraitobj = VCMTrait(X_sim*B_sim, VarianceComponent(Î£_sim[1], V_sim[1]))
-@benchmark simulate(VCMtraitobj)
-```
+    379×1 Array{Float64,2}:
+     0.8088744352540489
+     1.6701367617702745
+     1.8455248160731537
+     0.8508388343337788
+     0.9712931279208524
+     0.6887865756651992
+     2.9436570129936905
+     1.808457300723279
+     1.1133732340741647
+     1.0798778322598372
+     0.8779238588613009
+     2.338615502643955
+     3.392334665830318
+     ⋮
+     3.654119285594163
+     1.4716923062049176
+     1.7276952768730827
+     1.3970739033596746
+     1.4755462272829616
+     2.981506123686394
+     1.6977542002518275
+     3.09839068211269
+     3.225180822413689
+     2.7490032145653913
+     3.8705735842017255
+     2.7194612533505413
 
 
-```julia
-function MN_J(X, B, Î£, V; n_reps = 1)
-    n, p = size(X*B)
-    sim = [zeros(n, p) for i in 1:n_reps]
-    for i in 1:n_reps
-        sim[i] = rand(MatrixNormal(X*B, V, Î£))
-    end
-    return(sim)
-end
 
-@benchmark MN_J($X_sim, $B_sim, $Î£_sim[1], $V_sim[1])
-```
+### Multiple Traits, Multiple Variance Components? Easy.
 
-## Compare simulation for m = 10 variance components
+This example extends the variance component model in the previous example to demo how to efficiently account for any number of other random effects, in addition to the additive genetic and environmental variance components. 
 
-still about 2x memory efficient but now 3.2x faster compared to the Distributions package
+Y ~ MatrixNormal($M = XB$, $Omega = \sum_{k=1}^m \Sigma_{k}$ $\otimes V_k$)
+
+We note that this form can also accompany more than 2 variance components.
+
+I encourage for those interested, to look at [this example](https://github.com/OpenMendel/TraitSimulation.jl/blob/master/docs/benchmarking_VCM.ipynb) where we demonstrate the simlation of $d = 2$ traits with $m = 10$ variance components, and benchmark it against the available method using the MatrixNormal distribution in Julia package, [Distributions.jl](https://juliastats.org/Distributions.jl/latest/matrix/#Distributions.MatrixNormal).
 
 
-```julia
-vc_vector = [VarianceComponent(Î£_sim[i], V_sim[i]) for i in eachindex(V_sim)]
-VCMtraitobjm = VCMTrait(X_sim*B_sim, vc_vector);
-@benchmark simulate(VCMtraitobjm)
-```
+# Example 3: Ordered Multinomial Trait
 
-
-```julia
-function MN_Jm(X, B, Î£, V; n_reps = 1)
-    n, p = size(X*B)
-    m = length(V)
-    sim = [zeros(n, p) for i in 1:n_reps]
-    for i in 1:n_reps
-        for j in 1:m
-            dist = MatrixNormal(X*B, V[j], Î£[j])
-            sim[i] += rand(dist)
-        end
-    end
-    return(sim)
-end
-
-@benchmark vecs = MN_Jm($X_sim, $B_sim, $Î£_sim, $V_sim)
-```
-
-# Example 3: Power Calculation
-
-For the last example, we show how to simulate from customized simulation models that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. This example illustrates the use of the simulations to generates data sets allowing researchers to accurately check the validity of programs and to calculate power for their proposed studies.
-
-
-## Genotype Simulation:
-
-a) genotype simulation utilities under HWE
-
-We use the minor allele frequency of the causal variant to simulate the SnpArray.
-
-
-```julia
-maf_causal_snp = [0.2]
-Simulated_SnpArray = snparray_simulation(maf_causal_snp, 379)
-```
-
-
-```julia
-Î²_new =
-[1.0
- 2.0
-10.0]
-```
-
-
-```julia
-d1 = Bernoulli(0.51)
-d2 = Normal(45, 8)
-
-sex = rand(d1, 379)
-age = zscore(rand(d2, 379))
-
-X_new = [age sex Simulated_SnpArray]
-```
-
-## Phenotype Simulation:
-b) phenotype simulation conditional on simulated genotypes
+Now we demonstrate on the `OrderedMultinomialTrait` model object in TraitSimulation.jl.
 
 ### Ordered Multinomial Trait
 
-
-```julia
-Î¸ = sort(rand(3))
-Multinomial_Model1 = OrdinalTrait(X_new, Î²_new, Î¸, LogitLink())
-```
+Recall that this phenotype is special, in that the [OrdinalMultinomialModels](https://openmendel.github.io/OrdinalMultinomialModels.jl/stable/#Syntax-1) package provides Julia utilities to fit ordered multinomial models, including [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) and [ordered Probit model](https://en.wikipedia.org/wiki/Ordered_probit) as special cases. 
 
 
 ```julia
-Multinomial_Trait = simulate(Multinomial_Model1)
+θ = [1.0, 1.2, 1.4]
+Ordinal_Model = OrderedMultinomialTrait(X, β, θ, LogitLink())
 ```
+
+
+
+
+    Ordinal Multinomial Model
+      * number of fixed effects: 3
+      * number of ordinal multinomial outcome categories: 4
+      * link function: LogitLink
+      * sample size: 379
+
+
+
+
+```julia
+Ordinal_Trait = simulate(Ordinal_Model)
+```
+
+
+
+
+    379-element Array{Int64,1}:
+     2
+     4
+     4
+     1
+     1
+     1
+     1
+     4
+     1
+     4
+     4
+     3
+     4
+     ⋮
+     4
+     4
+     2
+     1
+     1
+     4
+     1
+     4
+     4
+     4
+     4
+     4
+
+
 
 ### Simulate Ordered Multinomial Logistic
 
+Specific to the Ordered Multinomial Logistic model is the option to transform the multinomial outcome (i.e 1, 2, 3, 4) into a binary outcome for logistic regression. 
 
-```julia
-Logistic_Trait = simulate(Multinomial_Model1, Logistic = true, threshold = 2)
-```
-
-### Power Calculation:
-
-We use the following function to generate the p-values for the simulated power example for the logistic vs linear regression model. We include plots of different power/effect size combinations for Ordered Logistic Regression models
-
+Although by default is the multinomial simulation above, the user can simulate from the transformed logistic outcome for example by specifying arguments: `Logistic = true` and `threshold = 2` the value to use as a cutoff for identifying cases and controls. **(i.e if y > 2 => y_logit == 1).** We note if you specify `Logistic = true` and do not provide a threshold value, the function will throw an error to remind you to specify one.
 
 
 ```julia
-effectsizes =
-[0.0
-0.05
-0.1
-0.15
-0.2
-0.25
-0.3
-0.35
-0.4
-0.45
-0.5]
+Logistic_Trait = simulate(Ordinal_Model, Logistic = true, threshold = 2)
 ```
+
+
+
+
+    379-element Array{Int64,1}:
+     1
+     1
+     1
+     1
+     1
+     1
+     0
+     0
+     1
+     1
+     1
+     0
+     1
+     ⋮
+     1
+     1
+     0
+     1
+     1
+     1
+     0
+     0
+     1
+     1
+     1
+     1
+
+
+
+# Example 4: GLMM Trait Simulation
+
+Next, we demonstrate how to simulate a Poisson Trait, after controlling for family structure.  
 
 
 ```julia
-P = realistic_ordinal_power(1000, effectsizes, Multinomial_Model1, 1234)
+dist = Poisson()
+link = LogLink()
+
+vc = @vc [0.01][:,:] ⊗ (GRM + I_n) + [0.9][:, :] ⊗ I_n
+GLMMmodel = GLMMTrait(X, β[:,:], vc, dist, link)
 ```
+
+
+
+
+    Generalized Linear Mixed Model
+      * response distribution: Poisson
+      * link function: LogLink
+      * number of variance components: 2
+      * sample size: 379
+
+
 
 
 ```julia
-power_ES = power(P, 0.05)
+Y = simulate(GLMMmodel)
 ```
 
 
-```julia
-plot(effectsizes, power_ES)
+
+
+    379×1 Array{Int64,2}:
+     31
+      3
+      5
+      4
+      9
+     10
+      3
+     10
+     17
+      6
+     16
+     24
+     16
+      ⋮
+     18
+      3
+      4
+      2
+     28
+      5
+      1
+      6
+     32
+      0
+      9
+     13
+
+
+
+# Power Calculation
+
+![png](examples/diagram.png)
+
+Now we demonstrate the use of the simulations to generates data sets allowing researchers to accurately check the validity of programs and to calculate power for their proposed studies. For these examples we will demo the full power pipeline contatined within the OpenMendel environment.
+
+We illustrate this example in three digestable steps as shown in the figure: 
+   * The first by simulating genotypes and covariate values representative for our study population.
+   * Carry over the simulated design matrix from (1) to create the OrderedMultinomialTrait model object.
+   * Simulate off the OrderedMultinomialTrait model object created in (2) and run the power analyses for the desired significance level.
+
+Each column of this matrix represents each of the detected effect sizes, and each row of this matrix represents each simulation for that effect size. The user feeds into the function the number of simulations, the vector of effect sizes, the TraitSimulation.jl model object, and the random seed.
+
+For GLMTrait objects, the `realistic_power_simulation` function makes the appropriate calls to the GLM.jl package to get the simulation p-values obtained from testing the significance of the causal locus using the Wald Test by default. However since the GLM.jl package has its limitations, we include additional power utilities that make the appropriate function calls to the [OrdinalMultinomialModels](https://openmendel.github.io/OrdinalMultinomialModels.jl/stable/#Syntax-1) to get the p-value obtained from testing the significance of the causal locus. Variance Component Models for VCMTrait objects can be fit using [VarianceComponentModels.jl](https://openmendel.github.io/VarianceComponentModels.jl/latest/), and we demo for UK Biobank data in the docs. 
+
+
+## UKBiobank Power Pipeline
+
+```@contents
+Pages = [
+    "examples/ukbiobank_vcm_power.md",
+    "examples/ukbiobank_ordered_multinomial_power.md"
+]
+Depth = 2
 ```
 
-## Citations:
+For each effect size in $\gamma_s,$ in each column we have the p-values obtained from testing the significance of the causal locus `nsim = 1000` times under the desired model, and the `randomseed = 1234`.
+
+### `Try it Yourself Exercises: `
+
+With the remaining time we encourage you to play with the simulation models above. 
+
+(1) If you change the significance level, α, what would happen to the plot of the power? How would the plot change with a smaller value of α ? 
+
+(2) What if you change the sample size to be smaller than `n = 5000`? How does the power look as a function of the effect size when `n = 2500`? 
+
+(3) What if we changed the minor allele frequency of the SNP of interest from `maf = 0.2` to say `maf = 0.3` ?
+
+## Citations: 
 
 [1] Lange K, Papp JC, Sinsheimer JS, Sripracha R, Zhou H, Sobel EM (2013) Mendel: The Swiss army knife of genetic analysis programs. Bioinformatics 29:1568-1570.`
+
 
 [2] OPENMENDEL: a cooperative programming project for statistical genetics.
 [Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z](https://www.ncbi.nlm.nih.gov/pubmed/?term=OPENMENDEL).
 
 [3] German, CA, Sinsheimer, JS, Klimentidis, YC, Zhou, H, Zhou, JJ. Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 2019; 1– 13. https://doi.org/10.1002/gepi.22276
+

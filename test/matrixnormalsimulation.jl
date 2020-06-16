@@ -1,5 +1,5 @@
 using Random, SnpArrays
-using LinearAlgebra
+using LinearAlgebra,  BenchmarkTools
 Random.seed!(1234)
 import TraitSimulation: snparray_simulation
 n = 10
