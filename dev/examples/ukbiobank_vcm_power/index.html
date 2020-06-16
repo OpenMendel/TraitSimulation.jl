@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Trait Simulation - Variance Component Model Power (UKBiobank) · TraitSimulation.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TraitSimulation.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../testing_MendelIHT_glm/">Testing Methods</a></li><li><span class="tocitem">Real Data Examples</span><ul><li class="is-active"><a class="tocitem" href>Trait Simulation - Variance Component Model Power (UKBiobank)</a><ul class="internal"><li><a class="tocitem" href="#Background-1"><span>Background</span></a></li><li><a class="tocitem" href="#Demonstration-1"><span>Demonstration</span></a></li><li class="toplevel"><a class="tocitem" href="#Reading-genotype-data-using-SnpArrays-1"><span>Reading genotype data using SnpArrays</span></a></li><li class="toplevel"><a class="tocitem" href="#Construct-Genetic-Model:-(VCM-Parameter-Specification)-1"><span>Construct Genetic Model: (VCM Parameter Specification)</span></a></li><li class="toplevel"><a class="tocitem" href="#Power-Calculation-1"><span>Power Calculation</span></a></li><li><a class="tocitem" href="#Design-Matrix-1"><span>Design Matrix</span></a></li><li><a class="tocitem" href="#Phenotype-Simulation:-1"><span>Phenotype Simulation:</span></a></li><li><a class="tocitem" href="#Univariate-VCM-Trait-1"><span>Univariate VCM Trait</span></a></li><li><a class="tocitem" href="#Bivariate-VCM-Trait-1"><span>Bivariate VCM Trait</span></a></li><li class="toplevel"><a class="tocitem" href="#Univariate-VCM-Power-1"><span>Univariate VCM Power</span></a></li><li class="toplevel"><a class="tocitem" href="#Bivariate-VCM-Power-1"><span>Bivariate VCM Power</span></a></li><li><a class="tocitem" href="#Citations:-1"><span>Citations:</span></a></li></ul></li><li><a class="tocitem" href="../ukbiobank_ordered_multinomial_power/">Trait Simulation - Ordinal Multinomial Power</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Real Data Examples</a></li><li class="is-active"><a href>Trait Simulation - Variance Component Model Power (UKBiobank)</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Trait Simulation - Variance Component Model Power (UKBiobank)</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/OpenMendel/TraitSimulation.jl/blob/master/docs/src/examples/ukbiobank_vcm_power.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Trait-Simulation-Variance-Component-Model-Power-(UKBiobank)-1"><a class="docs-heading-anchor" href="#Trait-Simulation-Variance-Component-Model-Power-(UKBiobank)-1">Trait Simulation - Variance Component Model Power (UKBiobank)</a><a class="docs-heading-anchor-permalink" href="#Trait-Simulation-Variance-Component-Model-Power-(UKBiobank)-1" title="Permalink"></a></h1><p>Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange, Hua Zhou, Eric Sobel</p><p>In this notebook we show how to use the <code>TraitSimulation.jl</code> package we illustrate how TraitSimulation.jl can easily simulate traits from genotype data, all within the OpenMendel universe. Operating within this universe brings potential advantages over the available software(s) when needed for downstream analysis or study design. </p><p>Using just a few calls on the command line to the appropriate packages within the OpenMendel, we demonstrate in three easy examples the utilities of the TraitSimulation.jl package.</p><p>Users who want a reference on genetic modeling, we recommend  <a href="http://www.biometrica.tomsk.ru/lib/lange_1.pdf">Mathematical And Statistical Methods For Genetic Analysis</a> by Dr. Kenneth Lange. In chapter 8 of this book, the user can find an introduction to Variance Component Models in Genetic Setting. For a more in depth review of variance component modeling in the genetic setting, we include a reference at the end of the notebook [4].</p><h2 id="Background-1"><a class="docs-heading-anchor" href="#Background-1">Background</a><a class="docs-heading-anchor-permalink" href="#Background-1" title="Permalink"></a></h2><p>There is a lack of software available to geneticists who wish to calculate power and sample sizes in designing a study on genetics data. Typically, the study power depends on assumptions about the underlying disease model.  Many power calculating software tools operate as a black box and do not allow for customization.  To develop custom tests, researchers can develop their own simulation procedures to carry out power calculations.  One limitation with many existing methods for simulating traits conditional on genotypes is that these methods are limited to normally distributed traits and to fixed effects. </p><p>This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. We demonstrate customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example Variance Component Models (VCM) and <a href="https://github.com/OpenMendel/TraitSimulation.jl/blob/master/docs/Example_Ordinal_Multinomial_Power.ipynb">ordered multinomial traits</a>. We demonstrate the simulation utilities on a subset of 20,000 individuals and 470228 snps in the UK Biobank dataset. We use a subset of the dataset in the <a href="https://doi.org/10.1002/gepi.22276">Ordinal GWAS paper</a> to include only the first 20,000 individuals for this demo. </p><h2 id="Demonstration-1"><a class="docs-heading-anchor" href="#Demonstration-1">Demonstration</a><a class="docs-heading-anchor-permalink" href="#Demonstration-1" title="Permalink"></a></h2><h5 id="Example-Data-1"><a class="docs-heading-anchor" href="#Example-Data-1">Example Data</a><a class="docs-heading-anchor-permalink" href="#Example-Data-1" title="Permalink"></a></h5><p>We use the OpenMendel package <a href="https://openmendel.github.io/SnpArrays.jl/latest/">SnpArrays.jl</a> to both read in and write out PLINK formatted files. </p><p>For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient.</p><p>In each example the user can specify the simulation model parameters, along with the number of repetitions for each simulation model as desired. By default, the simulation will return the result of a single simulation.</p><h3 id="Double-check-that-you-are-using-Julia-version-1.0-or-higher-by-checking-the-machine-information-1"><a class="docs-heading-anchor" href="#Double-check-that-you-are-using-Julia-version-1.0-or-higher-by-checking-the-machine-information-1">Double check that you are using Julia version 1.0 or higher by checking the machine information</a><a class="docs-heading-anchor-permalink" href="#Double-check-that-you-are-using-Julia-version-1.0-or-higher-by-checking-the-machine-information-1" title="Permalink"></a></h3><pre><code class="language-julia">versioninfo()</code></pre><pre><code class="language-none">Julia Version 1.3.0
+Commit 46ce4d7933 (2019-11-26 06:09 UTC)
+Platform Info:
+  OS: Linux (x86_64-pc-linux-gnu)
+  CPU: Intel(R) Core(TM) i9-9920X CPU @ 3.50GHz
+  WORD_SIZE: 64
+  LIBM: libopenlibm
+  LLVM: libLLVM-6.0.1 (ORCJIT, skylake)</code></pre><pre><code class="language-julia">using SnpArrays, Distributions, Test, Statistics, VarianceComponentModels, Distributions, Random
+using DataFrames, LinearAlgebra, StatsBase, TraitSimulation, Distributions, CSV, Plots, BenchmarkTools
+Random.seed!(1234);</code></pre><h1 id="Reading-genotype-data-using-SnpArrays-1"><a class="docs-heading-anchor" href="#Reading-genotype-data-using-SnpArrays-1">Reading genotype data using SnpArrays</a><a class="docs-heading-anchor-permalink" href="#Reading-genotype-data-using-SnpArrays-1" title="Permalink"></a></h1><p>First use <code>SnpArrays.jl</code> to read in the genotype data. We use PLINK formatted data with the same prefixes for the .bim, .fam, .bed files.</p><p>SnpArrays is a very useful utility and can do a lot more than just read in the data. More information about all the functionality of SnpArrays can be found at: https://openmendel.github.io/SnpArrays.jl/latest/</p><p>As missing genotypes are often due to problems making the calls, the called genotypes at a marker with too much missing genotypes are potentially unreliable. By default, SnpArrays filters to keep only the genotypes with success rates greater than 0.98 and the minimum minor allele frequency to be 0.01. If the user wishes to change the stringency, change the number given in filter according to <a href="https://openmendel.github.io/SnpArrays.jl/latest/#Fitering-1">SnpArrays</a>.</p><pre><code class="language-julia">filename = &quot;/mnt/UKBiobank/ukbdata/ordinalanalysis/ukb.plink.filtered&quot;
+full_snp_data = SnpData(filename)</code></pre><pre><code class="language-none">SnpData(people: 185565, snps: 470228,
+snp_info: 
+│ Row │ chromosome │ snpid       │ genetic_distance │ position │ allele1      │ allele2      │
+│     │ String     │ String      │ Float64          │ Int64    │ Categorical… │ Categorical… │
+├─────┼────────────┼─────────────┼──────────────────┼──────────┼──────────────┼──────────────┤
+│ 1   │ 1          │ rs3131972   │ 0.0              │ 752721   │ A            │ G            │
+│ 2   │ 1          │ rs12184325  │ 0.0              │ 754105   │ T            │ C            │
+│ 3   │ 1          │ rs3131962   │ 0.0              │ 756604   │ A            │ G            │
+│ 4   │ 1          │ rs12562034  │ 0.0              │ 768448   │ A            │ G            │
+│ 5   │ 1          │ rs116390263 │ 0.0              │ 772927   │ T            │ C            │
+│ 6   │ 1          │ rs4040617   │ 0.0              │ 779322   │ G            │ A            │
+…,
+person_info: 
+│ Row │ fid       │ iid       │ father    │ mother    │ sex       │ phenotype │
+│     │ Abstract… │ Abstract… │ Abstract… │ Abstract… │ Abstract… │ Abstract… │
+├─────┼───────────┼───────────┼───────────┼───────────┼───────────┼───────────┤
+│ 1   │ 1000019   │ 1000019   │ 0         │ 0         │ 1         │ -9        │
+│ 2   │ 1000078   │ 1000078   │ 0         │ 0         │ 1         │ -9        │
+│ 3   │ 1000081   │ 1000081   │ 0         │ 0         │ 1         │ -9        │
+│ 4   │ 1000105   │ 1000105   │ 0         │ 0         │ 2         │ -9        │
+│ 5   │ 1000112   │ 1000112   │ 0         │ 0         │ 1         │ -9        │
+│ 6   │ 1000129   │ 1000129   │ 0         │ 0         │ 1         │ -9        │
+…,
+srcbed: /mnt/UKBiobank/ukbdata/ordinalanalysis/ukb.plink.filtered.bed
+srcbim: /mnt/UKBiobank/ukbdata/ordinalanalysis/ukb.plink.filtered.bim
+srcfam: /mnt/UKBiobank/ukbdata/ordinalanalysis/ukb.plink.filtered.fam
+)</code></pre><pre><code class="language-julia">sample_snps = SnpArray(&quot;tmp.filter.20k.chr1to7.bed&quot;, 20000)</code></pre><pre><code class="language-none">20000X�425292 SnpArray:
+ 0x02  0x02  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x02  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x02  0x02  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x00  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x02  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x02  0x03  0x02  0x03  0x03  0x02    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x02  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x02  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x02  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x02  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x02  0x03  0x02  0x03  0x03  0x02    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x02  0x03  0x02  0x03  0x03  0x02    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x02  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x02  0x02  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
+ 0x02  0x03  0x02  0x03  0x03  0x02    0x00  0x00  0x00  0x00  0x00  0x00</code></pre><p>The published hypertension GWAS analysis includes the following covariates: sex, center, age, age2, BMI, and the top ten principal components to adjust for ancestry/relatedness.</p><h1 id="Construct-Genetic-Model:-(VCM-Parameter-Specification)-1"><a class="docs-heading-anchor" href="#Construct-Genetic-Model:-(VCM-Parameter-Specification)-1">Construct Genetic Model: (VCM Parameter Specification)</a><a class="docs-heading-anchor-permalink" href="#Construct-Genetic-Model:-(VCM-Parameter-Specification)-1" title="Permalink"></a></h1><p>Say that you have the the classical setting in genetics, two variance components, one for the additive genetic variance and one for the environmental variance. For simulating <span>$d$</span> correlated traits for <span>$n$</span> related people under the VCM, users can specify their covariance structures as follows.</p><div>\[Y_{n \times d} \sim \text{MatrixNormal}(\mathbf{M}_{n \times d} = XB, \Omega_{nd \times nd} = \Sigma_A \otimes V_A + \Sigma_E \otimes V_E)\]</div><p>Suppose we want to see a particular SNP has an effect on a given phenotype after accounting for relatedness among individuals. Here we fit variance component model with a single SNP &#39;s&#39; as fixed effect. </p><div>\[\hspace{5em}  \mathbf{y} = \mathbf{X}\mathbf{\beta} + \mathbf{G}_s \gamma + \mathbf{g} + \mathbf{\epsilon} \hspace{5em} (1)\]</div>$<p>\mathbf{g} \sim N(\mathbf{0}, \sigma<em>g^2\mathbf{\Phi}); \mathbf{\epsilon} \sim N(\mathbf{0}, \sigma</em>e^2\mathbf{I}) (2) $</p><p>where  <span>$\mathbf{y}$</span>: phenotype and </p><ul><li>Fixed effects:    <span>$\mathbf{X}: \text{matrix of covariates including intercept}$</span>   <span>$\beta: \text{vector of covariate effects, including intercept}$</span>   <span>$\mathbf{G}_s: \text{genotype of SNP &#39;s&#39;}$</span>   <span>$\gamma: \text{(scalar) association parameter of interest, measuring the effect of genotype on phenotype}$</span></li><li>Random effects:   <span>$\mathbf{g}: \text{random vector of polygenic effects with} \mathbf{g} \sim N(\mathbf{0}, \sigma_g^2 \mathbf{\Phi})$</span>       <span>$\sigma_g^2: \text{additive genetic variance}$</span>       <span>$\mathbf{\Phi}: \text{matrix of pairwise measures of genetic relatedness}$</span>   <span>$\epsilon: \text{random vector with} \epsilon \sim N(\mathbf{0}, \sigma_e^2\mathbf{I})$</span>       <span>$\sigma_e^2: \text{non-genetic variance due to non-genetic effects assumed to be acting independently on individuals}$</span></li></ul><p>To test whether SNP &#39;s&#39; is associated with phenotype, we fit two models. First consider the model without SNP  &#39;s&#39; as fixed effects (aka null model): </p><div>\[\hspace{5em}  \mathbf{y} = \mathbf{X}\mathbf{\beta} + \mathbf{g} + \mathbf{\epsilon} \hspace{5em} (2)\]</div><p>and the model with SNP &#39;s&#39; as fixed effects (1). Then we can compare the log likelihood to see if there is improvement in the model fit with inclusion of the SNP of interest. </p><pre><code class="language-julia">sample_snps = SnpArray(&quot;tmp.filter.20k.chr1to7.bed&quot;, 20000)
+bimfile = full_snp_data.snp_info # store the snp_info with the snp names
+snpid  = bimfile[:, :snpid] # store the snp names in the snpid vector
+causal_snp_index = findfirst(x -&gt; x == &quot;rs11240779&quot;, snpid); # find the index of the snp of interest by snpid</code></pre><pre><code class="language-julia">GRM = grm(sample_snps, cinds = (1:50000), minmaf = 0.05)</code></pre><pre><code class="language-none">20000×20000 Array{Float64,2}:
+  0.484156      0.00597776   -0.00546745   …  -0.000619711  -0.00303873 
+  0.00597776    0.495968     -0.00707199       0.0117363     0.000888748
+ -0.00546745   -0.00707199    0.496102        -0.000331281   0.000782371
+  0.00381941    0.00167924    0.00956107       0.000762047   0.00437559 
+ -0.00144129   -0.00908248   -0.00472724      -0.00618115   -0.00571785 
+  0.00073305    0.00622141    0.0027326    …  -0.00318683   -0.00419594 
+  0.00314762   -0.00238743    0.000807163      0.00242279   -0.00666091 
+ -0.00580214    0.00263065    0.00160677      -0.00371358    0.00494184 
+ -0.00075661    0.00225328   -0.00374283      -0.00402865   -0.00304101 
+  0.00229812    0.0054374     0.000593526     -0.00236298   -0.00359522 
+  0.00316909    0.000840955   0.0127431    …  -0.00213737    0.00333481 
+  0.00146024   -0.00469578    0.00319257       0.00558896   -0.000461851
+ -0.00324931    0.00241239    0.00797953      -0.0102366    -0.00657798 
+  ⋮                                        ⋱                            
+  0.00164156   -0.00319575   -0.00399023       0.00439952   -0.00151732 
+ -0.00761124   -0.00439661    0.000206945      0.00108872   -0.00603369 
+  0.000619589   0.00316643   -0.00132394   …   0.00661205    0.00313253 
+ -0.000544604  -0.00491485    0.000410359     -0.0021603     0.00195482 
+  0.000969757  -0.00319238    0.00395337       0.00332249    1.72426e-5 
+ -0.00218307   -0.00343704   -0.0019731       -0.00263199   -0.000637567
+  0.00507449   -0.000652566  -0.00806479       0.00143266   -0.00657432 
+ -0.0029458     0.00347321   -0.00135441   …   0.00335228    0.00388207 
+ -0.0103544    -0.0043632     0.00665735      -0.00523865   -0.00983538 
+  0.00177748    0.00161656   -0.00428977       0.00767306   -0.0046504  
+ -0.000619711   0.0117363    -0.000331281      0.495208     -4.80061e-6 
+ -0.00303873    0.000888748   0.000782371     -4.80061e-6    0.503932</code></pre><h1 id="Power-Calculation-1"><a class="docs-heading-anchor" href="#Power-Calculation-1">Power Calculation</a><a class="docs-heading-anchor-permalink" href="#Power-Calculation-1" title="Permalink"></a></h1><p>This example illustrates the use of the simulations to generates data sets allowing researchers to accurately check the validity of programs and to calculate power for their proposed studies. </p><p>We illustrate this example in three digestable steps: </p><ul><li>The first by simulating genotypes and covariate values representative for our study population.</li><li>Carry over the simulated design matrix from (1) to create the VCMTrait object.</li><li>Simulate off the VCMTrait model object created in (2) and run the power analyses for the desired significance level.</li></ul><h3 id="convert-1"><a class="docs-heading-anchor" href="#convert-1">convert</a><a class="docs-heading-anchor-permalink" href="#convert-1" title="Permalink"></a></h3><p>By default <code>convert</code> function translates genotypes according to the <em>additive</em> SNP model, which essentially counts the number of <strong>A2</strong> allele (0, 1 or 2) per genotype. Other SNP models are <em>dominant</em> and <em>recessive</em>, both in terms of the <strong>A2</strong> allele.</p><table><tr><th style="text-align: center">Genotype</th><th style="text-align: center"><code>SnpArray</code></th><th style="text-align: center"><code>model=ADDITIVE_MODEL</code></th><th style="text-align: center"><code>model=DOMINANT_MODEL</code></th><th style="text-align: center"><code>model=RECESSIVE_MODEL</code></th></tr><tr><td style="text-align: center">A1,A1</td><td style="text-align: center">0x00</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td></tr><tr><td style="text-align: center">missing</td><td style="text-align: center">0x01</td><td style="text-align: center">NaN</td><td style="text-align: center">NaN</td><td style="text-align: center">NaN</td></tr><tr><td style="text-align: center">A1,A2</td><td style="text-align: center">0x02</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td></tr><tr><td style="text-align: center">A2,A2</td><td style="text-align: center">0x03</td><td style="text-align: center">2</td><td style="text-align: center">1</td><td style="text-align: center">1</td></tr></table><p>If desired, the user can decide to specify alternative model parameters found in the <a href="https://openmendel.github.io/SnpArrays.jl/latest/#convert-and-copyto!-1">SnpArrays</a> documentation.</p><pre><code class="language-julia">locus = convert(Vector{Float64}, @view sample_snps[:, causal_snp_index]; impute =  true)</code></pre><pre><code class="language-none">20000-element Array{Float64,1}:
+ 2.0
+ 2.0
+ 1.0
+ 1.0
+ 2.0
+ 2.0
+ 0.0
+ 2.0
+ 2.0
+ 2.0
+ 0.0
+ 1.0
+ 2.0
+ ⋮ 
+ 2.0
+ 2.0
+ 1.0
+ 2.0
+ 2.0
+ 1.0
+ 1.0
+ 2.0
+ 1.0
+ 2.0
+ 2.0
+ 1.0</code></pre><h2 id="Design-Matrix-1"><a class="docs-heading-anchor" href="#Design-Matrix-1">Design Matrix</a><a class="docs-heading-anchor-permalink" href="#Design-Matrix-1" title="Permalink"></a></h2><p>Now we concatenate the simulated causal locus, transformed to Float64, to the other covariates we want to control for in the study design.</p><p>The published hypertension GWAS analysis includes the following covariates: sex, center, age, age2, BMI, and the top ten principal components to adjust for ancestry/relatedness.</p><pre><code class="language-julia">n = length(locus)
+published_covariate_data = CSV.read(&quot;/mnt/UKBiobank/ukbdata/ordinalanalysis/Covariate_Final.csv&quot;)
+covariates = published_covariate_data[1:20000, :]
+sex = Float64.(covariates[!, :sex])</code></pre><h2 id="Phenotype-Simulation:-1"><a class="docs-heading-anchor" href="#Phenotype-Simulation:-1">Phenotype Simulation:</a><a class="docs-heading-anchor-permalink" href="#Phenotype-Simulation:-1" title="Permalink"></a></h2><p>Now that we have our simulated design matrix with the desired SNP of interest, we can simulate our phenotypes on the simulated data under different TraitSimulation models. To illustrate, we demonstrate on the <code>VCMTrait</code> model object in TraitSimulation.jl.</p><h2 id="Univariate-VCM-Trait-1"><a class="docs-heading-anchor" href="#Univariate-VCM-Trait-1">Univariate VCM Trait</a><a class="docs-heading-anchor-permalink" href="#Univariate-VCM-Trait-1" title="Permalink"></a></h2><pre><code class="language-julia">X = [sex locus]
+β_full =
+ [0.52
+0.05]
+
+I_n = Matrix(I, size(GRM))
+vc = @vc [0.11][:, :]  ⊗ 2GRM + [1.0][:, :] ⊗ I_n;
+trait = VCMTrait(X, β_full[:, :], vc)</code></pre><pre><code class="language-none">Variance Component Model
+  * number of traits: 1
+  * number of variance components: 2
+  * sample size: 20000</code></pre><h2 id="Bivariate-VCM-Trait-1"><a class="docs-heading-anchor" href="#Bivariate-VCM-Trait-1">Bivariate VCM Trait</a><a class="docs-heading-anchor-permalink" href="#Bivariate-VCM-Trait-1" title="Permalink"></a></h2><pre><code class="language-julia">ΣA = [0.3 0.0; 0.0 0.3]
+ΣE = [1.0 0.0; 0.0 1.0]
+β_full =
+ [0.52 0.52
+0.05 0.01]</code></pre><pre><code class="language-none">2×2 Array{Float64,2}:
+ 0.52  0.52
+ 0.05  0.01</code></pre><pre><code class="language-julia">X = [sex locus]
+I_n = Matrix(I, size(GRM))
+vc = @vc ΣA ⊗ 2GRM + ΣE ⊗ I_n;</code></pre><pre><code class="language-julia">trait = VCMTrait(X, β_full[:, :], vc)</code></pre><pre><code class="language-none">Variance Component Model
+  * number of traits: 2
+  * number of variance components: 2
+  * sample size: 20000</code></pre><p>We use the following function to generate the p-values for the simulated power example for the ordered multinomial regression model. We range effect sizes in the vector gamma_s, which collects effect sizes from 0 to 0.054. To demo, we simulate the bivariate trait symmetrically using the same single variant and effect size. As expected, the power increases as the effect size increases. </p><p>The power calculation works in the following two steps:</p><ol><li>For each of the specified number of simulations, nsim, we will simulate the bivariate trait under the specified genetic model and effect size. </li><li>For each simulated phenotype, we use VarianceComponentModels.jl to test the significance of the causal locus.</li></ol><pre><code class="language-julia">Y = zeros(size(trait.�))
+X = trait.X
+V1 = trait.vc[1].V
+V2 = trait.vc[2].V;</code></pre><pre><code class="language-julia"># allocate variance component objects for null and alternative hypothesis
+vcm_null, vcrot_null, vcm_alt, vcrot_alt = @time null_and_alternative_vcm_and_rotate(Y, X, V1, V2);</code></pre><pre><code class="language-julia">gamma_s = [collect(0.0:0.005:0.015); collect(0.016:0.002:0.032); collect(0.034:0.005:0.065)]</code></pre><pre><code class="language-none">20-element Array{Float64,1}:
+ 0.0  
+ 0.005
+ 0.01 
+ 0.015
+ 0.016
+ 0.018
+ 0.02 
+ 0.022
+ 0.024
+ 0.026
+ 0.028
+ 0.03 
+ 0.032
+ 0.034
+ 0.039
+ 0.044
+ 0.049
+ 0.054
+ 0.059
+ 0.064</code></pre><h1 id="Univariate-VCM-Power-1"><a class="docs-heading-anchor" href="#Univariate-VCM-Power-1">Univariate VCM Power</a><a class="docs-heading-anchor-permalink" href="#Univariate-VCM-Power-1" title="Permalink"></a></h1><p>For 20,000 individuals at 20 SNP effect sizes each performing 1000 Likelihood Ratio tests while controlling for the estimate for the kinship matrix, it took 4.83 hours to run the following bivariate trait power analysis</p><pre><code class="language-julia">Random.seed!(12345)
+nsim = 1000
+pvalues = @time power_simulation(trait, gamma_s, nsim, vcm_null, vcrot_null, vcm_alt, vcrot_alt)
+results = DataFrame(pvalues)</code></pre><pre><code class="language-none">******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit http://projects.coin-or.org/Ipopt
+******************************************************************************
+
+17414.656838 seconds (1.93 G allocations: 130.153 GiB, 0.14% gc time)</code></pre><p>Each column of this matrix represents each of the detected effect sizes, and each row of this matrix represents each simulation for that effect size. The user feeds into the function the number of simulations, the vector of effect sizes, the TraitSimulation.jl model object, and the random seed.</p><p>For VCMTrait objects, we include additional power utilities that make the appropriate function calls to the <a href="https://openmendel.github.io/VarianceComponentModels.jl/stable/">VarianceComponentModels</a> module to get the p-value obtained from testing the significance of the causal locus on the simulated trait.</p><p>For each effect size in <span>$\gamma_s,$</span> in each column we have the p-values obtained from testing the significance of the causal locus on both traits, <code>nsim = 1000</code> times under the VCM and the <code>randomseed = 1234</code>.</p><p>Now we find the power of each effect size in the user-specified gamma_s vector at the specified alpha level of significance, and plot the trajectory using the Plots.jl package.</p><pre><code class="language-julia">alpha = 5*10^-8
+
+univariate_power_effectsize = power(pvalues, alpha)</code></pre><pre><code class="language-none">20-element Array{Float64,1}:
+ 0.0  
+ 0.0  
+ 0.0  
+ 0.005
+ 0.004
+ 0.011
+ 0.027
+ 0.06 
+ 0.103
+ 0.187
+ 0.288
+ 0.423
+ 0.592
+ 0.688
+ 0.913
+ 0.983
+ 0.998
+ 1.0 
+ 1.0
+ 1.0</code></pre><pre><code class="language-julia">maf = 0.23
+total_variance = 1.3
+prop_v2 = gamma_s.^2 ./ total_variance
+prop_explained_by_SNP = (2*(1 - maf)*maf).* prop_v2
+plot([prop_explained_by_SNP], [univariate_power_effectsize], title = &quot;Univariate Variance Component Model Power&quot;, label = &quot;maf = 0.23, snp: rs11240779&quot;, lw = 3 , legend = :bottomright, legendfontsize= 9)  # plot power
+xlabel!(&quot;Proportion of Variation Explained by the SNP for Each Trait&quot;)
+hline!([.8], label = &quot;power = 80%, p-value threshold = 5*10^-8&quot;, lw = 3)</code></pre><p><img src="../univariate_vcm_power.png" alt="png"/></p><h1 id="Bivariate-VCM-Power-1"><a class="docs-heading-anchor" href="#Bivariate-VCM-Power-1">Bivariate VCM Power</a><a class="docs-heading-anchor-permalink" href="#Bivariate-VCM-Power-1" title="Permalink"></a></h1><p>For 20,000 individuals at 20 SNP effect sizes each performing 1000 Likelihood Ratio tests while controlling for the estimate for the kinship matrix, it took 5.97 hours to run the following bivariate trait power analysis</p><pre><code class="language-julia">Random.seed!(12345)
+nsim = 1000
+pvalues = @time power_simulation(trait, gamma_s, nsim, vcm_null, vcrot_null, vcm_alt, vcrot_alt)
+results = DataFrame(pvalues)</code></pre><pre><code class="language-none">******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit http://projects.coin-or.org/Ipopt
+******************************************************************************
+
+21500.556177 seconds (1.80 G allocations: 164.017 GiB, 0.15% gc time)</code></pre><pre><code class="language-julia">alpha = 5*10^-8
+
+bivariate_power_effectsize = power(pvalues, alpha)</code></pre><pre><code class="language-none">20-element Array{Float64,1}:
+ 0.0  
+ 0.0  
+ 0.0  
+ 0.022
+ 0.028
+ 0.061
+ 0.164
+ 0.29 
+ 0.473
+ 0.652
+ 0.83 
+ 0.926
+ 0.964
+ 0.994
+ 1.0  
+ 1.0  
+ 1.0  
+ 1.0  
+ 1.0
+ 1.0</code></pre><pre><code class="language-julia">maf = 0.23
+total_variance = 1.3
+prop_v2 = gamma_s.^2 ./ total_variance
+prop_explained_by_SNP = (2*(1 - maf)*maf).* prop_v2
+plot([prop_explained_by_SNP], [bivariate_power_effectsize], title = &quot;Bivariate Variance Component Model Power&quot;, label = &quot;maf = 0.23, snp: rs11240779&quot;, lw = 3 , legend = :bottomright, legendfontsize= 9)  # plot power
+xlabel!(&quot;Proportion of Variation Explained by the SNP for Each Trait&quot;)
+hline!([.8], label = &quot;power = 80%, p-value threshold = 5*10^-8&quot;, lw = 3)</code></pre><p><img src="../symmetric_bivariate_vcm.png" alt="png"/></p><h2 id="Citations:-1"><a class="docs-heading-anchor" href="#Citations:-1">Citations:</a><a class="docs-heading-anchor-permalink" href="#Citations:-1" title="Permalink"></a></h2><p>[1] Lange K, Papp JC, Sinsheimer JS, Sripracha R, Zhou H, Sobel EM (2013) Mendel: The Swiss army knife of genetic analysis programs. Bioinformatics 29:1568-1570.`</p><p>[2] OPENMENDEL: a cooperative programming project for statistical genetics. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=OPENMENDEL">Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z</a>.</p><p>[3] German, CA, Sinsheimer, JS, Klimentidis, YC, Zhou, H, Zhou, JJ. Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 2019; 1�� 13. https://doi.org/10.1002/gepi.22276</p><p>[4] Lange K, Boehnke M (1983) Extensions to pedigree analysis. IV. Covariance component models for multivariate traits. Amer J Med Genet 14:513��524</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../testing_MendelIHT_glm/">« Testing Methods</a><a class="docs-footer-nextpage" href="../ukbiobank_ordered_multinomial_power/">Trait Simulation - Ordinal Multinomial Power »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 16 June 2020 09:39">Tuesday 16 June 2020</span>. Using Julia version 1.2.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
