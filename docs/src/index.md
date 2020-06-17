@@ -3,21 +3,19 @@
 
 Authors: Sarah Ji, Kenneth Lange, Janet Sinsheimer, Jin Zhou, Hua Zhou, Eric Sobel
 
+We present TraitSimulation, an open-source Julia package that makes it trivial to quickly simulate phenotypes under a variety of genetic architectures. This package is integrated into our larger OpenMendel suite of software tools for easy downstream analyses. Julia was purpose-built for scientific programming and provides tremendous speed and memory efficiency, extensive libraries, and easy access to multi-CPU and GPU hardware and to distributed cloud-based parallelization. It is designed to encourage flexible trait simulation with the standard devices of applied statistics, generalized linear models (GLMs)and generalized linear mixed models (GLMMs).TraitSimulation also accommodates many study designs: unrelateds, sibships, pedigrees, or a mixture of all three. 
+
 ## Background
 
-There is a lack of software available to geneticists who wish to calculate power and sample sizes in designing a study on genetics data. Typically, the study power depends on assumptions about the underlying disease model.  Many power calculating software tools operate as a black box and do not allow for customization.  To develop custom tests, researchers can develop their own simulation procedures to carry out power calculations.  One limitation with many existing methods for simulating traits conditional on genotypes is that these methods are limited to normally distributed traits and to fixed effects.
-
-This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. This package gives users the ability to easily simulate phenotypic traits under GLMs, VCMs and GLMM's conditional on PLINK formatted genotype data [3]. In addition, we include customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example, ordered, multinomial traits. We introduce each of the simulation models, and demonstrate how to run the simulation utilities on the example dataset described below.
-
+Statistical geneticists employ simulation to estimate the power of proposed studies, test new analysis tools, and evaluate properties of causal models. Although there are existing trait simulators, there is ample room for modernization of currently available simulation models and computing platforms.For example, most phenotype simulators are limited to Gaussian traits or traits transformable to normality, ignoring qualitative traits and realistic, non-normal trait distributions. Modern computer languages, such as Julia, that accommodate parallelization and cloud-based computing are now mainstream but rarely used inolder applications. To meet the challenges of contemporary big studies, it is nearly imperative for geneticists to adopt new computational tools. Although GPU and Threading capabilities are relatively new and under current development, we explore the potential of these language features and present the results to users who are interested in Julia. Users who wish to play with the prototype GPU code for simulation can find the file in the test folder, but we warn users that the CuArrays package will not install if the proper GPU machinery is not detected. 
 
 ## Demonstration
 
 ##### Example Data
 
-We use the OpenMendel package [SnpArrays.jl](https://openmendel.github.io/SnpArrays.jl/latest/) to both read in and write out PLINK formatted files. Available in the data directory under the [Example_Data](https://openmendel.github.io/SnpArrays.jl/latest/#Example-data-1) section of this package, we use the file `"EUR_SUBSET"` for the demonstration how to simulate phenotypic traits on PLINK formatted data. 
-For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient.
+We can use the OpenMendel package [SnpArrays.jl](https://openmendel.github.io/SnpArrays.jl/latest/) to both read in and write out PLINK formatted files. Available in the data directory under the [Example_Data](https://openmendel.github.io/SnpArrays.jl/latest/#Example-data-1) section of this package, we use the file `"EUR_SUBSET"` for the demonstration how to simulate phenotypic traits on PLINK formatted data. For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient.
 
-In each example the user can specify the simulation model parameters, along with the number of repitions for each simulation model as desired. By default, the simulation will return the result of a single simulation.
+In each simulation model, the user can specify parameters, along with the number of repetitions for each simulation model as desired. By default, the simulation will return the result of a single simulation.
 
 ### Double check that you are using Julia version 1.0 or higher by checking the machine information
 

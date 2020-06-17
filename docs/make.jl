@@ -13,8 +13,8 @@ makedocs(
 	"Testing Methods" => "examples/testing_MendelIHT_glm.md",
         "Real Data Examples" => Any[
             "examples/ukbiobank_vcm_power.md",
-	    "examples/ukbiobank_ordered_multinomial_power.md"
-        ],
+	    "examples/ukbiobank_ordered_multinomial_power.md"],
+	"Exploring GPU Potential" => "examples/GPU.md",
      ]
 )
 
