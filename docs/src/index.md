@@ -383,6 +383,9 @@ Now we demonstrate on the `OrderedMultinomialTrait` model object in TraitSimulat
 
 Recall that this phenotype is special, in that the [OrdinalMultinomialModels](https://openmendel.github.io/OrdinalMultinomialModels.jl/stable/#Syntax-1) package provides Julia utilities to fit ordered multinomial models, including [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) and [ordered Probit model](https://en.wikipedia.org/wiki/Ordered_probit) as special cases. 
 
+For this model, we have intercept parameters $\theta_1 \le \cdots \le \theta_{J-1}$ enforce the order between the categories and $\boldsymbol{\beta}$ reflects the effects of the linear predictors under the proportional hazards model. The effect sizes can be interpreted as the expected change of the response variable on an ordered log-odds scale for each unit increase in the predictor. 
+
+
 
 ```julia
 θ = [1.0, 1.2, 1.4]
@@ -555,9 +558,20 @@ We illustrate this example in three digestable steps as shown in the figure:
    * Carry over the simulated design matrix from (1) to create the OrderedMultinomialTrait model object.
    * Simulate off the OrderedMultinomialTrait model object created in (2) and run the power analyses for the desired significance level.
 
-Each column of this matrix represents each of the detected effect sizes, and each row of this matrix represents each simulation for that effect size. The user feeds into the function the number of simulations, the vector of effect sizes, the TraitSimulation.jl model object, and the random seed.
+Each column of this matrix represents each of the detected effect sizes, and each row of this matrix represents each simulation for that effect size. The user feeds into the function the number of simulations, the vector of effect sizes, the TraitSimulation.jl model object, and the random seed. 
+
+$\mathbf{Y}_{n \times 1} = \mathbf{X}\mathbf{\beta} + \mathbf{G}_s \gamma + \mathbf{g} + \mathbf{\epsilon}$
+$\mathbf{g} \sim N(\mathbf{0}, \sigma_A \times \mathbf{\Phi})$
+$\mathbf{\epsilon} \sim N(\mathbf{0}, \sigma_E \times \mathbf{I_n})$
+
+Here $\sigma_A$ and $\Sigma_A$ are the additive genetic variance and matrix, $\sigma_E$ and $\Sigma_E$ are the environmental variance and matrix, $\mathbf{\Phi}$ is the kinship matrix, and $\mathbf{I_n}$ is the $n \times n$ identity matrix.
+
+We illustrate the example on simulated data under the Ordered Multinomial Model and define the study power in the following way. For each simulated trait, we perform a likelihood ratio test of the above hypothesis test and reject the null when the p-value falls below prespecified significance level. In our example, we define the power for the model is estimated as the proportion of tests rejecting the null at significance level α = 5×10−8.
+
+$\textbf{H}_0: \gamma = 0  \hspace{0.25in}\text{versus}\hspace{0.25in} \textbf{H}_A: \gamma \neq 0$
 
 For GLMTrait objects, the `realistic_power_simulation` function makes the appropriate calls to the GLM.jl package to get the simulation p-values obtained from testing the significance of the causal locus using the Wald Test by default. However since the GLM.jl package has its limitations, we include additional power utilities that make the appropriate function calls to the [OrdinalMultinomialModels](https://openmendel.github.io/OrdinalMultinomialModels.jl/stable/#Syntax-1) to get the p-value obtained from testing the significance of the causal locus. Variance Component Models for VCMTrait objects can be fit using [VarianceComponentModels.jl](https://openmendel.github.io/VarianceComponentModels.jl/latest/), and we demo for UK Biobank data in the docs. 
+
 
 
 ## UKBiobank Power Pipeline
