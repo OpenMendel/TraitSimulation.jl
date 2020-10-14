@@ -111,7 +111,6 @@ This simulates a GLM trait once under the desired generalized linear model, spec
   By default we simulate the multinomial ordered outcome, but with the specification of the Logistic and threshold arguments, we can do the transformation to ordinal logistic.
   """
   function simulate!(y, trait::OrderedMultinomialTrait; Logistic::Bool = false, threshold::Union{T, Nothing} = nothing) where T <: Real
-      # in a for-loop
       y .= rpolr(trait.X, trait.β, trait.θ, trait.link)
       if Logistic
           threshold == nothing && error("I need the cutoff for case/control")
