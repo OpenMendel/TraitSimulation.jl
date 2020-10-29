@@ -19,8 +19,11 @@ This package requires Julia v0.7 or later, which can be obtained from https://ju
 The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL. To reproduce the given examples, install the following OpenMendel packages in this order before installing TraitSimulation.
 
 `(v1.5) pkg> add https://github.com/OpenMendel/SnpArrays.jl`
+\\
 `(v1.5) pkg> add https://github.com/OpenMendel/VarianceComponentModels.jl`
+\\
 `(v1.5) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl`
+\\
 `(v1.5) pkg> add https://github.com/OpenMendel/TraitSimulation.jl`
 
 #Citation
