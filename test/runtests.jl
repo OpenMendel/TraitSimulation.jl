@@ -7,17 +7,16 @@ using DataFrames
 using VarianceComponentModels
 using SnpArrays
 using Suppressor
+using DelimitedFiles
 
 @testset "modelparameters" begin
 	include("modelparameters.jl")
 end
 
-@testset "matrixnormalsimulation" begin
-	include("matrixnormalsimulation.jl")
-end
-
 @testset "simulationmodels" begin
 	include("simulationmodels.jl")
+	include("matrixnormalsimulation.jl")
+	include("writetopheno.jl")
 end
 
 @testset "simulatepower" begin

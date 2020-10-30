@@ -7,6 +7,7 @@ using SnpArrays
 using OrdinalMultinomialModels
 using VarianceComponentModels
 using Distributions
+using DelimitedFiles
 import Base: show
 using LinearAlgebra: BlasReal, copytri!
 
@@ -19,6 +20,8 @@ include("simulatesnparray.jl")
 include("modelparameterparsers.jl")
 
 include("simulatepower.jl")
+
+include("writetofilepheno.jl")
 
 "Simulate the trait under the given model."
 simulate(trait::AbstractTraitModel) = __default_behavior(trait)
@@ -259,6 +262,6 @@ This simulates a GLM trait once under the desired generalized linear model, spec
   export GLMTrait, OrderedMultinomialTrait, VCMTrait, GLMMTrait
   export simulate_effect_size, snparray_simulation, genotype_sim
   export nsamplesize, neffects, noutcomecategories, nvc, ntraits
-  export simulate!, simulate
+  export simulate!, simulate, writepheno
   export null_and_alternative_vcm_and_rotate, power_simulation, power, VCM_trait_simulation
 end #module

@@ -1,6 +1,5 @@
 using SnpArrays, Distributions, Test, Statistics, VarianceComponentModels, Distributions, Random
 using DataFrames, LinearAlgebra, StatsBase, TraitSimulation, Distributions
-Random.seed!(1234)
 
 # demo genetic data can be found in Snparrays package directory
 filename = "EUR_subset"
