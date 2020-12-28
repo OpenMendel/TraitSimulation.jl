@@ -3,25 +3,25 @@
 
 Authors: Sarah Ji, Janet Sinsheimer, Kenneth Lange, Hua Zhou, Eric Sobel
 
-In this notebook we show how to use the `TraitSimulation.jl` package we illustrate how TraitSimulation.jl can easily simulate traits from genotype data, all within the OpenMendel universe. Operating within this universe brings potential advantages over the available software(s) when needed for downstream analysis or study design. 
+In this notebook we show how to use the `TraitSimulation.jl` package we illustrate how TraitSimulation.jl can easily simulate traits from genotype data, all within the OpenMendel universe. Operating within this universe brings potential advantages over the available software(s) when needed for downstream analysis or study design.
 
 Using just a few calls on the command line to the appropriate packages within the OpenMendel, we demonstrate in three easy examples the utilities of the TraitSimulation.jl package.
 
-Users who want a reference on genetic modeling, we recommend 
+Users who want a reference on genetic modeling, we recommend
 [Mathematical And Statistical Methods For Genetic Analysis](http://www.biometrica.tomsk.ru/lib/lange_1.pdf) by Dr. Kenneth Lange. In chapter 8 of this book, the user can find an introduction to Variance Component Models in Genetic Setting. For a more in depth review of variance component modeling in the genetic setting, we include a reference at the end of the notebook [4].
 
 
 ## Background
 
-There is a lack of software available to geneticists who wish to calculate power and sample sizes in designing a study on genetics data. Typically, the study power depends on assumptions about the underlying disease model.  Many power calculating software tools operate as a black box and do not allow for customization.  To develop custom tests, researchers can develop their own simulation procedures to carry out power calculations.  One limitation with many existing methods for simulating traits conditional on genotypes is that these methods are limited to normally distributed traits and to fixed effects. 
+There is a lack of software available to geneticists who wish to calculate power and sample sizes in designing a study on genetics data. Typically, the study power depends on assumptions about the underlying disease model.  Many power calculating software tools operate as a black box and do not allow for customization.  To develop custom tests, researchers can develop their own simulation procedures to carry out power calculations.  One limitation with many existing methods for simulating traits conditional on genotypes is that these methods are limited to normally distributed traits and to fixed effects.
 
-This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. We demonstrate customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example Variance Component Models (VCM) and [ordered multinomial traits](https://github.com/OpenMendel/TraitSimulation.jl/blob/master/docs/Example_Ordinal_Multinomial_Power.ipynb). We demonstrate the simulation utilities on a subset of 20,000 individuals and 470228 snps in the UK Biobank dataset. We use a subset of the dataset in the [Ordinal GWAS paper](https://doi.org/10.1002/gepi.22276) to include only the first 20,000 individuals for this demo. 
+This software package, TraitSimuliation.jl addresses the need for simulated trait data in genetic analyses.  This package generates data sets that will allow researchers to accurately check the validity of programs and to calculate power for their proposed studies. We demonstrate customized simulation utilities that accompany specific genetic analysis options in Open-Mendel; for example Variance Component Models (VCM) and [ordered multinomial traits](https://github.com/OpenMendel/TraitSimulation.jl/blob/master/docs/Example_Ordinal_Multinomial_Power.ipynb). We demonstrate the simulation utilities on a subset of 20,000 individuals and 470228 snps in the UK Biobank dataset. We use a subset of the dataset in the [Ordinal GWAS paper](https://doi.org/10.1002/gepi.22276) to include only the first 20,000 individuals for this demo.
 
 ## Demonstration
 
-##### Example Data
+##### UK Biobank Example Data
 
-We use the OpenMendel package [SnpArrays.jl](https://openmendel.github.io/SnpArrays.jl/latest/) to both read in and write out PLINK formatted files. 
+The data used in the analysis examples in this manuscript are from the UK Biobank data repository and are publicly available, after approval by their review board, from the [UKBiobank](https://www.ukbiobank.ac.uk). We retrieved the data under Project IDs 48152 and 15678. We will use the OpenMendel package [SnpArrays.jl](https://openmendel.github.io/SnpArrays.jl/latest/) to read in the PLINK formatted data files.
 
 For convenience we use the common assumption that the residual covariance among two relatives can be captured by the additive genetic variance times twice the kinship coefficient.
 
@@ -70,7 +70,7 @@ full_snp_data = SnpData(filename)
 
 
     SnpData(people: 185565, snps: 470228,
-    snp_info: 
+    snp_info:
     │ Row │ chromosome │ snpid       │ genetic_distance │ position │ allele1      │ allele2      │
     │     │ String     │ String      │ Float64          │ Int64    │ Categorical… │ Categorical… │
     ├─────┼────────────┼─────────────┼──────────────────┼──────────┼──────────────┼──────────────┤
@@ -81,7 +81,7 @@ full_snp_data = SnpData(filename)
     │ 5   │ 1          │ rs116390263 │ 0.0              │ 772927   │ T            │ C            │
     │ 6   │ 1          │ rs4040617   │ 0.0              │ 779322   │ G            │ A            │
     …,
-    person_info: 
+    person_info:
     │ Row │ fid       │ iid       │ father    │ mother    │ sex       │ phenotype │
     │     │ Abstract… │ Abstract… │ Abstract… │ Abstract… │ Abstract… │ Abstract… │
     ├─────┼───────────┼───────────┼───────────┼───────────┼───────────┼───────────┤
@@ -104,7 +104,7 @@ full_snp_data = SnpData(filename)
 sample_snps = SnpArray("tmp.filter.20k.chr1to7.bed", 20000)
 ```
 
-    20000X�425292 SnpArray:
+    20000X�425292 SnpArray:
      0x02  0x02  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
      0x03  0x03  0x03  0x03  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
      0x03  0x03  0x03  0x02  0x03  0x03    0x00  0x00  0x00  0x00  0x00  0x00
@@ -142,14 +142,14 @@ Say that you have the the classical setting in genetics, two variance components
 
 $$Y_{n \times d} \sim \text{MatrixNormal}(\mathbf{M}_{n \times d} = XB, \Omega_{nd \times nd} = \Sigma_A \otimes V_A + \Sigma_E \otimes V_E)$$
 
-Suppose we want to see a particular SNP has an effect on a given phenotype after accounting for relatedness among individuals. Here we fit variance component model with a single SNP 's' as fixed effect. 
+Suppose we want to see a particular SNP has an effect on a given phenotype after accounting for relatedness among individuals. Here we fit variance component model with a single SNP 's' as fixed effect.
 
 $$\hspace{5em}  \mathbf{y} = \mathbf{X}\mathbf{\beta} + \mathbf{G}_s \gamma + \mathbf{g} + \mathbf{\epsilon} \hspace{5em} (1)$$
 
 
 $$ \mathbf{g} \sim N(\mathbf{0}, \sigma_g^2\mathbf{\Phi}); \mathbf{\epsilon} \sim N(\mathbf{0}, \sigma_e^2\mathbf{I}) (2) $$
 
-where  $\mathbf{y}$: phenotype and 
+where  $\mathbf{y}$: phenotype and
 
 * Fixed effects:
      $\mathbf{X}: \text{matrix of covariates including intercept}$
@@ -165,11 +165,11 @@ where  $\mathbf{y}$: phenotype and
 
 
 
-To test whether SNP 's' is associated with phenotype, we fit two models. First consider the model without SNP  's' as fixed effects (aka null model): 
+To test whether SNP 's' is associated with phenotype, we fit two models. First consider the model without SNP  's' as fixed effects (aka null model):
 
 $$\hspace{5em}  \mathbf{y} = \mathbf{X}\mathbf{\beta} + \mathbf{g} + \mathbf{\epsilon} \hspace{5em} (2)$$
 
-and the model with SNP 's' as fixed effects (1). Then we can compare the log likelihood to see if there is improvement in the model fit with inclusion of the SNP of interest. 
+and the model with SNP 's' as fixed effects (1). Then we can compare the log likelihood to see if there is improvement in the model fit with inclusion of the SNP of interest.
 
 
 ```julia
@@ -186,39 +186,39 @@ GRM = grm(sample_snps, cinds = (1:50000), minmaf = 0.05)
 
 
     20000×20000 Array{Float64,2}:
-      0.484156      0.00597776   -0.00546745   …  -0.000619711  -0.00303873 
+      0.484156      0.00597776   -0.00546745   …  -0.000619711  -0.00303873
       0.00597776    0.495968     -0.00707199       0.0117363     0.000888748
      -0.00546745   -0.00707199    0.496102        -0.000331281   0.000782371
-      0.00381941    0.00167924    0.00956107       0.000762047   0.00437559 
-     -0.00144129   -0.00908248   -0.00472724      -0.00618115   -0.00571785 
-      0.00073305    0.00622141    0.0027326    …  -0.00318683   -0.00419594 
-      0.00314762   -0.00238743    0.000807163      0.00242279   -0.00666091 
-     -0.00580214    0.00263065    0.00160677      -0.00371358    0.00494184 
-     -0.00075661    0.00225328   -0.00374283      -0.00402865   -0.00304101 
-      0.00229812    0.0054374     0.000593526     -0.00236298   -0.00359522 
-      0.00316909    0.000840955   0.0127431    …  -0.00213737    0.00333481 
+      0.00381941    0.00167924    0.00956107       0.000762047   0.00437559
+     -0.00144129   -0.00908248   -0.00472724      -0.00618115   -0.00571785
+      0.00073305    0.00622141    0.0027326    …  -0.00318683   -0.00419594
+      0.00314762   -0.00238743    0.000807163      0.00242279   -0.00666091
+     -0.00580214    0.00263065    0.00160677      -0.00371358    0.00494184
+     -0.00075661    0.00225328   -0.00374283      -0.00402865   -0.00304101
+      0.00229812    0.0054374     0.000593526     -0.00236298   -0.00359522
+      0.00316909    0.000840955   0.0127431    …  -0.00213737    0.00333481
       0.00146024   -0.00469578    0.00319257       0.00558896   -0.000461851
-     -0.00324931    0.00241239    0.00797953      -0.0102366    -0.00657798 
+     -0.00324931    0.00241239    0.00797953      -0.0102366    -0.00657798
       ⋮                                        ⋱                            
-      0.00164156   -0.00319575   -0.00399023       0.00439952   -0.00151732 
-     -0.00761124   -0.00439661    0.000206945      0.00108872   -0.00603369 
-      0.000619589   0.00316643   -0.00132394   …   0.00661205    0.00313253 
-     -0.000544604  -0.00491485    0.000410359     -0.0021603     0.00195482 
-      0.000969757  -0.00319238    0.00395337       0.00332249    1.72426e-5 
+      0.00164156   -0.00319575   -0.00399023       0.00439952   -0.00151732
+     -0.00761124   -0.00439661    0.000206945      0.00108872   -0.00603369
+      0.000619589   0.00316643   -0.00132394   …   0.00661205    0.00313253
+     -0.000544604  -0.00491485    0.000410359     -0.0021603     0.00195482
+      0.000969757  -0.00319238    0.00395337       0.00332249    1.72426e-5
      -0.00218307   -0.00343704   -0.0019731       -0.00263199   -0.000637567
-      0.00507449   -0.000652566  -0.00806479       0.00143266   -0.00657432 
-     -0.0029458     0.00347321   -0.00135441   …   0.00335228    0.00388207 
-     -0.0103544    -0.0043632     0.00665735      -0.00523865   -0.00983538 
+      0.00507449   -0.000652566  -0.00806479       0.00143266   -0.00657432
+     -0.0029458     0.00347321   -0.00135441   …   0.00335228    0.00388207
+     -0.0103544    -0.0043632     0.00665735      -0.00523865   -0.00983538
       0.00177748    0.00161656   -0.00428977       0.00767306   -0.0046504  
-     -0.000619711   0.0117363    -0.000331281      0.495208     -4.80061e-6 
+     -0.000619711   0.0117363    -0.000331281      0.495208     -4.80061e-6
      -0.00303873    0.000888748   0.000782371     -4.80061e-6    0.503932   
 
 
 # Power Calculation
 
-This example illustrates the use of the simulations to generates data sets allowing researchers to accurately check the validity of programs and to calculate power for their proposed studies. 
+This example illustrates the use of the simulations to generates data sets allowing researchers to accurately check the validity of programs and to calculate power for their proposed studies.
 
-We illustrate this example in three digestable steps: 
+We illustrate this example in three digestable steps:
    * The first by simulating genotypes and covariate values representative for our study population.
    * Carry over the simulated design matrix from (1) to create the VCMTrait object.
    * Simulate off the VCMTrait model object created in (2) and run the power analyses for the desired significance level.
@@ -254,7 +254,7 @@ locus = convert(Vector{Float64}, @view sample_snps[:, causal_snp_index]; impute 
      0.0
      1.0
      2.0
-     ⋮ 
+     ⋮
      2.0
      2.0
      1.0
@@ -342,17 +342,17 @@ trait = VCMTrait(X, β_full[:, :], vc)
       * sample size: 20000
 
 
-We use the following function to generate the p-values for the simulated power example for the ordered multinomial regression model. We range effect sizes in the vector gamma_s, which collects effect sizes from 0 to 0.054. To demo, we simulate the bivariate trait symmetrically using the same single variant and effect size. As expected, the power increases as the effect size increases. 
+We use the following function to generate the p-values for the simulated power example for the ordered multinomial regression model. We range effect sizes in the vector gamma_s, which collects effect sizes from 0 to 0.054. To demo, we simulate the bivariate trait symmetrically using the same single variant and effect size. As expected, the power increases as the effect size increases.
 
 
 The power calculation works in the following two steps:
-1. For each of the specified number of simulations, nsim, we will simulate the bivariate trait under the specified genetic model and effect size. 
+1. For each of the specified number of simulations, nsim, we will simulate the bivariate trait under the specified genetic model and effect size.
 2. For each simulated phenotype, we use VarianceComponentModels.jl to test the significance of the causal locus.
-    
+
 
 
 ```julia
-Y = zeros(size(trait.�))
+Y = zeros(size(trait.�))
 X = trait.X
 V1 = trait.vc[1].V
 V2 = trait.vc[2].V;
@@ -369,16 +369,16 @@ gamma_s = [collect(0.0:0.005:0.015); collect(0.016:0.002:0.032); collect(0.034:0
     20-element Array{Float64,1}:
      0.0  
      0.005
-     0.01 
+     0.01
      0.015
      0.016
      0.018
-     0.02 
+     0.02
      0.022
      0.024
      0.026
      0.028
-     0.03 
+     0.03
      0.032
      0.034
      0.039
@@ -396,15 +396,15 @@ nsim = 1000
 pvalues = @time power_simulation(trait, gamma_s, nsim, vcm_null, vcrot_null, vcm_alt, vcrot_alt)
 results = DataFrame(pvalues)
 ```
-    
+
     ******************************************************************************
     This program contains Ipopt, a library for large-scale nonlinear optimization.
      Ipopt is released as open source code under the Eclipse Public License (EPL).
              For more information visit http://projects.coin-or.org/Ipopt
     ******************************************************************************
-    
+
     17414.656838 seconds (1.93 G allocations: 130.153 GiB, 0.14% gc time)
-    
+
 
 Each column of this matrix represents each of the detected effect sizes, and each row of this matrix represents each simulation for that effect size. The user feeds into the function the number of simulations, the vector of effect sizes, the TraitSimulation.jl model object, and the random seed.
 
@@ -414,7 +414,7 @@ For VCMTrait objects, we include additional power utilities that make the approp
 For each effect size in $\gamma_s,$ in each column we have the p-values obtained from testing the significance of the causal locus on both traits, `nsim = 1000` times under the VCM and the `randomseed = 1234`.
 
 Now we find the power of each effect size in the user-specified gamma_s vector at the specified alpha level of significance, and plot the trajectory using the Plots.jl package.
-    
+
 
 ```julia
 alpha = 5*10^-8
@@ -429,7 +429,7 @@ univariate_power_effectsize = power(pvalues, alpha)
      0.004
      0.011
      0.027
-     0.06 
+     0.06
      0.103
      0.187
      0.288
@@ -439,7 +439,7 @@ univariate_power_effectsize = power(pvalues, alpha)
      0.913
      0.983
      0.998
-     1.0 
+     1.0
      1.0
      1.0
 
@@ -471,7 +471,7 @@ results = DataFrame(pvalues)
      Ipopt is released as open source code under the Eclipse Public License (EPL).
              For more information visit http://projects.coin-or.org/Ipopt
     ******************************************************************************
-    
+
     21500.556177 seconds (1.80 G allocations: 164.017 GiB, 0.15% gc time)
 
 ```julia
@@ -487,10 +487,10 @@ bivariate_power_effectsize = power(pvalues, alpha)
      0.028
      0.061
      0.164
-     0.29 
+     0.29
      0.473
      0.652
-     0.83 
+     0.83
      0.926
      0.964
      0.994
@@ -513,7 +513,7 @@ hline!([.8], label = "power = 80%, p-value threshold = 5*10^-8", lw = 3)
 
 ![png](symmetric_bivariate_vcm.png)
 
-## Citations: 
+## Citations:
 
 [1] Lange K, Papp JC, Sinsheimer JS, Sripracha R, Zhou H, Sobel EM (2013) Mendel: The Swiss army knife of genetic analysis programs. Bioinformatics 29:1568-1570.`
 
@@ -521,7 +521,7 @@ hline!([.8], label = "power = 80%, p-value threshold = 5*10^-8", lw = 3)
 [2] OPENMENDEL: a cooperative programming project for statistical genetics.
 [Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z](https://www.ncbi.nlm.nih.gov/pubmed/?term=OPENMENDEL).
 
-[3] German, CA, Sinsheimer, JS, Klimentidis, YC, Zhou, H, Zhou, JJ. Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 2019; 1�� 13. https://doi.org/10.1002/gepi.22276
+[3] German, CA, Sinsheimer, JS, Klimentidis, YC, Zhou, H, Zhou, JJ. Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 2019; 1�� 13. https://doi.org/10.1002/gepi.22276
 
 [4] Lange K, Boehnke M (1983) Extensions to pedigree analysis. IV. Covariance component models for multivariate traits. Amer J Med Genet
-14:513��524
+14:513��524
