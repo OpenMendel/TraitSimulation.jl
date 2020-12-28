@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Exploring GPU Potential · TraitSimulation.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TraitSimulation.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../testing_MendelIHT_glm/">Testing Methods</a></li><li><span class="tocitem">Real Data Examples</span><ul><li><a class="tocitem" href="../ukbiobank_vcm_power/">Trait Simulation - Variance Component Model Power (UKBiobank)</a></li><li><a class="tocitem" href="../ukbiobank_ordered_multinomial_power/">Trait Simulation - Ordinal Multinomial Power</a></li></ul></li><li class="is-active"><a class="tocitem" href>Exploring GPU Potential</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#Check-available-devices-on-this-machine-and-show-their-capability"><span>Check available devices on this machine and show their capability</span></a></li><li class="toplevel"><a class="tocitem" href="#.-Cholesky-Decomposition-of-Variance-Components"><span>1. Cholesky Decomposition of Variance Components</span></a></li><li class="toplevel"><a class="tocitem" href="#.-Matrix-Normal-Transformation-by-Cholesky-Factors"><span>2. Matrix Normal Transformation by Cholesky Factors</span></a></li><li class="toplevel"><a class="tocitem" href="#Perform-TraitSimulation"><span>Perform TraitSimulation</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Exploring GPU Potential</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Exploring GPU Potential</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/OpenMendel/TraitSimulation.jl/blob/master/docs/src/examples/GPU.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="TraitSimulation-explores-GPU-computing"><a class="docs-heading-anchor" href="#TraitSimulation-explores-GPU-computing">TraitSimulation explores GPU computing</a><a id="TraitSimulation-explores-GPU-computing-1"></a><a class="docs-heading-anchor-permalink" href="#TraitSimulation-explores-GPU-computing" title="Permalink"></a></h1><p>Author: Sarah Ji</p><p>In this notebook, we will explore some GPU capabilities of the Julia language in the CuArrays package, and present the potential for users to extend the functions in TraitSimulation.jl to accomodate advances in GPU computing. Although GPU computing is still under active development, it is fruitful for researchers to be aware of the most modern computing technologies available to users through open source options. </p><p>We will first present the major bottle necks of the simulation algorithm and benchmark the optimized code (using BLAS) on CPU vs. on GPU. Then we will simulate the symmetric Bivariate trait using TraitSimulation on CPU first, then GPU for comparison. </p><ol><li>First the simulation algorithm first performs the Cholesky factors of the variance/covariance matrices and stores them using the @vc macro.</li><li>Then we transform the standard normal matrix using the Cholesky factors above</li></ol><p>Note useres with many variance components or extremely large number of subjects may benefit most from exploring GPU.  Additionally, since the default setting in the notebook is 1 thread, so I will only compare the unthreaded CPU code vs. the GPU code. </p><pre><code class="language-julia">versioninfo()</code></pre><pre><code class="language-none">Julia Version 1.4.0
+Commit b8e9a9ecc6 (2020-03-21 16:36 UTC)
+Platform Info:
+  OS: Linux (x86_64-pc-linux-gnu)
+  CPU: Intel(R) Core(TM) i9-9920X CPU @ 3.50GHz
+  WORD_SIZE: 64
+  LIBM: libopenlibm
+  LLVM: libLLVM-8.0.1 (ORCJIT, skylake)</code></pre><h1 id="Check-available-devices-on-this-machine-and-show-their-capability"><a class="docs-heading-anchor" href="#Check-available-devices-on-this-machine-and-show-their-capability">Check available devices on this machine and show their capability</a><a id="Check-available-devices-on-this-machine-and-show-their-capability-1"></a><a class="docs-heading-anchor-permalink" href="#Check-available-devices-on-this-machine-and-show-their-capability" title="Permalink"></a></h1><pre><code class="language-julia">using CuArrays, CUDAdrv
+using CuArrays.CURAND
+
+for device in CuArrays.devices()
+    @show capability(device)
+end</code></pre><pre><code class="language-none">capability(device) = v&quot;7.5.0&quot;</code></pre><p>We use simulated data and include the exploratory TraitSimulation on GPU code, in the file <code>exploring_gpu_simulation.jl</code>. We encourage users with the right NVIDIA GPU machine to explore these options for themselves</p><pre><code class="language-julia">include(&quot;/home/sarahji/TraitSimulation.jl/src/exploring_gpu_simulation.jl&quot;);</code></pre><pre><code class="language-julia">using GLM, LinearAlgebra, Random, BenchmarkTools
+using SnpArrays, Statistics
+
+Random.seed!(1234)
+
+function generateSPDmatrix(n)
+    A = rand(n)
+    m = 0.5 * (A * A&#39;)
+    PDmat = m + (n * Diagonal(ones(n)))
+end
+
+
+function generateRandomVCM(n::Int64, p::Int64, d::Int64, m::Int64)
+    # n-by-p design matrix
+    X = randn(n, p)
+
+    # p-by-d mean component regression coefficient for each trait
+    B = rand(p, d)
+
+    V = ntuple(x -&gt; zeros(n, n), m)
+    for i = 1:m-1
+      copy!(V[i], generateSPDmatrix(n))
+    end
+    copy!(V[end], Diagonal(ones(n))) # last covarianec matrix is identity
+
+    # a tuple of m d-by-d variance component parameters
+    Σ = ntuple(x -&gt; zeros(d, d), m)
+    for i in 1:m
+      copy!(Σ[i], generateSPDmatrix(d))
+    end
+    return(X, B, Σ, V)
+end
+
+
+n = 5000 # number of people
+p = 3   # number of fixed effects
+d = 10   # number of traits
+m = 10   # number of variance components
+
+X, β, Σ, V = generateRandomVCM(n, p, d, m);</code></pre><h1 id=".-Cholesky-Decomposition-of-Variance-Components"><a class="docs-heading-anchor" href="#.-Cholesky-Decomposition-of-Variance-Components">1. Cholesky Decomposition of Variance Components</a><a id=".-Cholesky-Decomposition-of-Variance-Components-1"></a><a class="docs-heading-anchor-permalink" href="#.-Cholesky-Decomposition-of-Variance-Components" title="Permalink"></a></h1><p>The major bottleneck in the simulation process is the cholesky decomposition of the variance covariance matrices (variance components). We note that if users have many variance components will benefit from having the GPU option available to their software. </p><p>First we compute the Cholesky Decomposition of a single nxn matrix, V[1], then we use the @vc macro and make a GPU alternative to compare.</p><p>We see that for a 5000 by 5000 matrix, the GPU code is more than 30x faster than the cholesky decomposition computed on CPU.</p><h3 id="Cholesky-on-CPU-for-a-single-variance-component-(n-x-n)"><a class="docs-heading-anchor" href="#Cholesky-on-CPU-for-a-single-variance-component-(n-x-n)">Cholesky on CPU for a single variance component (n x n)</a><a id="Cholesky-on-CPU-for-a-single-variance-component-(n-x-n)-1"></a><a class="docs-heading-anchor-permalink" href="#Cholesky-on-CPU-for-a-single-variance-component-(n-x-n)" title="Permalink"></a></h3><pre><code class="language-julia"># Cholesky on CPU for a single trait
+@show size(V[1])
+@benchmark cholesky((Symmetric($V[1])))</code></pre><pre><code class="language-none">size(V[1]) = (5000, 5000)
+
+BenchmarkTools.Trial: 
+  memory estimate:  190.74 MiB
+  allocs estimate:  6
+  --------------
+  minimum time:     277.191 ms (0.00% GC)
+  median time:      292.412 ms (0.00% GC)
+  mean time:        326.911 ms (1.62% GC)
+  maximum time:     769.881 ms (4.69% GC)
+  --------------
+  samples:          16
+  evals/sample:     1</code></pre><h3 id="Cholesky-on-GPU-for-a-single-variance-component-(n-x-n)"><a class="docs-heading-anchor" href="#Cholesky-on-GPU-for-a-single-variance-component-(n-x-n)">Cholesky on GPU for a single variance component (n x n)</a><a id="Cholesky-on-GPU-for-a-single-variance-component-(n-x-n)-1"></a><a class="docs-heading-anchor-permalink" href="#Cholesky-on-GPU-for-a-single-variance-component-(n-x-n)" title="Permalink"></a></h3><pre><code class="language-julia">@time V1_gpu = CuArray{Float32}(V[1]) # Move the Variance Covariance Matrix V from CPU to GPU environment
+@benchmark cholesky((Symmetric($V1_gpu)))</code></pre><pre><code class="language-none">  0.959381 seconds (1.94 M allocations: 191.373 MiB)
+
+BenchmarkTools.Trial: 
+  memory estimate:  4.00 KiB
+  allocs estimate:  118
+  --------------
+  minimum time:     10.111 ms (0.00% GC)
+  median time:      10.289 ms (0.00% GC)
+  mean time:        10.339 ms (0.34% GC)
+  maximum time:     14.302 ms (19.20% GC)
+  --------------
+  samples:          484
+  evals/sample:     1</code></pre><p>We made this @vc macro to provide a more flexible input option for users, but we see that there is a cost for comfort!</p><p>The single cholesky is about 30 fold speed up but using the macro its only about 6x  So we note that for maximum efficiency, when users have large datasets, they can bypass this and just store the cholesky factors necessary to perform the transformation.</p><pre><code class="language-julia">vc_cpu = @vc Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2] # make the vc object with just 2 variance components
+trait = VCMTrait(X, β, [Σ...], [V...]) # make the trait object with all m = 10 variance components.
+
+@benchmark vc_cpu = @vc $Σ[1] ⊗ $V[1] + $Σ[2] ⊗ $V[2]</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  381.47 MiB
+  allocs estimate:  25
+  --------------
+  minimum time:     1.609 s (0.31% GC)
+  median time:      1.801 s (3.48% GC)
+  mean time:        2.100 s (3.78% GC)
+  maximum time:     2.890 s (5.90% GC)
+  --------------
+  samples:          3
+  evals/sample:     1</code></pre><pre><code class="language-julia">vc_gpu = @vc_gpu Σ[1] ⊗ V[1] + Σ[2] ⊗ V[2]
+@benchmark vc_gpu = @vc_gpu $Σ[1] ⊗ $V[1] + $Σ[2] ⊗ $V[2]</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  16.78 KiB
+  allocs estimate:  497
+  --------------
+  minimum time:     274.375 ms (0.00% GC)
+  median time:      277.834 ms (0.00% GC)
+  mean time:        292.647 ms (0.22% GC)
+  maximum time:     350.880 ms (0.83% GC)
+  --------------
+  samples:          18
+  evals/sample:     1</code></pre><h1 id=".-Matrix-Normal-Transformation-by-Cholesky-Factors"><a class="docs-heading-anchor" href="#.-Matrix-Normal-Transformation-by-Cholesky-Factors">2. Matrix Normal Transformation by Cholesky Factors</a><a id=".-Matrix-Normal-Transformation-by-Cholesky-Factors-1"></a><a class="docs-heading-anchor-permalink" href="#.-Matrix-Normal-Transformation-by-Cholesky-Factors" title="Permalink"></a></h1><p>Each variance component will require it&#39;s own simulation from the standard normal distribution and the appropriate transformations by the cholesky factors of the row and column variances. </p><p>We saw separately that the cholesky decomposition is sped up by an order of magnitude on GPU vs. on CPU in step 1. Now, to complete the simulation we will perform step 2 to multiply on the left and right to transform the simulated trait to have the desired covariance.</p><p>There is a 30x fold speed up in JUST transforming the matrix normal using GPU.</p><pre><code class="language-julia">function cpu_single_vc(trait, CholΣ, CholV)
+    randn!(trait.Z)
+    BLAS.trmm!(&#39;L&#39;, &#39;U&#39;, &#39;T&#39;, &#39;N&#39;, 1.0, CholV, trait.Z)
+    BLAS.trmm!(&#39;R&#39;, &#39;U&#39;, &#39;N&#39;, &#39;N&#39;, 1.0, CholΣ, trait.Z)
+    trait.Z
+end
+
+CholΣ = trait.vc[1].CholΣ # grab the cholesky factors of Σ (dxd) from step 1
+CholV = trait.vc[1].CholV # grab the cholesky factor of V (nxn) from step 1
+
+@benchmark cpu_single_vc($trait, $CholΣ, $CholV)</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     19.655 ms (0.00% GC)
+  median time:      20.967 ms (0.00% GC)
+  mean time:        21.233 ms (0.00% GC)
+  maximum time:     23.723 ms (0.00% GC)
+  --------------
+  samples:          236
+  evals/sample:     1</code></pre><pre><code class="language-julia">function gpu_single_vc(Z_d, CholΣ, CholV)
+    randn!(Z_d)
+    CuArrays.CUBLAS.trmm!(&#39;L&#39;, &#39;U&#39;, &#39;T&#39;, &#39;N&#39;, 1.0, CholV, Z_d, similar(Z_d))
+    CuArrays.CUBLAS.trmm!(&#39;R&#39;, &#39;U&#39;, &#39;N&#39;, &#39;N&#39;, 1.0, CholΣ, Z_d, similar(Z_d))
+    Z_d
+end
+
+Z_d = CuArray{Float64}(trait.Z)
+CholΣ_gpu = vc_gpu[1].CholΣ # grab the cholesky factors of Σ (dxd) from step 1
+CholV_gpu = vc_gpu[1].CholV # grab the cholesky factor of V (nxn) from step 1
+
+@benchmark gpu_single_vc($Z_d, $CholΣ_gpu, $CholV_gpu)</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  784 bytes
+  allocs estimate:  29
+  --------------
+  minimum time:     16.213 μs (0.00% GC)
+  median time:      1.061 ms (0.00% GC)
+  mean time:        1.010 ms (0.08% GC)
+  maximum time:     10.271 ms (38.50% GC)
+  --------------
+  samples:          4946
+  evals/sample:     1</code></pre><h1 id="Perform-TraitSimulation"><a class="docs-heading-anchor" href="#Perform-TraitSimulation">Perform TraitSimulation</a><a id="Perform-TraitSimulation-1"></a><a class="docs-heading-anchor-permalink" href="#Perform-TraitSimulation" title="Permalink"></a></h1><p>Here we just compare a single simulation on CPU vs. on GPU.  This is the function that is continuously called in the power calculation. It writes over the field Y, the simulated results after aggregating the simulation results of the m variance components. (random effects) </p><ol><li>First we see the simulation for a single variance component</li><li>Then we see the simulation for the entire variance component set in trait.vc</li></ol><h3 id="TraitSimulation-for-a-Single-Variance-Component"><a class="docs-heading-anchor" href="#TraitSimulation-for-a-Single-Variance-Component">TraitSimulation for a Single Variance Component</a><a id="TraitSimulation-for-a-Single-Variance-Component-1"></a><a class="docs-heading-anchor-permalink" href="#TraitSimulation-for-a-Single-Variance-Component" title="Permalink"></a></h3><p>We see this is roughly 20 times faster on GPU than on CPU for a single <span>$V_{n \times n}, \Sigma_{d \times d}$</span></p><pre><code class="language-julia">@benchmark TraitSimulation.simulate_matrix_normal!($trait.Z, $vc_cpu[1])</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     27.357 ms (0.00% GC)
+  median time:      32.112 ms (0.00% GC)
+  mean time:        40.311 ms (0.00% GC)
+  maximum time:     83.568 ms (0.00% GC)
+  --------------
+  samples:          124
+  evals/sample:     1</code></pre><pre><code class="language-julia">Z_d = CuArray{Float64}(trait.Z)
+@benchmark simulate_matrix_normal_gpu!($Z_d, $vc_gpu[1])</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  784 bytes
+  allocs estimate:  29
+  --------------
+  minimum time:     17.176 μs (0.00% GC)
+  median time:      1.060 ms (0.00% GC)
+  mean time:        1.009 ms (0.00% GC)
+  maximum time:     1.468 ms (0.00% GC)
+  --------------
+  samples:          4950
+  evals/sample:     1</code></pre><h3 id="TraitSimulation-for-the-set-of-m-Variance-Components"><a class="docs-heading-anchor" href="#TraitSimulation-for-the-set-of-m-Variance-Components">TraitSimulation for the set of m Variance Components</a><a id="TraitSimulation-for-the-set-of-m-Variance-Components-1"></a><a class="docs-heading-anchor-permalink" href="#TraitSimulation-for-the-set-of-m-Variance-Components" title="Permalink"></a></h3><p>We see above that the simulation for just a single variance component is roughly 30 times faster. </p><p>Since we have m = 10 variance components in our model, we see that in this case the simulation on GPU is 100x faster.</p><pre><code class="language-julia">Y = zero(trait.μ)
+@benchmark TraitSimulation.VCM_trait_simulation($Y, $trait.Z, $trait.μ, $trait.vc)</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     200.812 ms (0.00% GC)
+  median time:      257.338 ms (0.00% GC)
+  mean time:        266.100 ms (0.00% GC)
+  maximum time:     626.675 ms (0.00% GC)
+  --------------
+  samples:          19
+  evals/sample:     1</code></pre><pre><code class="language-julia">Y_d = zeros(CuArray{Float32}, size(trait.Z))
+μ_d = zeros(CuArray{Float32}, size(trait.μ))
+@benchmark VCM_trait_simulation_gpu($Y_d, $μ_d, $Z_d, $vc_gpu)</code></pre><pre><code class="language-none">BenchmarkTools.Trial: 
+  memory estimate:  10.67 KiB
+  allocs estimate:  283
+  --------------
+  minimum time:     67.968 μs (0.00% GC)
+  median time:      2.134 ms (0.00% GC)
+  mean time:        2.056 ms (0.00% GC)
+  maximum time:     2.361 ms (0.00% GC)
+  --------------
+  samples:          2430
+  evals/sample:     1</code></pre><h3 id="Threading:"><a class="docs-heading-anchor" href="#Threading:">Threading:</a><a id="Threading:-1"></a><a class="docs-heading-anchor-permalink" href="#Threading:" title="Permalink"></a></h3><p>For users who wish to do multiple simulation runs simultaneously, we recommend to set the machinery to use threading. Users can check using the command: <code>Threads.nthreads()</code> to ensure multi-threading is on. <a href="https://github.com/OpenMendel/TraitSimulation.jl/blob/master/src/TraitSimulation.jl#L188">TraitSimulation</a> will automatically use the Threading option for multiple TraitSimulation. To set the number of threads, users should follow the documentation on <a href="https://docs.julialang.org/en/v1/base/multi-threading/">Threads.jl</a> and ensure before starting Julia to specify the desired number of threads using <code>export JULIA_NUM_THREADS=4</code>.</p><p>For users who are using the Threading option and are seeing some variation in the benchmarking results, make sure that the julia number of threads and the BLAS number of threads are not confusing one another and specify the command: <code>LinearAlgebra.BLAS.set_num_threads(1)</code> to make simulations more consistent.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ukbiobank_ordered_multinomial_power/">« Trait Simulation - Ordinal Multinomial Power</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 28 December 2020 19:54">Monday 28 December 2020</span>. Using Julia version 1.2.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
