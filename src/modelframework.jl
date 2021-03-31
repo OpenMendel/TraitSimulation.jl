@@ -144,13 +144,11 @@ end
 function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray, γ::Matrix{T},
 	 vc::Vector{VarianceComponent}) where T <: BlasReal
 	n, p, m, d = size(X, 1), size(X, 2), length(vc), size(β, 2)
-	genovec = SnpBitMatrix{Float64}(G, model=ADDITIVE_MODEL, center=true, scale=true);
-	μ = Matrix{T}(undef, n, d)
+	genovec = SnpLinAlg{Float64}(G, model=ADDITIVE_MODEL, center=true, scale=true);
+	μ = zeros(n, d)
 	μ_null = zeros(n, d)
 	LinearAlgebra.mul!(μ_null, X, β)
-	for j in 1:d
-		mul!(μ[:, j], genovec, γ[:, j]);
-	end
+	mul!(μ, genovec, γ)
 	BLAS.axpby!(1.0, μ_null, 1.0, μ)
 	# constructor
 	VCMTrait(X, β, genovec, γ, vc, μ)

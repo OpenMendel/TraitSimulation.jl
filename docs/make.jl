@@ -5,7 +5,7 @@ ENV["DOCUMENTER_DEBUG"] = "true"
 makedocs(
     format = Documenter.HTML(),
     sitename = "TraitSimulation.jl",
-    authors = "Sarah Ji, Hua Zhou, Kenneth Lange, Janet Sinsheimer, Eric Sobel",
+    authors = "Sarah Ji, Chris German, Kenneth Lange, Janet Sinsheimer, Jin Zhou, Hua Zhou, Eric Sobel",
     clean = true,
     debug = true,
     pages = Any[
@@ -22,4 +22,3 @@ deploydocs(
     repo   = "github.com/OpenMendel/TraitSimulation.jl.git",
     target = "build"
 )
-
