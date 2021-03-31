@@ -1,25 +1,7 @@
 
-| **Documentation**                                                                           | **Build Status**                                                              | **Code Coverage**                                                                            |
-|---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| [![Stable][docs-stable-img]][docs-stable-url] [![Latest][docs-latest-img]][docs-latest-url] | [![Travis][travis-img]][travis-url]| [![Coverage Status][coveralls-img]][coveralls-url] [![codecov.io][codecov-img]][codecov-url] |
-
-[docs-latest-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-latest-url]: https://openmendel.github.io/TraitSimulation.jl/dev/
-
-[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://openmendel.github.io/TraitSimulation.jl/stable/
-
-[travis-img]: https://travis-ci.org/OpenMendel/TraitSimulation.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/OpenMendel/TraitSimulation.jl
-
-[issues-url]: https://github.com/OpenMendel/TraitSimulation.jl/issues
-
-[coveralls-img]: https://coveralls.io/repos/github/OpenMendel/TraitSimulation.jl/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/OpenMendel/TraitSimulation.jl?branch=master
-
-[codecov-img]: https://codecov.io/gh/OpenMendel/TraitSimulation.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/OpenMendel/TraitSimulation.jl
-
+| **Documentation** | **Build Status** | **Code Coverage**  |
+|-------------------|------------------|--------------------|
+| [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://OpenMendel.github.io/TraitSimulation.jl/latest) [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://OpenMendel.github.io/TraitSimulation.jl/stable) | [![build Actions Status](https://github.com/OpenMendel/TraitSimulation.jl/workflows/CI/badge.svg)](https://github.com/OpenMendel/TraitSimulation.jl/actions) | [![codecov](https://codecov.io/gh/OpenMendel/TraitSimulation.jl/branch/master/graph/badge.svg?token=YyPqiFpIM1)](https://codecov.io/gh/OpenMendel/TraitSimulation.jl) |
 
 # TraitSimulation.jl
 Authors: Sarah Ji, Chris German, Kenneth Lange, Janet Sinsheimer, Jin Zhou, Hua Zhou, Eric Sobel
