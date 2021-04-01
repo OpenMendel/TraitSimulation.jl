@@ -157,7 +157,7 @@ end
 function VCMTrait(X::Matrix{T}, β::Matrix{T}, G::SnpArray,
 	 γ::Matrix{T}, Σ::Vector{Matrix{T}}, V::Vector{Matrix{T}}) where T <: BlasReal
 	vc = [VarianceComponent(Σ[i], V[i]) for i in 1:length(V)]
-	return VCMTrait(X, β, vc)
+	return VCMTrait(X, β, G, γ, vc)
 end
 
 function VCMTrait(X::Matrix{T}, β::Matrix{T},
