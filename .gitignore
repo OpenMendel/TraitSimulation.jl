@@ -1,5 +1,6 @@
 docs/build/
 */.DS_Store
+.DS_Store
 docs/.DS_Store
 .DS_Store
 .ipynb_checkpoints
