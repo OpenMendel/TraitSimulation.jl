@@ -66,9 +66,9 @@ nsnps = p
 @test snparray_simulation([minor_alle_frequency], nsnps) isa SnpArrays.SnpArray
 
 variance_formula2  = @vc [minor_alle_frequency][:,:] ⊗ V[1] + [minor_alle_frequency][:,:] ⊗ V[1]
-trait2 = VCMTrait(["x2 + 3x1", "2 +2x1"], DataFrame(X), variance_formula2)
+trait2 = VCMTrait(["x2 + 3x1", "2 +2x1"], DataFrame(X, :auto), variance_formula2)
 sigma, v = vcobjtuple(variance_formula2)
-trait2_equivalent = VCMTrait(["x2 + 3x1", "2 +2x1"], DataFrame(X), [sigma...], [v...])
+trait2_equivalent = VCMTrait(["x2 + 3x1", "2 +2x1"], DataFrame(X, :auto), [sigma...], [v...])
 
 @test trait2_equivalent.vc[1].V == trait2.vc[1].V
 

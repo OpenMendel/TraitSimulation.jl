@@ -5,11 +5,12 @@ The first two columns of the phenotype file will be the Family ID and the Indivi
 """
 function writepheno(plink_file::AbstractString, file_path::AbstractString, traitobject::Union{GLMTrait, OrderedMultinomialTrait}, nsim::Int; famname::AbstractString=plink_file*".fam")
     # simulate phenotypes
-    pheno = DataFrame(simulate(traitobject, nsim))
+    pheno = DataFrame(simulate(traitobject, nsim), :auto)
     rename!(pheno, [Symbol("Trait$i") for i in 1:nsim])
 
     # load person info
-    famfile = convert(DataFrame, readdlm(file_path*"/"*famname, AbstractString))
+    dlmdata = readdlm(file_path*"/"*famname, AbstractString)
+    famfile = DataFrame(Tables.table(dlmdata, header = Symbol.(:x, axes(dlmdata,2))))
     personinfo = famfile[:, 1:2]
     outfile = hcat(personinfo, pheno)
     open("pheno.txt"; write=true) do f
@@ -28,11 +29,12 @@ function writepheno(plink_file::AbstractString, file_path::AbstractString, trait
     n_traits = ntraits(traitobject)
     phenotypes = simulate(traitobject, nsim)
     pheno = [phenotypes[i][:, j] for j in 1:n_traits, i in 1:nsim]
-    pheno = DataFrame(hcat(pheno...))
+    pheno = DataFrame(hcat(pheno...), :auto)
     rename!(pheno[:,1:n_traits:n_traits*nsim], [Symbol("Simulation$i") for i in 1:nsim])
 
     # load person info
-    famfile = convert(DataFrame, readdlm(file_path*"/"*famname, AbstractString))
+    dlmdata = readdlm(file_path*"/"*famname, AbstractString)
+    famfile = DataFrame(Tables.table(dlmdata, header = Symbol.(:x, axes(dlmdata,2))))
     personinfo = famfile[:, 1:2]
     rename!(personinfo, [Symbol("FID"), Symbol("IID")])
 

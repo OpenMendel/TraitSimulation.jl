@@ -80,7 +80,7 @@ x = rand(n)
 effectsizes = rand(n)
 our_names = ["sarah"; "janet"; "hua"; "eric"; "ken"; "jenny"; "ben"; "chris"; "juhyun"; "xinkai"]
 whats_my_mean_formula = TraitSimulation.FixedEffectTerms(effectsizes, our_names)
-data_frame_2 = DataFrame(ones(n, n))
+data_frame_2 = DataFrame(ones(n, n), :auto)
 rename!(data_frame_2, Symbol.(our_names))
 
 @test unique(mean_formula(whats_my_mean_formula, data_frame_2)[1])[1] == sum(effectsizes)

@@ -1,6 +1,7 @@
 module TraitSimulation
 using GLM # this already defines some useful distribution and link types
 using DataFrames # so we can test it
+using Tables
 using LinearAlgebra
 using Random
 using SnpArrays
