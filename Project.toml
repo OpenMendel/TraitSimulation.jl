@@ -28,6 +28,7 @@ VarianceComponentModels = "813005db-34b4-5f71-be9e-1bbf0a1d8f1c"
 [compat]
 DataFrames = "1"
 Distributions = "0.24"
+Suppressor = "0.2"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
