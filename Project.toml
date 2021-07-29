@@ -26,8 +26,17 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VarianceComponentModels = "813005db-34b4-5f71-be9e-1bbf0a1d8f1c"
 
 [compat]
-DataFrames = "1"
+BenchmarkTools = "1"
+DataFrames = "0.22 - 1"
 Distributions = "0.24"
+Documenter = "0.27"
+GLM = "1"
+SpecialFunctions = "0.10 - 1"
+StatsBase = "0.33"
+StatsFuns = "0.9"
+StatsModels = "0.6"
+Tables = "1"
+julia = "1.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
