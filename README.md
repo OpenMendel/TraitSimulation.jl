@@ -21,7 +21,7 @@ A convenient tool for simulating phenotypes for unrelateds or families under a v
 ## Installation
 This package requires Julia v0.7 or later, which can be obtained from https://julialang.org/downloads/ or by building Julia from the sources in the https://github.com/JuliaLang/julia repository.
 
-The package has not yet been registered and must be installed using the repository location. For example, you can run the following code:
+The package has not yet been registered and must be installed using the repository location. For example, by executing the following code:
 
 ```julia
 using Pkg
