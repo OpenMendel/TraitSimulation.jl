@@ -21,15 +21,12 @@ A convenient tool for simulating phenotypes for unrelateds or families under a v
 ## Installation
 This package requires Julia v0.7 or later, which can be obtained from https://julialang.org/downloads/ or by building Julia from the sources in the https://github.com/JuliaLang/julia repository.
 
-The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL. To reproduce the given examples, install the following OpenMendel packages in this order before installing TraitSimulation.
+The package has not yet been registered and must be installed using the repository location. For example, you can run the following code:
 
-`(v1.5) pkg> add https://github.com/OpenMendel/SnpArrays.jl`
-
-`(v1.5) pkg> add https://github.com/OpenMendel/VarianceComponentModels.jl`
-
-`(v1.5) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl`
-
-`(v1.5) pkg> add https://github.com/OpenMendel/TraitSimulation.jl`
+```julia
+using Pkg
+pkg"add https://github.com/OpenMendel/TraitSimulation.jl"
+```
 
 # Citation
 If you use OpenMendel analysis packages in your research, please cite the following reference in the resulting publications:
