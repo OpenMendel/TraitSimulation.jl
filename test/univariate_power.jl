@@ -52,6 +52,6 @@ nsim = 10
 randomseed = 12345
 glm_pvals = power_simulation(nsim, γs, glm_trait, randomseed)
 
-alpha = 0.05
+alpha = 0.20
 powers = power(glm_pvals, alpha)
 @test powers[1] < powers[end]
