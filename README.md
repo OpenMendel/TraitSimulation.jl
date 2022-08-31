@@ -32,7 +32,7 @@ pkg"add https://github.com/OpenMendel/TraitSimulation.jl"
 
 If you use TraitSimulation.jl in your research, please cite the following reference in the resulting publication:
 
-*Ji, Sarah & German, Christopher & Lange, Kenneth & Sinsheimer, Janet & Zhou, Hua & Zhou, Jin & Sobel, Eric. (2021). Modern simulation utilities for genetic analysis. BMC Bioinformatics. 22. 10.1186/s12859-021-04086-8. 
+*Ji, Sarah & German, Christopher & Lange, Kenneth & Sinsheimer, Janet & Zhou, Hua & Zhou, Jin & Sobel, Eric. (2021). Modern simulation utilities for genetic analysis. BMC Bioinformatics. 22. 10.1186/s12859-021-04086-8. PMID: 33941078; PMCID: [PMC8091532](https://pubmed.ncbi.nlm.nih.gov/33941078/)
 
 If you use any [OpenMendel](https://openmendel.github.io) analysis packages in your research, please cite the following reference in the resulting publication:
 
